@@ -32,6 +32,17 @@ GAMEPLAY.4
 - [x] allow fish to damage enemies
 - [x] add and use sprite.direction
 
+GAMEPLAY.5
+- [x] seals jump when piled up
+- [x] differentiate enemy types
+- [x] health bar
+- [x] reset when game ends
+
+GAMEPLAY.6
+- [ ] splash damage on stomp attack
+- [ ] seals get launched when stomped
+- [ ] gulls change color and fall when killed
+
 ### UI Todos
 UI.1
 - [ ] points are displayed

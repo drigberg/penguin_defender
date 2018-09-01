@@ -4,6 +4,10 @@
 let body
 
 (function main() {
+  function intersection(arr1, arr2) {
+    return arr1.filter(item => arr2.includes(item))
+  }
+
   let idPointer = 0
 
   function createId() {
@@ -11,24 +15,37 @@ let body
     return idPointer
   }
 
+  const RED = '#aa2222'
+  const YELLOW = '#aaaa22'
+  const GREEN = '#22aa22'
+
   const LEFT = -1
   const RIGHT = 1
+
   const SPRITE = 'SPRITE'
   const GROUND = 'GROUND'
   const WALL = 'WALL'
   const FISH = 'FISH'
-  const ENEMY = 'ENEMY'
+  const SEAL = 'SEAL'
+  const GULL = 'GULL'
+
   const INVINCIBILITY_INTERVAL = 30
   const SHAKE_THRESHOLD = 20
   const GRAVITY = -60
-  const SPRINT_MULTIPLIER = 1.75
+
   const BORDER_X_RIGHT = 40
   const BORDER_X_LEFT = -40
 
+  const HEALTH_BAR_X = -25
+  const HEALTH_BAR_Y = 26
+  const HEALTH_BAR_MAX_WIDTH = 5
+
   const SPRITE_JUMP = 35
-  const SPRITE_HEALTH = 10
+  const SPRITE_MAX_HEALTH = 10
   const SPRITE_DAMAGE = 1
   const SPRITE_SPEED = 25
+  const SPRITE_MAX_JUMPS = 2
+  const SPRITE_SPRINT_MULTIPLIER = 1.75
 
   const FISH_DAMAGE = 1
   const FISH_THROW_X = 20
@@ -41,6 +58,9 @@ let body
   const SEAL_SPAWN_X = 60
   const SEAL_SPAWN_Y = 5
   const SEAL_PROBABILITY = 0.01
+  const SEAL_JUMP = 7
+  const SEAL_MAX_JUMPS = 1
+  const SEAL_POINTS = 10
 
   const GULL_SPEED = 6.0
   const GULL_HEALTH = 1
@@ -50,8 +70,16 @@ let body
   const GULL_FLAP = 7
   const GULL_FLAP_INTERVAL = 45
   const GULL_PROBABILITY = 0.01
+  const GULL_POINTS = 15
 
-  const m_points = []
+  let gameActive = true
+
+  const ENEMY_TYPES = [
+    GULL,
+    SEAL,
+  ]
+
+  const collisions = []
   const Vec2 = planck.Vec2
 
   const world = new planck.World({
@@ -60,6 +88,25 @@ let body
 
   const enemies = {}
   const fishes = {}
+  let points = 0
+
+  function resetBodies() {
+    Object.keys(enemies).forEach((id) => {
+      world.destroyBody(enemies[id].body)
+    })
+
+    Object.keys(fishes).forEach((id) => {
+      world.destroyBody(fishes[id].body)
+    })
+
+    fishes = {}
+    enemies = {}
+  }
+
+  function addPoints(num) {
+    points += num
+    console.log(`${points} points!`)
+  }
 
   world.on('pre-solve', function (contact, oldManifold) {
     const manifold = contact.getManifold()
@@ -76,7 +123,7 @@ let body
       fixtureB.getBody().type,
     ]
 
-    if (types.includes(WALL) && types.includes(ENEMY)) {
+    if (types.includes(WALL) && intersection(types, ENEMY_TYPES).length) {
       contact.setEnabled(false)
     } else if (types.includes(SPRITE) && types.includes(FISH)) {
       contact.setEnabled(false)
@@ -87,7 +134,7 @@ let body
     const worldManifold = contact.getWorldManifold()
 
     for (let i = 0; i < manifold.pointCount; ++i) {
-      m_points.push({
+      collisions.push({
         fixtureA,
         fixtureB,
         position: worldManifold.points[i],
@@ -103,6 +150,34 @@ let body
     testbed.info('←/→: Accelerate sprite, ↑: jump, ↓: attack')
     testbed.speed = 2
     testbed.hz = 50
+  }
+
+  class HealthBar {
+    update(health) {
+      if (this.body) {
+        world.destroyBody(this.body)
+      }
+
+      if (health) {
+        this.body = world.createBody(Vec2(HEALTH_BAR_X, HEALTH_BAR_Y));
+        this.body.createFixture(planck.Box(HEALTH_BAR_MAX_WIDTH * (health / SPRITE_MAX_HEALTH), 0.5), 0.0);
+
+        let color
+
+        if (health > SPRITE_MAX_HEALTH * 0.67) {
+          color = GREEN
+        } else if (health > SPRITE_MAX_HEALTH * 0.33) {
+          color = YELLOW
+        } else {
+          color = RED
+        }
+
+        this.body.render = {
+          fill: color,
+          stroke: color,
+        }
+      }
+    }
   }
 
   class Enemy {
@@ -131,6 +206,7 @@ let body
 
       if (this.health <= 0) {
         world.destroyBody(this.body)
+        addPoints(this.points)
       }
     }
   }
@@ -142,6 +218,7 @@ let body
         health: SEAL_HEALTH,
       })
 
+      this.points = SEAL_POINTS
       this.velocity = SEAL_SPEED
       if (direction === LEFT) {
         this.velocity *= -1
@@ -167,7 +244,7 @@ let body
         stroke: '#cc0000'
       }
 
-      this.body.type = ENEMY
+      this.body.type = SEAL
       this.body.id = this.id
     }
 
@@ -176,6 +253,17 @@ let body
         this.velocity,
         this.body.getLinearVelocity().y
       ))
+    }
+
+    jump() {
+      if (!this.jumps) { return }
+
+      this.body.setLinearVelocity(Vec2(
+        this.body.getLinearVelocity().x,
+        SEAL_JUMP * (Math.random() / 2 + 0.5))
+      )
+
+      this.jumps -= 1
     }
   }
 
@@ -186,6 +274,7 @@ let body
         health: GULL_HEALTH,
       })
 
+      this.points = GULL_POINTS
       this.velocity = GULL_SPEED
       if (direction === LEFT) {
         this.velocity *= -1
@@ -211,7 +300,7 @@ let body
         stroke: '#00cc00'
       }
 
-      this.body.type = ENEMY
+      this.body.type = GULL
       this.body.id = this.id
       this.untilFlap = GULL_FLAP_INTERVAL
     }
@@ -276,7 +365,7 @@ let body
 
   class Sprite {
     constructor() {
-      this.health = SPRITE_HEALTH
+      this.health = SPRITE_MAX_HEALTH
       this.invincibilityTime = 0
       this.fishThrowTime = 0
       this.damage = SPRITE_DAMAGE
@@ -304,7 +393,7 @@ let body
         stroke: '#dddddd'
       }
 
-      this.jumps = 2
+      this.jumps = SPRITE_MAX_JUMPS
       this.speed = SPRITE_SPEED
       body = this.body
     }
@@ -312,14 +401,17 @@ let body
     /**
      * @param {Integer} damage - damage dealt
      */
-    takeDamage(damage) {
+    takeDamage(damage, bar) {
       if (this.invincibilityTime) { return }
 
       this.health -= damage
       this.invincibilityTime = INVINCIBILITY_INTERVAL
       if (this.health <= 0) {
         world.destroyBody(this.body)
+        gameActive = false
       }
+
+      bar.update(this.health)
     }
 
     throwFish() {
@@ -349,7 +441,7 @@ let body
     move(direction) {
       this.direction = direction
       const sprintMultiplier = this.sprinting
-        ? SPRINT_MULTIPLIER
+        ? SPRITE_SPRINT_MULTIPLIER
         : 1
 
       this.body.setLinearVelocity(Vec2(
@@ -435,6 +527,8 @@ let body
     createBorders(testbed)
 
     const sprite = new Sprite()
+    const healthBar = new HealthBar()
+    healthBar.update(sprite.health)
 
     testbed.keydown = function () {
       if (testbed.activeKeys.up) {
@@ -463,50 +557,71 @@ let body
     }
 
     function evaluateCollisions() {
-      for (let i = 0; i < m_points.length; ++i) {
-        const point = m_points[i]
+      for (let i = 0; i < collisions.length; ++i) {
+        const point = collisions[i]
 
-        const body1 = point.fixtureA.getBody()
-        const body2 = point.fixtureB.getBody()
-
-        const types = [
-          body1.type,
-          body2.type,
+        const bodies = [
+          point.fixtureA.getBody(),
+          point.fixtureB.getBody(),
         ]
 
+        const types = bodies.map(item => item.type)
+
         if (types.includes(GROUND)) {
-          if (types.includes(SPRITE)) {
+          const other = bodies.find(item => item.type !== GROUND)
+
+          if (other.type === SPRITE) {
             if (sprite.body.getLinearVelocity().y <= 0) {
-              sprite.jumps = 2
+              sprite.jumps = SPRITE_MAX_JUMPS
             }
-          } else if (types.includes(FISH)) {
-            const fish = fishes[[body1, body2].find(item => item.type === FISH).id]
+          } else if (other.type === FISH) {
+            const fish = fishes[other.id]
 
             fish.destroy()
+          } else if (other.type === SEAL) {
+            const enemy = enemies[other.id]
+            enemy.jumps = SEAL_MAX_JUMPS
           }
-        } else if (types.includes(ENEMY)) {
-          const enemy = enemies[[body1, body2].find(item => item.type === ENEMY).id]
-
-          if (types.includes(SPRITE)) {
+        } else if (types.includes(SPRITE)) {
+          const other = bodies.find(item => item.type !== SPRITE)
+          if (ENEMY_TYPES.includes(other.type)) {
+            const enemy = enemies[other.id];
             if (point.normal.y < 0 && Math.abs(point.normal.y) - Math.abs(point.normal.x) > 0.5) {
               enemy.takeDamage(sprite.damage)
-              sprite.jumps = 2
+              sprite.jumps = SPRITE_MAX_JUMPS
             } else {
-              sprite.takeDamage(enemy.damage)
+              sprite.takeDamage(enemy.damage, healthBar)
             }
-          } else if (types.includes(FISH)) {
-            const fish = fishes[[body1, body2].find(item => item.type === FISH).id]
+          }
+        } else if (types.filter(item => item === SEAL).length === 2) {
+          let enemy1 = enemies[bodies[0].id]
+          let enemy2 = enemies[bodies[1].id]
 
-            enemy.takeDamage(fish.damage)
+          if (Math.random() > 0.5) {
+            enemy1.jump()
+          } else {
+            enemy2.jump()
+          }
+        } else if (types.includes(FISH) && types.filter(item => item === FISH).length === 1) {
+          const fish = fishes[bodies.find(item => item.type === FISH).id]
+          const other = bodies.find(item => item.type !== FISH)
+
+          if (ENEMY_TYPES.includes(other.type)) {
+            enemies[other.id].takeDamage(fish.damage)
             fish.destroy()
           }
         }
       }
 
-      m_points.length = 0
+      collisions.length = 0
     }
 
     testbed.step = function () {
+      if (!gameActive) {
+        resetBodies()
+        return
+      }
+
       evaluateCollisions()
       evaluateActiveKeys()
       spawn()
@@ -525,7 +640,6 @@ let body
       } else {
         sprite.fishThrowTime = 0
       }
-
     }
 
     return world
