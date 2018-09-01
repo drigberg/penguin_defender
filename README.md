@@ -11,21 +11,26 @@ ROUND 1 TODOS
 - [x] enemies move on their own
 - [x] enemies can pass through walls
 
-
 ROUND 2 TODOS
-- [ ] enemies do damage upon collisions
-- [ ] invincibility for one second after being hit
-- [ ] enemies can take damage
-- [ ] enemies disappear if dead
-- [ ] triple-jump bug: restores to 2 while leaving ground
-
+- [x] enemies do damage upon collisions
+- [x] invincibility for one second after being hit
+- [x] sprite disappears if dead
+- [x] enemies can take damage when attacked
+- [x] enemies disappear if dead
 
 ROUND 3 TODOS
-- [ ] points accrue for kills
-- [ ] game ends if sprite dies
+- [x] fine-tune movement
+- [x] sprint
+- [x] only damage enemies if actually on top
+- [ ] triple-jump bug: restores to 2 while leaving ground
 
 ROUND 4 TODOS
+- [ ] points are displayed
 - [ ] sprite texture
 - [ ] enemy texture
 - [ ] background image
 - [ ] damage effect: screen shakes? character flashes/dims?
+
+ROUDN 5 TODOS
+- [ ] show menu to start game
+- [ ] show restart and menu buttons when game ends
