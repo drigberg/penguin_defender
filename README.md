@@ -43,22 +43,36 @@ GAMEPLAY.5
 GAMEPLAY.6
 - [x] three flaps
 - [x] glide/sprint
-- [ ] allow more keys: F for stomp, G for glide
+- [x] allow more keys: F for stomp, G for glide
+- [x] use masks for ignoring collisions
+
+GAMEPLAY.DIFFICULT
 - [ ] splash damage on stomp attack: figure out how to destroy fixtures
+- [ ] fix bird-summoning bug
 
 GAMEPLAY.7
-- [ ] males
-- [ ] males get dragged away by seals
-- [ ] detection for how many males have been lost / are still left
-- [ ] defined waves with level formula
+- [x] use one map for all objects besides sprite
+- [x] rename sprite ==> hero to avoid naming confusing
+- [x] males huddle up in the center
+- [ ] males get killed by seals
+- [ ] use a map instead of if statements for collion resolution
 
 GAMEPLAY.8
+- [ ] detection for how many males have been lost / are still left
+- [ ] defined waves with level formula
+- [ ] display wave number
+- [ ] countdown between waves
+- [ ] restore males between waves
+
+GAMEPLAY.9
+- [ ] males get dragged away by seals
 - [ ] gulls can swoop
 - [ ] gulls can carry away males
 - [ ] seals get launched when stomped
 - [ ] gulls change color and fall when killed
 
-GAMEPLAY.9
+GAMEPLAY.10
+- [ ] figure out how masks REALLY work, and do that
 - [ ] Putin-on-a-Horse
 - [ ] post-wave movement
 
@@ -75,8 +89,9 @@ UI.1
 - [x] background image
 
 UI.2
+- [x] make UI contactless
+- [x] fit background to screen
 - [ ] hide planck canvas
-- [ ] fit background to screen
 - [ ] make cute static pixel images: penguin
 - [ ] make cute static pixel images: seal
 - [ ] make cute static pixel images: gull
@@ -91,6 +106,7 @@ UI.3
 - [ ] show restart and menu buttons when game ends
 
 UI.4
+- [ ] resize screen
 - [ ] sprite jump animation
 - [ ] sprite attack animation
 - [ ] sprite death animation
