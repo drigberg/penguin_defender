@@ -1,5 +1,7 @@
 # penguin_defender
-Survive global warming for as long as you can!
+You are the King of all Emperor Penguins. The greatest warrior! The sole defender of the southern reaches!
+
+The females of the colony are on their long journey to the ocean and back. In their absence, the males are guarding the eggs. They are vulnerable! You must defend them from no-good egg-stealers!
 
 ### Gameplay Todos
 GAMEPLAY.1
@@ -39,27 +41,58 @@ GAMEPLAY.5
 - [x] reset when game ends
 
 GAMEPLAY.6
-- [ ] splash damage on stomp attack
+- [x] three flaps
+- [x] glide/sprint
+- [ ] allow more keys: F for stomp, G for glide
+- [ ] splash damage on stomp attack: figure out how to destroy fixtures
+
+GAMEPLAY.7
+- [ ] males
+- [ ] males get dragged away by seals
+- [ ] detection for how many males have been lost / are still left
+- [ ] defined waves with level formula
+
+GAMEPLAY.8
+- [ ] gulls can swoop
+- [ ] gulls can carry away males
 - [ ] seals get launched when stomped
 - [ ] gulls change color and fall when killed
 
+GAMEPLAY.9
+- [ ] Putin-on-a-Horse
+- [ ] post-wave movement
+
 ### UI Todos
 UI.1
-- [ ] points are displayed
-- [ ] static sprite texture
-- [ ] static enemy texture
-- [ ] background image
+- [x] static sprite texture
+- [x] static fish texture
+- [x] health bar
+- [x] static seal texture
+- [x] static gull texture
+- [x] basic text display for game end
+- [x] wave countdown
+- [x] points are displayed
+- [x] background image
 
 UI.2
-- [ ] running animations
+- [ ] sprite running animation
+- [ ] seal running animation
+- [ ] gull flying animation
 - [ ] show menu to start game
 - [ ] show restart and menu buttons when game ends
+- [ ] standard text display ("WAVE 1", "GAME OVER", etc)
 
 UI.3
 - [ ] sprite jump animation
 - [ ] sprite attack animation
 - [ ] sprite death animation
+- [ ] sprite glide animation
 
 UI.4
 - [ ] enemy attack animation
 - [ ] enemy death animation
+- [ ] snowstorm in background while wave is active
+
+UI.5
+- [ ] opening scene
+- [ ] post-wave animations (female textures, cheering)

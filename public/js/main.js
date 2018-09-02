@@ -4,6 +4,24 @@
 let body
 
 (function main() {
+  const pscale = 13;
+
+  function mpx(m) {
+    return m * pscale + (window.innerWidth / 2.3);
+  }
+
+  function mpy(m) {
+    return window.innerHeight * 0.5 - (m * pscale);
+  }
+
+  const app = new PIXI.Application(window.innerWidth * 0.9, window.innerHeight * 0.9)
+  const container = new PIXI.Container();
+  app.stage.addChild(container);
+
+  document.getElementById('content').appendChild(app.view);
+  app.view.style.position = 'absolute';
+  app.view.style.border = '1px solid #222222';
+
   function intersection(arr1, arr2) {
     return arr1.filter(item => arr2.includes(item))
   }
@@ -15,9 +33,24 @@ let body
     return idPointer
   }
 
-  const RED = '#aa2222'
+  const RED = '#ee1111'
+  const BLUE = '#5555ee'
   const YELLOW = '#aaaa22'
   const GREEN = '#22aa22'
+
+  const BIT_RED = 0xEE5555
+  const BIT_BLUE = 0x5555EE
+  const BIT_YELLOW = 0xAAAA22
+  const BIT_GREEN = 0x22AA22
+
+  const TEXT_STYLE = new PIXI.TextStyle({
+    fontFamily: 'Courier New',
+    fontSize: 72,
+    stroke: '#000000',
+    strokeThickness: 5,
+    fontWeight: 'bold',
+    fill: BLUE,
+  });
 
   const LEFT = -1
   const RIGHT = 1
@@ -32,27 +65,30 @@ let body
   const INVINCIBILITY_INTERVAL = 30
   const SHAKE_THRESHOLD = 20
   const GRAVITY = -60
-
+  const BACKGROUND_TEXTURE = PIXI.Texture.fromImage('assets/sierra.png')
   const BORDER_X_RIGHT = 40
   const BORDER_X_LEFT = -40
 
-  const HEALTH_BAR_X = -25
+  const HEALTH_BAR_X = -40
   const HEALTH_BAR_Y = 26
-  const HEALTH_BAR_MAX_WIDTH = 5
+  const HEALTH_BAR_MAX_WIDTH = 10
 
   const SPRITE_JUMP = 35
-  const SPRITE_MAX_HEALTH = 10
+  const SPRITE_MAX_HEALTH = 5
   const SPRITE_DAMAGE = 1
   const SPRITE_SPEED = 25
-  const SPRITE_MAX_JUMPS = 2
+  const SPRITE_MAX_JUMPS = 3
   const SPRITE_SPRINT_MULTIPLIER = 1.75
+  const SPRITE_GLIDE_IMPULSE = 7
+  const SPRITE_TEXTURE = PIXI.Texture.fromImage('assets/penguin.png')
 
   const FISH_DAMAGE = 1
   const FISH_THROW_X = 20
   const FISH_THROW_Y = 50
   const FISH_THROW_INTERVAL = 25
+  const FISH_TEXTURE = PIXI.Texture.fromImage('assets/fish.png')
 
-  const SEAL_SPEED = 10.0
+  const SEAL_SPEED = 5.0
   const SEAL_HEALTH = 1
   const SEAL_DAMAGE = 1
   const SEAL_SPAWN_X = 60
@@ -61,8 +97,9 @@ let body
   const SEAL_JUMP = 7
   const SEAL_MAX_JUMPS = 1
   const SEAL_POINTS = 10
+  const SEAL_TEXTURE = PIXI.Texture.fromImage('assets/penguin.png')
 
-  const GULL_SPEED = 6.0
+  const GULL_SPEED = 3.0
   const GULL_HEALTH = 1
   const GULL_DAMAGE = 2
   const GULL_SPAWN_X = 60
@@ -71,6 +108,9 @@ let body
   const GULL_FLAP_INTERVAL = 45
   const GULL_PROBABILITY = 0.01
   const GULL_POINTS = 15
+  const GULL_TEXTURE = PIXI.Texture.fromImage('assets/penguin.png')
+
+  let waveCountdown = 100
 
   let gameActive = true
 
@@ -86,18 +126,34 @@ let body
     gravity: Vec2(0, GRAVITY)
   })
 
-  const enemies = {}
-  const fishes = {}
+  let sprite
+  let enemies = {}
+  let fishes = {}
   let points = 0
+  let healthBar
+  let textDisplay
+  let pointDisplay
+  let background
+
+  function gameOver() {
+    resetBodies()
+    textDisplay.show('GAME OVER', {
+      fill: RED
+    });
+  }
 
   function resetBodies() {
+    healthBar.graphics.clear();
+
     Object.keys(enemies).forEach((id) => {
-      world.destroyBody(enemies[id].body)
+      enemies[id].destroy()
     })
 
     Object.keys(fishes).forEach((id) => {
-      world.destroyBody(fishes[id].body)
+      fishes[id].destroy()
     })
+
+    sprite.destroy()
 
     fishes = {}
     enemies = {}
@@ -153,6 +209,10 @@ let body
   }
 
   class HealthBar {
+    constructor() {
+      this.graphics = new PIXI.Graphics();
+      container.addChild(this.graphics);
+    }
     update(health) {
       if (this.body) {
         world.destroyBody(this.body)
@@ -163,19 +223,61 @@ let body
         this.body.createFixture(planck.Box(HEALTH_BAR_MAX_WIDTH * (health / SPRITE_MAX_HEALTH), 0.5), 0.0);
 
         let color
+        let bitColor
 
         if (health > SPRITE_MAX_HEALTH * 0.67) {
           color = GREEN
+          bitColor = BIT_GREEN
         } else if (health > SPRITE_MAX_HEALTH * 0.33) {
           color = YELLOW
+          bitColor = BIT_YELLOW
         } else {
           color = RED
+          bitColor = BIT_RED
         }
 
+        this.graphics.clear();
+        createBlockDisplay(
+          this.graphics,
+          HEALTH_BAR_X,
+          HEALTH_BAR_Y,
+          HEALTH_BAR_X + (HEALTH_BAR_MAX_WIDTH * (health / SPRITE_MAX_HEALTH)),
+          HEALTH_BAR_Y + 2,
+          bitColor
+        )
+
         this.body.render = {
-          fill: color,
           stroke: color,
         }
+      }
+    }
+  }
+
+  class Text {
+    constructor(x, y, style) {
+      this.x = x
+      this.y = y
+      this.style = style
+    }
+
+    show(text, style) {
+      container.removeChild(this.text)
+
+      this.text = new PIXI.Text(text, {
+        ...this.style,
+        ...style,
+      });
+      this.text.anchor.set(0.5)
+      this.text.x = mpx(this.x)
+      this.text.y = mpy(this.y)
+
+      container.addChild(this.text);
+    }
+
+    hide() {
+      if (this.text) {
+        container.removeChild(this.text)
+        this.text = null
       }
     }
   }
@@ -207,7 +309,13 @@ let body
       if (this.health <= 0) {
         world.destroyBody(this.body)
         addPoints(this.points)
+        this.destroy()
       }
+    }
+
+    destroy() {
+      world.destroyBody(this.body)
+      container.removeChild(this.sprite)
     }
   }
 
@@ -240,12 +348,22 @@ let body
       })
 
       this.body.render = {
-        fill: '#cc0000',
-        stroke: '#cc0000'
+        stroke: RED
       }
 
       this.body.type = SEAL
       this.body.id = this.id
+
+      this.sprite = new PIXI.Sprite(SEAL_TEXTURE)
+      this.sprite.scale.set(0.13)
+      this.sprite.anchor.set(0.5);
+      container.addChild(this.sprite)
+    }
+
+    render() {
+      const pos = this.body.getPosition()
+      this.sprite.position.set(mpx(pos.x), mpy(pos.y))
+      this.sprite.rotation = this.body.getAngle()
     }
 
     move() {
@@ -253,6 +371,8 @@ let body
         this.velocity,
         this.body.getLinearVelocity().y
       ))
+
+      this.render()
     }
 
     jump() {
@@ -296,13 +416,21 @@ let body
       })
 
       this.body.render = {
-        fill: '#00cc00',
-        stroke: '#00cc00'
+        stroke: BLUE
       }
 
       this.body.type = GULL
       this.body.id = this.id
       this.untilFlap = GULL_FLAP_INTERVAL
+      this.sprite = new PIXI.Sprite(GULL_TEXTURE)
+      this.sprite.scale.set(0.13)
+      this.sprite.anchor.set(0.5);
+      container.addChild(this.sprite)
+    }
+
+    render() {
+      const pos = this.body.getPosition()
+      this.sprite.position.set(mpx(pos.x), mpy(pos.y))
     }
 
     move() {
@@ -324,6 +452,8 @@ let body
       var f = this.body.getWorldVector(Vec2(0.0, 1.7))
       var p = this.body.getWorldPoint(Vec2(0.0, 2.0))
       this.body.applyLinearImpulse(f, p, true)
+
+      this.render()
     }
   }
 
@@ -343,6 +473,11 @@ let body
         FISH_THROW_Y
       ))
 
+      this.sprite = new PIXI.Sprite(FISH_TEXTURE)
+      this.sprite.scale.set(0.13)
+      this.sprite.anchor.set(0.5);
+      container.addChild(this.sprite)
+
       this.body.setAngularVelocity(Math.random() * Math.PI * 10 - (Math.PI * 5));
 
       this.body.type = FISH
@@ -360,6 +495,13 @@ let body
 
     destroy() {
       world.destroyBody(this.body)
+      container.removeChild(this.sprite)
+    }
+
+    render() {
+      const pos = this.body.getPosition()
+      this.sprite.position.set(mpx(pos.x), mpy(pos.y))
+      this.sprite.rotation = this.body.getAngle()
     }
   }
 
@@ -370,8 +512,12 @@ let body
       this.fishThrowTime = 0
       this.damage = SPRITE_DAMAGE
       this.sprinting = false
-      this.attacking = false
       this.direction = RIGHT
+
+      this.sprite = new PIXI.Sprite(SPRITE_TEXTURE)
+      this.sprite.scale.set(0.2)
+      this.sprite.anchor.set(0.5)
+      container.addChild(this.sprite)
 
       this.body = world.createBody({
         position : Vec2(0, 5.0),
@@ -389,13 +535,11 @@ let body
       ]), 1.0)
 
       this.body.render = {
-        fill: '#dddddd',
-        stroke: '#dddddd'
+        stroke: GREEN
       }
 
       this.jumps = SPRITE_MAX_JUMPS
       this.speed = SPRITE_SPEED
-      body = this.body
     }
 
     /**
@@ -427,15 +571,47 @@ let body
       this.fishThrowTime = FISH_THROW_INTERVAL
     }
 
+    destroy() {
+      world.destroyBody(this.body)
+      container.removeChild(this.sprite)
+    }
+
     stomp() {
-      this.attacking = true
       this.body.setLinearVelocity(Vec2(
         this.body.getLinearVelocity().x,
         -70)
       )
+
+      this.stompFixture = this.body.createFixture(planck.Polygon([
+        Vec2(-3, 0),
+        Vec2(3, 0),
+        Vec2(3, -1),
+        Vec2(-3, -1),
+      ]), 1.0);
+
+      body = this.stompFixture
     }
 
-        /**
+    glide() {
+      this.jumps = 0
+
+      var f = this.body.getWorldVector(Vec2(0.0, SPRITE_GLIDE_IMPULSE))
+      var p = this.body.getWorldPoint(Vec2(0.0, 2.0))
+      this.body.applyLinearImpulse(f, p, true)
+    }
+
+    land() {
+      if (this.body.getLinearVelocity().y <= 0) {
+        this.jumps = SPRITE_MAX_JUMPS
+      }
+
+      if (this.stompFixture) {
+        // this.body.destroyFixture(this.stompFixture)
+        // this.stompFixture = null
+      }
+    }
+
+    /**
      * @param {Integer} direction - LEFT or RIGHT
      */
     move(direction) {
@@ -460,14 +636,41 @@ let body
 
       this.jumps -= 1
     }
+
+    render() {
+      const pos = this.body.getPosition()
+      this.sprite.position.set(mpx(pos.x), mpy(pos.y))
+    }
+  }
+
+  function createBlockDisplay(graphics, x1, y1, x2, y2, color) {
+    graphics.beginFill(color, 1);
+    graphics.drawRect(
+      mpx(x1),
+      mpy(y1),
+      mpx(x2) - mpx(x1),
+      mpy(y2) - mpy(y1)
+    )
+    graphics.endFill();
+  }
+
+  function createBlock(graphics, body, box2dOpts, display, x1, y1, x2, y2) {
+    if (display) {
+      createBlockDisplay(graphics, x1, y1, x2, y2, BIT_BLUE)
+    }
+
+    body.createFixture(planck.Edge(Vec2(x1, y1), Vec2(x2, y2)), box2dOpts)
   }
 
   function createBorders() {
-    const walls = world.createBody()
+    const graphics = new PIXI.Graphics();
+    container.addChild(graphics);
+
+    const wall = world.createBody()
     const ground = world.createBody()
 
     ground.type = GROUND
-    walls.type = WALL
+    wall.type = WALL
 
     const groundOpts = {
       density: 0.0,
@@ -479,10 +682,10 @@ let body
       friction: 0.0
     }
 
-    walls.createFixture(planck.Edge(Vec2(BORDER_X_LEFT, -20.0), Vec2(BORDER_X_LEFT, 30.0)), wallOpts)
-    walls.createFixture(planck.Edge(Vec2(BORDER_X_RIGHT, -20.0), Vec2(BORDER_X_RIGHT, 30.0)), wallOpts)
-    walls.createFixture(planck.Edge(Vec2(BORDER_X_LEFT, 30.0), Vec2(BORDER_X_RIGHT, 30.0)), wallOpts)
-    ground.createFixture(planck.Edge(Vec2(-100.0, -20.0), Vec2(100.0, -20.0)), groundOpts)
+    createBlock(graphics, wall, wallOpts, true, BORDER_X_LEFT, -20.0, BORDER_X_LEFT, 30.0)
+    createBlock(graphics, wall, wallOpts, true, BORDER_X_RIGHT, -20.0, BORDER_X_RIGHT, 30.0)
+    createBlock(graphics, wall, wallOpts, true, BORDER_X_LEFT, 30.0, BORDER_X_RIGHT, 30.0)
+    createBlock(graphics, ground, groundOpts, true, -100.0, -20.0, 100.0, -20.0)
   }
 
   function createSeal() {
@@ -526,8 +729,24 @@ let body
     setDefaults(testbed)
     createBorders(testbed)
 
-    const sprite = new Sprite()
-    const healthBar = new HealthBar()
+    background = new PIXI.Sprite(BACKGROUND_TEXTURE)
+    background.scale.set(1)
+    // background.anchor.set(0.5)
+    background.zOrder = -3
+    container.addChild(background)
+
+    textDisplay = new Text(0, 10, {
+      ...TEXT_STYLE,
+      fill: GREEN,
+    })
+
+    pointDisplay = new Text(40, 25, {
+      ...TEXT_STYLE,
+      fill: BLUE,
+    })
+
+    sprite = new Sprite()
+    healthBar = new HealthBar()
     healthBar.update(sprite.health)
 
     testbed.keydown = function () {
@@ -537,15 +756,19 @@ let body
     }
 
     function evaluateActiveKeys() {
-      // sprite.sprinting = Boolean(testbed.activeKeys.fire)
-
       if (testbed.activeKeys.fire) {
         sprite.throwFish()
       }
 
-      if (testbed.activeKeys.down) {
-        sprite.stomp()
-      } else if (testbed.activeKeys.right) {
+      if (testbed.activeKeys.down) { // TODO: G
+        sprite.glide()
+      }
+
+      // if (testbed.activeKeys.F) {
+      //   sprite.stomp()
+      // }
+
+      if (testbed.activeKeys.right) {
         sprite.move(RIGHT)
       } else if (testbed.activeKeys.left) {
         sprite.move(LEFT)
@@ -554,6 +777,7 @@ let body
 
     function shake() {
       testbed.x = Math.random() * 1.5 - 0.75
+      container.x = (Math.random() * 1.5 - 0.75) * pscale
     }
 
     function evaluateCollisions() {
@@ -571,9 +795,7 @@ let body
           const other = bodies.find(item => item.type !== GROUND)
 
           if (other.type === SPRITE) {
-            if (sprite.body.getLinearVelocity().y <= 0) {
-              sprite.jumps = SPRITE_MAX_JUMPS
-            }
+            sprite.land()
           } else if (other.type === FISH) {
             const fish = fishes[other.id]
 
@@ -617,8 +839,20 @@ let body
     }
 
     testbed.step = function () {
+      sprite.render()
+      pointDisplay.show(String(points))
+
+      if (waveCountdown > 0) {
+        textDisplay.show(String(Math.floor(waveCountdown / 25)));
+
+        waveCountdown -= 1
+        return;
+      }
+
+      textDisplay.hide()
+
       if (!gameActive) {
-        resetBodies()
+        gameOver()
         return
       }
 
@@ -626,6 +860,10 @@ let body
       evaluateActiveKeys()
       spawn()
       moveEnemies()
+
+      Object.keys(fishes).forEach((id) => {
+        fishes[id].render()
+      })
 
       if (sprite.invincibilityTime) {
         if (sprite.invincibilityTime > SHAKE_THRESHOLD) {
