@@ -882,6 +882,73 @@
       container.x = (Math.random() * 1.5 - 0.75) * pscale
     }
 
+    function handleEnemyHeroCollision(enemy, point) {
+      if (point.normal.y < 0 && Math.abs(point.normal.y) - Math.abs(point.normal.x) > 0.5) {
+        enemy.takeDamage(hero.damage)
+        hero.jumps = SPRITE_MAX_JUMPS
+      } else {
+        hero.takeDamage(enemy.damage, healthBar)
+      }
+    }
+
+    function handleEnemyFishCollision(enemy, fish) {
+      enemy.takeDamage(fish.damage)
+      fish.destroy()
+    }
+
+    const collisionHandlers = {
+      [`${GROUND}-${SPRITE}`]: function() {
+        hero.land()
+      },
+      [`${FISH}-${GROUND}`]: function(bodies) {
+        objects[bodies.find(item => item.type === FISH).id].destroy()
+      },
+      [`${GROUND}-${SEAL}`]: function(bodies) {
+        objects[bodies.find(item => item.type === SEAL).id].jumps = SEAL_MAX_JUMPS
+      },
+      [`${GROUND}-${MALE}`]: function(bodies) {
+        objects[bodies.find(item => item.type === MALE).id].jumps = MALE_MAX_JUMPS
+      },
+      [`${SEAL}-${SPRITE}`]: function(bodies, point) {
+        const enemy = objects[bodies.find(item => item.type === SEAL).id];
+        handleEnemyHeroCollision(enemy, point)
+      },
+      [`${GULL}-${SPRITE}`]: function(bodies, point) {
+        const enemy = objects[bodies.find(item => item.type === GULL).id];
+        handleEnemyHeroCollision(enemy, point)
+      },
+      [`${SEAL}-${SEAL}`]: function(bodies) {
+        if (Math.random() > 0.5) {
+          objects[bodies[0].id].jump()
+        } else {
+          objects[bodies[1].id].jump()
+        }
+      },
+      [`${FISH}-${SEAL}`]: function(bodies) {
+        handleEnemyFishCollision(
+          objects[bodies.find(item => item.type === SEAL).id],
+          objects[bodies.find(item => item.type === FISH).id],
+        )
+      },
+      [`${FISH}-${GULL}`]: function(bodies) {
+        handleEnemyFishCollision(
+          objects[bodies.find(item => item.type === GULL).id],
+          objects[bodies.find(item => item.type === FISH).id],
+        )
+      },
+      [`${MALE}-${MALE}`]: function(bodies) {
+        if (Math.random() < 0.5) {
+          objects[bodies[0].id].jump()
+        } else {
+          objects[bodies[1].id].jump()
+        }
+      },
+      [`${MALE}-${SEAL}`]: function(bodies) {
+        objects[bodies[0].id].destroy()
+        objects[bodies[0].id].destroy()
+      },
+    }
+
     function evaluateCollisions() {
       for (let i = 0; i < collisions.length; ++i) {
         const point = collisions[i]
@@ -891,65 +958,14 @@
           point.fixtureB.getBody(),
         ]
 
-        const types = bodies.map(item => item.type)
+        const key = bodies
+          .map(item => item.type)
+          .sort((a, b) => a > b)
+          .join('-')
 
-        if (types.includes(GROUND)) {
-          const other = bodies.find(item => item.type !== GROUND)
-
-          if (other.type === SPRITE) {
-            hero.land()
-          } else if (other.type === FISH) {
-            const fish = objects[other.id]
-
-            fish.destroy()
-          } else if (other.type === SEAL) {
-            const enemy = objects[other.id]
-            enemy.jumps = SEAL_MAX_JUMPS
-          } else if (other.type === MALE) {
-            const male = objects[other.id]
-            male.jumps = MALE_MAX_JUMPS
-          }
-        } else if (types.includes(SPRITE)) {
-          const other = bodies.find(item => item.type !== SPRITE)
-          if (ENEMY_TYPES.includes(other.type)) {
-            const enemy = objects[other.id];
-            if (point.normal.y < 0 && Math.abs(point.normal.y) - Math.abs(point.normal.x) > 0.5) {
-              enemy.takeDamage(hero.damage)
-              hero.jumps = SPRITE_MAX_JUMPS
-            } else {
-              hero.takeDamage(enemy.damage, healthBar)
-            }
-          }
-        } else if (types.filter(item => item === SEAL).length === 2) {
-          let enemy1 = objects[bodies[0].id]
-          let enemy2 = objects[bodies[1].id]
-
-          if (Math.random() > 0.5) {
-            enemy1.jump()
-          } else {
-            enemy2.jump()
-          }
-        } else if (types.includes(FISH) && types.filter(item => item === FISH).length === 1) {
-          const fish = objects[bodies.find(item => item.type === FISH).id]
-          const other = bodies.find(item => item.type !== FISH)
-
-          if (ENEMY_TYPES.includes(other.type)) {
-            objects[other.id].takeDamage(fish.damage)
-            fish.destroy()
-          }
-        } else if (types.includes(MALE)) {
-          const male = bodies.find(item => item.type === MALE)
-          const other = bodies.find(item => item.id !== male.id)
-          if (other.type === MALE) {
-            if (Math.random() < 0.5) {
-              objects[male.id].jump()
-            } else {
-              objects[other.id].jump()
-            }
-          } else if (other.type === SEAL) {
-            objects[male.id].destroy()
-            objects[other.id].destroy()
-          }
+        const handler = collisionHandlers[key]
+        if (handler) {
+          handler(bodies, point)
         }
       }
 

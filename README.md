@@ -54,8 +54,8 @@ GAMEPLAY.7
 - [x] use one map for all objects besides sprite
 - [x] rename sprite ==> hero to avoid naming confusing
 - [x] males huddle up in the center
-- [ ] males get killed by seals
-- [ ] use a map instead of if statements for collion resolution
+- [x] use a map of collision handlers instead of if-statements
+- [x] males get killed by seals
 
 GAMEPLAY.8
 - [ ] detection for how many males have been lost / are still left
