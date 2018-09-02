@@ -69,30 +69,38 @@ UI.1
 - [x] health bar
 - [x] static seal texture
 - [x] static gull texture
-- [x] basic text display for game end
+- [x] standard text display
 - [x] wave countdown
 - [x] points are displayed
 - [x] background image
 
 UI.2
+- [ ] hide planck canvas
+- [ ] fit background to screen
+- [ ] make cute static pixel images: penguin
+- [ ] make cute static pixel images: seal
+- [ ] make cute static pixel images: gull
+- [ ] make cute static pixel images: fish
+- [ ] make cute static pixel images: background
+
+UI.3
 - [ ] sprite running animation
 - [ ] seal running animation
 - [ ] gull flying animation
 - [ ] show menu to start game
 - [ ] show restart and menu buttons when game ends
-- [ ] standard text display ("WAVE 1", "GAME OVER", etc)
 
-UI.3
+UI.4
 - [ ] sprite jump animation
 - [ ] sprite attack animation
 - [ ] sprite death animation
 - [ ] sprite glide animation
 
-UI.4
+UI.5
 - [ ] enemy attack animation
 - [ ] enemy death animation
 - [ ] snowstorm in background while wave is active
 
-UI.5
+UI.6
 - [ ] opening scene
 - [ ] post-wave animations (female textures, cheering)

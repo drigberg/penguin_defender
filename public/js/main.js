@@ -65,7 +65,7 @@ let body
   const INVINCIBILITY_INTERVAL = 30
   const SHAKE_THRESHOLD = 20
   const GRAVITY = -60
-  const BACKGROUND_TEXTURE = PIXI.Texture.fromImage('assets/sierra.png')
+  const BACKGROUND_TEXTURE = PIXI.Texture.fromImage('assets/sierra.jpg')
   const BORDER_X_RIGHT = 40
   const BORDER_X_LEFT = -40
 
