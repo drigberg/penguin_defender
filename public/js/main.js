@@ -86,7 +86,7 @@
       SPEED: 25,
       MAX_JUMPS: 3,
       SPRINT_MULTIPLIER: 1.75,
-      GLIDE_IMPULSE: 1.5,
+      GLIDE_IMPULSE: 1,
       TEXTURE: PIXI.Texture.fromImage('assets/penguin.png'),
     },
     HEALTH_BAR: {
@@ -133,10 +133,9 @@
       BORDER_X_RIGHT: 40,
       BORDER_X_LEFT: -40,
       BACKGROUND_TEXTURE: PIXI.Texture.fromImage('assets/sierra.jpg'),
+      WAVE_COUNTDOWN_TIME: 100,
     }
   })
-
-  let waveCountdown = 100
 
   const Vec2 = planck.Vec2
 
@@ -154,6 +153,7 @@
       this.objects = {}
       this.points = 0
       this.active = true
+      this.waveCountdownTime = SETTINGS.GLOBAL.WAVE_COUNTDOWN_TIME
 
       this.setupWorld()
       this.setupDisplay()
@@ -201,6 +201,8 @@
       this.wave += 1
       this.waveStats = this.getWaveStats()
 
+      this.waveDisplay.show(this.wave)
+
       this.setupMales()
     }
 
@@ -216,12 +218,20 @@
       this.renderObjects()
     }
 
-    onStepPauseDependent() {
-      if (waveCountdown > 0) {
-        this.textDisplay.show(String(Math.floor(waveCountdown / 25)));
+    waveCountdown() {
+      if (this.waveCountdownTime > 0) {
+        this.textDisplay.show(String(Math.floor(this.waveCountdownTime / 25)));
 
-        waveCountdown -= 1
-        return;
+        this.waveCountdownTime -= 1
+        return true
+      }
+    }
+
+    onStepPauseDependent() {
+      const countingDown = this.waveCountdown()
+
+      if (countingDown) {
+        return
       }
 
       if (!this.active) {
@@ -231,7 +241,6 @@
 
       this.world.step(SETTINGS.GLOBAL.TIME_STEP);
       this.textDisplay.hide()
-
 
       this.evaluateCollisions()
       this.evaluateActiveKeys()
@@ -409,9 +418,13 @@
     }
 
     setupDisplay() {
-      this.textDisplay = new Text(0, 10, {
-        ...BASE_TEXT_STYLE,
-        fill: GREEN,
+      this.textDisplay = new Text({
+        x: 0,
+        y: 10,
+        style: {
+          ...BASE_TEXT_STYLE,
+          fill: GREEN,
+        }
       })
 
       this.background = new PIXI.Sprite(SETTINGS.GLOBAL.BACKGROUND_TEXTURE)
@@ -421,8 +434,19 @@
       container.addChild(this.background)
 
       // must be AFTER background
-      this.pointDisplay = new Text(40, 25, BASE_TEXT_STYLE)
+      this.pointDisplay = new Text({
+        prefix: 'SCORE: ',
+        x: 35,
+        y: 25,
+      })
+
       this.pointDisplay.show(String(this.points))
+
+      this.waveDisplay = new Text({
+        prefix: 'WAVE: ',
+        x: 35,
+        y: 20,
+      })
       this.healthBar = new HealthBar(this);
     }
 
@@ -696,7 +720,14 @@
   }
 
   class Text {
-    constructor(x, y, style) {
+    constructor({
+      prefix = '',
+      x,
+      y,
+      style = BASE_TEXT_STYLE
+    })
+      {
+      this.prefix = prefix
       this.x = x
       this.y = y
       this.style = style
@@ -705,7 +736,7 @@
     show(text, style) {
       container.removeChild(this.text)
 
-      this.text = new PIXI.Text(text, {
+      this.text = new PIXI.Text(`${this.prefix} ${text}`, {
         ...this.style,
         ...style,
       });

@@ -64,7 +64,9 @@ GAMEPLAY.8
 GAMEPLAY.9
 - [x] detection for how many males have been lost / are still left
 - [x] defined waves with level formula
-- [ ] display wave number
+- [x] bug: standardize type assignment
+- [x] display wave number
+- [x] refactor: text display prefixes
 - [ ] detect wave completion
 - [ ] display success on wave completion
 
