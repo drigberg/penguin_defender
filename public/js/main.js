@@ -159,6 +159,13 @@
       this.setupInteractivity()
     }
 
+    onMaleDestroyed() {
+      this.malesLeft -= 1
+      if (!this.malesLeft) {
+        this.active = false
+      }
+    }
+
     onStepPauseIndependent() {
       this.hero.render()
       this.renderObjects()
@@ -342,6 +349,8 @@
       for (let i = 0; i < num; i++) {
         new Male(this)
       }
+
+      this.malesLeft = num
     }
 
     setupDisplay() {
@@ -654,11 +663,6 @@
       this.game.objects[this.id] = this
     }
 
-    destroy() {
-      this.game.world.destroyBody(this.body)
-      container.removeChild(this.sprite)
-    }
-
     render() {
       const pos = this.body.getPosition()
       this.sprite.position.set(mpx(pos.x), mpy(pos.y))
@@ -669,6 +673,7 @@
     constructor(parent) {
       super(parent)
       this.velocity = SETTINGS.MALE.SPEED
+      this.alive = true
       this.abducted = false
 
       this.jumps = SETTINGS.MALE.MAX_JUMPS
@@ -702,26 +707,41 @@
       container.addChild(this.sprite)
     }
 
+    destroy() {
+      if (!this.alive) {
+        return
+      }
+
+      this.alive = true
+      this.game.world.destroyBody(this.body)
+      container.removeChild(this.sprite)
+      this.game.onMaleDestroyed()
+    }
+
     move() {
-      if (!this.abducted) {
-        const pos = this.body.getPosition()
-        const velocity = this.body.getLinearVelocity()
-        if (pos.x < -1) {
-          this.body.setLinearVelocity(Vec2(
-            SETTINGS.MALE.SPEED,
-            velocity.y
-          ))
-        } else if (pos.x > 1) {
-          this.body.setLinearVelocity(Vec2(
-            SETTINGS.MALE.SPEED * -1,
-            velocity.y
-          ))
-        }
+      if (this.abducted) {
+        return
+      }
+
+      const pos = this.body.getPosition()
+      const velocity = this.body.getLinearVelocity()
+      if (pos.x < -1) {
+        this.body.setLinearVelocity(Vec2(
+          SETTINGS.MALE.SPEED,
+          velocity.y
+        ))
+      } else if (pos.x > 1) {
+        this.body.setLinearVelocity(Vec2(
+          SETTINGS.MALE.SPEED * -1,
+          velocity.y
+        ))
       }
     }
 
     jump() {
-      if (!this.jumps) { return }
+      if (!this.jumps) {
+        return
+      }
 
       this.body.setLinearVelocity(Vec2(
         this.body.getLinearVelocity().x,
@@ -738,6 +758,7 @@
       health,
       parent,
     }) {
+      this.alive = true
       this.damage = damage
       this.health = health
       this.invincibilityTime = 0
@@ -766,6 +787,11 @@
     }
 
     destroy() {
+      if (!this.alive) {
+        return
+      }
+
+      this.alive = false
       this.game.world.destroyBody(this.body)
       container.removeChild(this.sprite)
     }
@@ -829,7 +855,9 @@
     }
 
     jump() {
-      if (!this.jumps) { return }
+      if (!this.jumps) {
+        return
+      }
 
       this.body.setLinearVelocity(Vec2(
         this.body.getLinearVelocity().x,
@@ -914,6 +942,7 @@
       direction,
       parent,
     }) {
+      this.alive = true
       this.damage = SETTINGS.FISH.DAMAGE
       this.game = parent
 
@@ -954,6 +983,11 @@
     }
 
     destroy() {
+      if (!this.alive) {
+        return
+      }
+
+      this.alive = false
       this.game.world.destroyBody(this.body)
       container.removeChild(this.sprite)
     }
@@ -968,6 +1002,7 @@
   class Hero {
     constructor(parent) {
       this.game = parent
+      this.alive = true
       this.health = SETTINGS.HERO.MAX_HEALTH
       this.invincibilityTime = 0
       this.fishThrowTime = 0
@@ -1009,7 +1044,9 @@
      * @param {Integer} damage - damage dealt
      */
     takeDamage(damage) {
-      if (this.invincibilityTime) { return }
+      if (this.invincibilityTime) {
+        return
+      }
 
       this.health -= damage
       this.invincibilityTime = SETTINGS.GLOBAL.INVINCIBILITY_INTERVAL
@@ -1021,7 +1058,9 @@
     }
 
     throwFish() {
-      if (this.fishThrowTime) { return }
+      if (this.fishThrowTime) {
+        return
+      }
 
       const pos = this.body.getPosition()
 
@@ -1036,6 +1075,11 @@
     }
 
     destroy() {
+      if (!this.alive) {
+        return
+      }
+
+      this.alive = false
       this.game.world.destroyBody(this.body)
       container.removeChild(this.sprite)
       this.game.active = false
@@ -1089,7 +1133,9 @@
     }
 
     jump() {
-      if (!this.jumps) { return }
+      if (!this.jumps) {
+        return
+      }
 
       this.body.setLinearVelocity(Vec2(
         this.body.getLinearVelocity().x,

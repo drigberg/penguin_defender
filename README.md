@@ -60,11 +60,13 @@ GAMEPLAY.8
 - [x] allow pause
 
 GAMEPLAY.9
-- [ ] detection for how many males have been lost / are still left
+- [x] detection for how many males have been lost / are still left
 - [ ] defined waves with level formula
 - [ ] display wave number
+- [ ] detect wave completion
+- [ ] display success on wave completion
+- [ ] start new wave on success
 - [ ] countdown between waves
-- [ ] restore males between waves
 
 GAMEPLAY.10
 - [ ] males get dragged away by seals
@@ -77,7 +79,6 @@ GAMEPLAY.11
 - [ ] figure out how masks REALLY work, and do that
 - [ ] Putin-on-a-Horse
 - [ ] post-wave movement
-
 
 GAMEPLAY.DIFFICULT
 - [ ] splash damage on stomp attack: figure out how to destroy fixtures
