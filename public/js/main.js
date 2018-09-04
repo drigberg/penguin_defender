@@ -185,6 +185,14 @@
       }
     }
 
+    assignType(entity, type) {
+      entity.type = type
+
+      if (entity.body) {
+        entity.body.type = type
+      }
+    }
+
     onHeroDestroyed() {
       this.active = false
     }
@@ -260,6 +268,10 @@
     }
 
     onKeyDown(key) {
+      if (this.keys.down[key]) {
+        return
+      }
+
       switch (key) {
         case 'P':
           this.paused = !this.paused
@@ -597,8 +609,8 @@
       const wall = this.world.createBody()
       const ground = this.world.createBody()
 
-      ground.type = TYPES.GROUND
-      wall.type = TYPES.WALL
+      this.assignType(ground, TYPES.GROUND)
+      this.assignType(wall, TYPES.WALL)
 
       const groundOpts = {
         density: 0.0,
@@ -754,7 +766,8 @@
         stroke: GREEN
       }
 
-      this.body.type = TYPES.MALE
+      this.game.assignType(this, TYPES.MALE)
+
       this.body.id = this.id
 
       this.sprite = new PIXI.Sprite(SETTINGS.MALE.TEXTURE)
@@ -873,7 +886,8 @@
         stroke: RED
       }
 
-      this.body.type = TYPES.SEAL
+      this.game.assignType(this, TYPES.SEAL)
+
       this.body.id = this.id
 
       this.sprite = new PIXI.Sprite(SETTINGS.SEAL.TEXTURE)
@@ -939,7 +953,8 @@
         stroke: BLUE
       }
 
-      this.body.type = TYPES.GULL
+      this.game.assignType(this, TYPES.GULL)
+
       this.body.id = this.id
       this.untilFlap = SETTINGS.GULL.FLAP_INTERVAL
       this.sprite = new PIXI.Sprite(SETTINGS.GULL.TEXTURE)
@@ -1000,7 +1015,8 @@
 
       this.body.setAngularVelocity(Math.random() * Math.PI * 10 - (Math.PI * 5));
 
-      this.body.type = TYPES.FISH
+      this.game.assignType(this, TYPES.FISH)
+
       this.body.createFixture(planck.Polygon([
         Vec2(-1, 0),
         Vec2(1, 0),
@@ -1047,7 +1063,9 @@
         allowSleep : false
       })
 
-      this.body.type = TYPES.HERO
+
+      this.game.assignType(this, TYPES.HERO)
+
       this.body.createFixture(planck.Polygon([
         Vec2(-1, -1),
         Vec2(1, -1),
@@ -1075,6 +1093,7 @@
 
       this.health -= damage
       this.invincibilityTime = SETTINGS.GLOBAL.INVINCIBILITY_INTERVAL
+
       if (this.health <= 0) {
         this.game.destroyEntity(this)
       }
@@ -1165,14 +1184,12 @@
     }
   }
 
-  function setupGame() {
+  (function setupGame() {
     const game = new Game()
 
     window.requestAnimationFrame(function() {
       game.onStep()
     });
-  }
-
-  setupGame()
+  })()
 })()
 
