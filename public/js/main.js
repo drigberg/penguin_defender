@@ -60,7 +60,7 @@
   const RIGHT = 1
 
   const TYPES = Object.freeze({
-    SPRITE: 'SPRITE',
+    HERO: 'HERO',
     GROUND: 'GROUND',
     WALL: 'WALL',
     MALE: 'MALE',
@@ -140,10 +140,15 @@
 
   const Vec2 = planck.Vec2
 
+  function enforcePositive(num) {
+    return num > 0
+      ? num
+      : 0
+  }
+
   class Game {
-    constructor({
-      males = 0,
-    }) {
+    constructor() {
+      this.wave = 0
       this.paused = false
       this.idPointer = 1
       this.objects = {}
@@ -152,11 +157,43 @@
 
       this.setupWorld()
       this.setupDisplay()
-      this.setupMales(males)
       this.createBorders()
       this.createHero()
       this.setupCollisionHandlers()
       this.setupInteractivity()
+      this.startWave()
+    }
+
+    destroyEntity(entity) {
+      if (!entity.alive) {
+        return
+      }
+
+      entity.alive = false
+      this.world.destroyBody(entity.body)
+      container.removeChild(entity.sprite)
+
+      switch (entity.type) {
+        case TYPES.MALE:
+          this.onMaleDestroyed()
+          break
+        case TYPES.HERO:
+          this.onHeroDestroyed()
+          break
+        default:
+          //nothing
+      }
+    }
+
+    onHeroDestroyed() {
+      this.active = false
+    }
+
+    startWave() {
+      this.wave += 1
+      this.waveStats = this.getWaveStats()
+
+      this.setupMales()
     }
 
     onMaleDestroyed() {
@@ -282,60 +319,66 @@
       this.collisions = []
     }
 
+    hashTypes(type1, type2) {
+      return [type1, type2]
+        .sort((a, b) => a > b)
+        .join('-')
+    }
+
     setupCollisionHandlers() {
       const that = this
       this.resetCollisions()
 
       this.collisionHandlers = {
-        [`${TYPES.GROUND}-${TYPES.SPRITE}`]: function() {
+        [that.hashTypes(TYPES.GROUND, TYPES.HERO)]: function() {
           that.hero.land()
         },
-        [`${TYPES.FISH}-${TYPES.GROUND}`]: function(bodies) {
-          that.objects[bodies.find(item => item.type === TYPES.FISH).id].destroy()
+        [that.hashTypes(TYPES.FISH, TYPES.GROUND)]: function(bodies) {
+          that.destroyEntity(that.objects[bodies.find(item => item.type === TYPES.FISH).id])
         },
-        [`${TYPES.GROUND}-${TYPES.SEAL}`]: function(bodies) {
+        [that.hashTypes(TYPES.GROUND, TYPES.SEAL)]: function(bodies) {
           that.objects[bodies.find(item => item.type === TYPES.SEAL).id].jumps = SETTINGS.SEAL.MAX_JUMPS
         },
-        [`${TYPES.GROUND}-${TYPES.MALE}`]: function(bodies) {
+        [that.hashTypes(TYPES.GROUND, TYPES.MALE)]: function(bodies) {
           that.objects[bodies.find(item => item.type === TYPES.MALE).id].jumps = SETTINGS.MALE.MAX_JUMPS
         },
-        [`${TYPES.SEAL}-${TYPES.SPRITE}`]: function(bodies, point) {
+        [that.hashTypes(TYPES.HERO, TYPES.SEAL)]: function(bodies, point) {
           const enemy = that.objects[bodies.find(item => item.type === TYPES.SEAL).id];
           that.handleEnemyHeroCollision(enemy, point)
         },
-        [`${TYPES.GULL}-${TYPES.SPRITE}`]: function(bodies, point) {
+        [that.hashTypes(TYPES.GULL, TYPES.HERO)]: function(bodies, point) {
           const enemy = that.objects[bodies.find(item => item.type === TYPES.GULL).id];
           that.handleEnemyHeroCollision(enemy, point)
         },
-        [`${TYPES.SEAL}-${TYPES.SEAL}`]: function(bodies) {
+        [that.hashTypes(TYPES.SEAL, TYPES.SEAL)]: function(bodies) {
           if (Math.random() > 0.5) {
             that.objects[bodies[0].id].jump()
           } else {
             that.objects[bodies[1].id].jump()
           }
         },
-        [`${TYPES.FISH}-${TYPES.SEAL}`]: function(bodies) {
+        [that.hashTypes(TYPES.FISH, TYPES.SEAL)]: function(bodies) {
           that.handleEnemyFishCollision(
             that.objects[bodies.find(item => item.type === TYPES.SEAL).id],
             that.objects[bodies.find(item => item.type === TYPES.FISH).id],
           )
         },
-        [`${TYPES.FISH}-${TYPES.GULL}`]: function(bodies) {
+        [that.hashTypes(TYPES.FISH, TYPES.GULL)]: function(bodies) {
           that.handleEnemyFishCollision(
             that.objects[bodies.find(item => item.type === TYPES.GULL).id],
             that.objects[bodies.find(item => item.type === TYPES.FISH).id],
           )
         },
-        [`${TYPES.MALE}-${TYPES.MALE}`]: function(bodies) {
+        [that.hashTypes(TYPES.MALE, TYPES.MALE)]: function(bodies) {
           if (Math.random() < 0.5) {
             that.objects[bodies[0].id].jump()
           } else {
             that.objects[bodies[1].id].jump()
           }
         },
-        [`${TYPES.MALE}-${TYPES.SEAL}`]: function(bodies) {
-          that.objects[bodies[0].id].destroy()
-          that.objects[bodies[0].id].destroy()
+        [that.hashTypes(TYPES.MALE, TYPES.SEAL)]: function(bodies) {
+          that.destroyEntity(that.objects[bodies[0].id])
+          that.destroyEntity(that.objects[bodies[0].id])
         },
       }
     }
@@ -345,12 +388,12 @@
       return this.idPointer
     }
 
-    setupMales(num) {
-      for (let i = 0; i < num; i++) {
+    setupMales() {
+      for (let i = 0; i < this.waveStats.males; i++) {
         new Male(this)
       }
 
-      this.malesLeft = num
+      this.malesLeft = this.waveStats.males
     }
 
     setupDisplay() {
@@ -414,33 +457,29 @@
 
     handleEnemyFishCollision(enemy, fish) {
       enemy.takeDamage(fish.damage)
-      fish.destroy()
+      this.destroyEntity(fish)
     }
 
     evaluateCollisions() {
-      for (let i = 0; i < this.collisions.length; ++i) {
-        const point = this.collisions[i]
-
+      this.collisions.forEach((point) => {
         const bodies = [
           point.fixtureA.getBody(),
           point.fixtureB.getBody(),
         ]
 
-        const key = bodies
-          .map(item => item.type)
-          .sort((a, b) => a > b)
-          .join('-')
+        const key = this.hashTypes(...bodies.map(item => item.type))
 
         const handler = this.collisionHandlers[key]
         if (handler) {
           handler(bodies, point)
         }
-      }
+      })
 
       this.resetCollisions()
     }
 
     createSeal() {
+      this.waveStats.seals -=1
       const direction = Math.random() < 0.5
         ? LEFT
         : RIGHT
@@ -449,6 +488,7 @@
     }
 
     createGull() {
+      this.waveStats.gulls -=1
       const direction = Math.random() < 0.5
         ? LEFT
         : RIGHT
@@ -467,13 +507,29 @@
       this.healthBar.graphics.clear();
 
       Object.keys(this.objects).forEach((id) => {
-        this.objects[id].destroy()
+        this.destroyEntity(this.objects[id])
       })
 
-      this.hero.destroy()
+      this.destroyEntity(this.hero)
       this.objects = {}
     }
 
+    getWaveStats() {
+      let males = 20 - (this.wave / 2)
+
+      if (males < 10) {
+        males = 10
+      }
+
+      const seals = enforcePositive(this.wave * 2 + 10)
+      const gulls = enforcePositive(this.wave * 3 - 10)
+
+      return {
+        seals,
+        gulls,
+        males,
+      }
+    }
 
     addPoints(num) {
       this.points += num
@@ -481,11 +537,11 @@
     }
 
     spawnEnemies() {
-      if (Math.random() < SETTINGS.SEAL.PROBABILITY) {
+      if (Math.random() < SETTINGS.SEAL.PROBABILITY && this.waveStats.seals) {
         this.createSeal()
       }
 
-      if (Math.random() < SETTINGS.GULL.PROBABILITY) {
+      if (Math.random() < SETTINGS.GULL.PROBABILITY && this.waveStats.gulls) {
         this.createGull()
       }
     }
@@ -707,17 +763,6 @@
       container.addChild(this.sprite)
     }
 
-    destroy() {
-      if (!this.alive) {
-        return
-      }
-
-      this.alive = true
-      this.game.world.destroyBody(this.body)
-      container.removeChild(this.sprite)
-      this.game.onMaleDestroyed()
-    }
-
     move() {
       if (this.abducted) {
         return
@@ -782,18 +827,8 @@
       if (this.health <= 0) {
         this.game.world.destroyBody(this.body)
         this.game.addPoints(this.points)
-        this.destroy()
+        this.game.destroyEntity(this)
       }
-    }
-
-    destroy() {
-      if (!this.alive) {
-        return
-      }
-
-      this.alive = false
-      this.game.world.destroyBody(this.body)
-      container.removeChild(this.sprite)
     }
 
     render() {
@@ -982,16 +1017,6 @@
       this.body.id = this.id
     }
 
-    destroy() {
-      if (!this.alive) {
-        return
-      }
-
-      this.alive = false
-      this.game.world.destroyBody(this.body)
-      container.removeChild(this.sprite)
-    }
-
     render() {
       const pos = this.body.getPosition()
       this.sprite.position.set(mpx(pos.x), mpy(pos.y))
@@ -1022,7 +1047,7 @@
         allowSleep : false
       })
 
-      this.body.type = TYPES.SPRITE
+      this.body.type = TYPES.HERO
       this.body.createFixture(planck.Polygon([
         Vec2(-1, -1),
         Vec2(1, -1),
@@ -1051,7 +1076,7 @@
       this.health -= damage
       this.invincibilityTime = SETTINGS.GLOBAL.INVINCIBILITY_INTERVAL
       if (this.health <= 0) {
-        this.destroy()
+        this.game.destroyEntity(this)
       }
 
       this.game.healthBar.update(this.health)
@@ -1072,17 +1097,6 @@
       })
 
       this.fishThrowTime = SETTINGS.FISH.THROW_INTERVAL
-    }
-
-    destroy() {
-      if (!this.alive) {
-        return
-      }
-
-      this.alive = false
-      this.game.world.destroyBody(this.body)
-      container.removeChild(this.sprite)
-      this.game.active = false
     }
 
     stomp() {
@@ -1152,9 +1166,7 @@
   }
 
   function setupGame() {
-    const game = new Game({
-      males: 20
-    })
+    const game = new Game()
 
     window.requestAnimationFrame(function() {
       game.onStep()

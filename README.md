@@ -58,31 +58,35 @@ GAMEPLAY.8
 - [x] hide testbed
 - [x] isolate render/move
 - [x] allow pause
+- [x] refactor: type hashing
+- [x] refactor: entity destruction
 
 GAMEPLAY.9
 - [x] detection for how many males have been lost / are still left
-- [ ] defined waves with level formula
+- [x] defined waves with level formula
 - [ ] display wave number
 - [ ] detect wave completion
 - [ ] display success on wave completion
-- [ ] start new wave on success
-- [ ] countdown between waves
 
 GAMEPLAY.10
+- [ ] start new wave on success
+- [ ] countdown between waves
 - [ ] males get dragged away by seals
+
+GALMPLEY.11
 - [ ] gulls can swoop
 - [ ] gulls can carry away males
 - [ ] seals get launched when stomped
 - [ ] gulls change color and fall when killed
 
-GAMEPLAY.11
-- [ ] figure out how masks REALLY work, and do that
+GAMEPLAY.12
 - [ ] Putin-on-a-Horse
 - [ ] post-wave movement
 
 GAMEPLAY.DIFFICULT
+- [ ] figure out how masks REALLY work, and do that
 - [ ] splash damage on stomp attack: figure out how to destroy fixtures
-- [ ] fix bird-summoning bug
+- [ ] fix bird-summoning bug on stomp attack
 
 ### UI Todos
 UI.1
