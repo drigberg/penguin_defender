@@ -47,6 +47,15 @@
     fill: BLUE,
   });
 
+  const KEY_CODE_MAP = {
+    39: 'RIGHT',
+    37: 'LEFT',
+    38: 'UP',
+    40: 'DOWN',
+    32: 'SPACE',
+    13: 'RETURN',
+  }
+
   const LEFT = -1
   const RIGHT = 1
 
@@ -117,6 +126,7 @@
       TEXTURE: PIXI.Texture.fromImage('assets/penguin.png'),
     },
     GLOBAL: {
+      TIME_STEP: 1 / 50,
       INVINCIBILITY_INTERVAL: 30,
       SHAKE_THRESHOLD: 20,
       GRAVITY: -60,
@@ -131,22 +141,133 @@
   const Vec2 = planck.Vec2
 
   class Game {
-    constructor(testbed, numMales) {
+    constructor({
+      males = 0,
+    }) {
+      this.paused = false
       this.idPointer = 1
       this.objects = {}
       this.points = 0
       this.active = true
 
       this.setupWorld()
-      this.setupTestbed(testbed)
       this.setupDisplay()
-      this.setupMales(numMales)
+      this.setupMales(males)
       this.createBorders()
       this.createHero()
       this.setupCollisionHandlers()
+      this.setupInteractivity()
+    }
+
+    onStepPauseIndependent() {
+      this.hero.render()
+      this.renderObjects()
+    }
+
+    onStepPauseDependent() {
+      if (waveCountdown > 0) {
+        this.textDisplay.show(String(Math.floor(waveCountdown / 25)));
+
+        waveCountdown -= 1
+        return;
+      }
+
+      if (!this.active) {
+        this.gameOver()
+        return
+      }
+
+      this.world.step(SETTINGS.GLOBAL.TIME_STEP);
+      this.textDisplay.hide()
+
+
+      this.evaluateCollisions()
+      this.evaluateActiveKeys()
+      this.spawnEnemies()
+      this.moveObjects()
+
+      if (this.hero.invincibilityTime) {
+        if (this.hero.invincibilityTime > SETTINGS.GLOBAL.SHAKE_THRESHOLD) {
+          this.shake()
+        }
+
+        this.hero.invincibilityTime -= 1
+      }
+
+      if (this.hero.fishThrowTime > 0) {
+        this.hero.fishThrowTime -= 1
+      } else {
+        this.hero.fishThrowTime = 0
+      }
+    }
+
+    onStep() {
+      const that = this
+
+      this.onStepPauseIndependent()
+
+      if (!this.paused) {
+        this.onStepPauseDependent()
+      }
+
+      window.requestAnimationFrame(function() {
+        that.onStep()
+      });
+    }
+
+    onKeyDown(key) {
+      switch (key) {
+        case 'P':
+          this.paused = !this.paused
+          break
+        case 'UP':
+          this.hero.jump()
+          break
+        case 'SPACE':
+          this.hero.throwFish()
+          break
+        case 'F':
+          this.hero.stomp()
+          break
+        default:
+          // nothing
+      }
+
+      this.keys.down[key] = true
+    }
+
+    onKeyUp(key) {
+      this.keys.down[key] = false
+    }
+
+    translateKeyCode(code) {
+      const char = String.fromCharCode(code)
+
+      if (/\w/.test(char)) {
+        return char
+      }
+
+      return KEY_CODE_MAP[code]
+    }
+
+    setupInteractivity() {
+      const that = this
+
+      this.keys = {
+        down: {},
+      };
+
+      window.addEventListener('keydown', function(e) {
+        that.onKeyDown(that.translateKeyCode(e.keyCode))
+      });
+
+      window.addEventListener('keyup', function(e) {
+        that.onKeyUp(that.translateKeyCode(e.keyCode))
+      });
     }
 
     createHero() {
+      // must be called AFTER background is set up
       this.hero = new Hero(this)
     }
 
@@ -229,34 +350,16 @@
         fill: GREEN,
       })
 
-      this.pointDisplay = new Text(40, 25, BASE_TEXT_STYLE)
-      this.pointDisplay.show(String(this.points))
-
       this.background = new PIXI.Sprite(SETTINGS.GLOBAL.BACKGROUND_TEXTURE)
       this.background.scale.x = 1.1
       this.background.scale.y = 1.01
       this.background.zOrder = -3
       container.addChild(this.background)
 
+      // must be AFTER background
+      this.pointDisplay = new Text(40, 25, BASE_TEXT_STYLE)
+      this.pointDisplay.show(String(this.points))
       this.healthBar = new HealthBar(this);
-    }
-
-    setupTestbed(testbed) {
-      const that = this
-      this.testbed = testbed
-      this.testbed.info('←/→: Accelerate game.hero, ↑: jump, ↓: attack')
-      this.testbed.speed = 2
-      this.testbed.hz = 50
-
-      this.testbed.keydown = function () {
-        if (that.testbed.activeKeys.up) {
-          that.hero.jump()
-        }
-      }
-
-      this.testbed.step = function () {
-        that.step()
-      }
     }
 
     setupWorld() {
@@ -381,7 +484,9 @@
     moveObjects() {
       Object.keys(this.objects).forEach((id) => {
         const object = this.objects[id]
-        object.move()
+        if (object.move && typeof object.move === 'function') {
+          object.move()
+        }
 
         if (object.invincibilityTime) {
           object.invincibilityTime -= 1
@@ -390,21 +495,13 @@
     }
 
     evaluateActiveKeys() {
-      if (this.testbed.activeKeys.fire) {
-        this.hero.throwFish()
-      }
-
-      if (this.testbed.activeKeys.G) {
+      if (this.keys.down.G) {
         this.hero.glide()
       }
 
-      // if (testbed.activeKeys.F) {
-      //   this.hero.stomp()
-      // }
-
-      if (this.testbed.activeKeys.right) {
+      if (this.keys.down.RIGHT) {
         this.hero.move(RIGHT)
-      } else if (this.testbed.activeKeys.left) {
+      } else if (this.keys.down.LEFT) {
         this.hero.move(LEFT)
       }
     }
@@ -458,45 +555,13 @@
     }
 
     shake() {
-      this.testbed.x = Math.random() * 1.5 - 0.75
       container.x = (Math.random() * 1.5 - 0.75) * pscale
     }
 
-    step() {
-      this.hero.render()
-
-      if (waveCountdown > 0) {
-        this.textDisplay.show(String(Math.floor(waveCountdown / 25)));
-
-        waveCountdown -= 1
-        return;
-      }
-
-      this.textDisplay.hide()
-
-      if (!this.active) {
-        this.gameOver()
-        return
-      }
-
-      this.evaluateCollisions()
-      this.evaluateActiveKeys()
-      this.spawnEnemies()
-      this.moveObjects()
-
-      if (this.hero.invincibilityTime) {
-        if (this.hero.invincibilityTime > SETTINGS.GLOBAL.SHAKE_THRESHOLD) {
-          this.shake()
-        }
-
-        this.hero.invincibilityTime -= 1
-      }
-
-      if (this.hero.fishThrowTime > 0) {
-        this.hero.fishThrowTime -= 1
-      } else {
-        this.hero.fishThrowTime = 0
-      }
+    renderObjects() {
+      Object.keys(this.objects).forEach((id) => {
+        this.objects[id].render()
+      })
     }
   }
 
@@ -653,8 +718,6 @@
           ))
         }
       }
-
-      this.render()
     }
 
     jump() {
@@ -763,8 +826,6 @@
         this.velocity,
         this.body.getLinearVelocity().y
       ))
-
-      this.render()
     }
 
     jump() {
@@ -843,8 +904,6 @@
       var f = this.body.getWorldVector(Vec2(0.0, 1.7))
       var p = this.body.getWorldPoint(Vec2(0.0, 2.0))
       this.body.applyLinearImpulse(f, p, true)
-
-      this.render()
     }
   }
 
@@ -897,11 +956,6 @@
     destroy() {
       this.game.world.destroyBody(this.body)
       container.removeChild(this.sprite)
-    }
-
-    move() {
-      // movement is all gravity
-      this.render()
     }
 
     render() {
@@ -1051,9 +1105,16 @@
     }
   }
 
-  planck.testbed('penguin_defender', function (testbed) {
-    const game = new Game(testbed, 20)
-    return game.world
-  })
+  function setupGame() {
+    const game = new Game({
+      males: 20
+    })
+
+    window.requestAnimationFrame(function() {
+      game.onStep()
+    });
+  }
+
+  setupGame()
 })()
 

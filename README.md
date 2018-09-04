@@ -55,20 +55,25 @@ GAMEPLAY.7
 - [x] refactor: as few globals as possible
 
 GAMEPLAY.8
+- [x] hide testbed
+- [x] isolate render/move
+- [x] allow pause
+
+GAMEPLAY.9
 - [ ] detection for how many males have been lost / are still left
 - [ ] defined waves with level formula
 - [ ] display wave number
 - [ ] countdown between waves
 - [ ] restore males between waves
 
-GAMEPLAY.9
+GAMEPLAY.10
 - [ ] males get dragged away by seals
 - [ ] gulls can swoop
 - [ ] gulls can carry away males
 - [ ] seals get launched when stomped
 - [ ] gulls change color and fall when killed
 
-GAMEPLAY.10
+GAMEPLAY.11
 - [ ] figure out how masks REALLY work, and do that
 - [ ] Putin-on-a-Horse
 - [ ] post-wave movement
@@ -93,7 +98,6 @@ UI.1
 UI.2
 - [x] make UI contactless
 - [x] fit background to screen
-- [ ] hide planck canvas
 - [ ] make cute static pixel images: penguin
 - [ ] make cute static pixel images: seal
 - [ ] make cute static pixel images: gull
