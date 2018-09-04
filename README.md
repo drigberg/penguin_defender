@@ -46,16 +46,13 @@ GAMEPLAY.6
 - [x] allow more keys: F for stomp, G for glide
 - [x] use masks for ignoring collisions
 
-GAMEPLAY.DIFFICULT
-- [ ] splash damage on stomp attack: figure out how to destroy fixtures
-- [ ] fix bird-summoning bug
-
 GAMEPLAY.7
 - [x] use one map for all objects besides sprite
 - [x] rename sprite ==> hero to avoid naming confusing
 - [x] males huddle up in the center
 - [x] use a map of collision handlers instead of if-statements
 - [x] males get killed by seals
+- [x] refactor: as few globals as possible
 
 GAMEPLAY.8
 - [ ] detection for how many males have been lost / are still left
@@ -75,6 +72,11 @@ GAMEPLAY.10
 - [ ] figure out how masks REALLY work, and do that
 - [ ] Putin-on-a-Horse
 - [ ] post-wave movement
+
+
+GAMEPLAY.DIFFICULT
+- [ ] splash damage on stomp attack: figure out how to destroy fixtures
+- [ ] fix bird-summoning bug
 
 ### UI Todos
 UI.1
