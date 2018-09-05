@@ -81,13 +81,18 @@ GAMEPLAY.10
 - [x] display gameover reason
 
 GAMEPLAY.11
+- [x] fix masks
+- [x] fix flying seals
+- [x] display "PAUSED"
+- [ ] penguins definitely don't render at all until wave starts
+
+GAMEPLAY.12
 - [ ] gulls can swoop
 - [ ] gulls can carry away males
 - [ ] seals get launched when stomped
 - [ ] gulls change color and fall when killed
 
-GAMEPLAY.12
-- [ ] penguins definitely don't render at all until wave starts
+GAMEPLAY.13
 - [ ] Putin-on-a-Horse
 - [ ] post-wave movement
 - [ ] clean up Game methods
@@ -152,11 +157,11 @@ UI.1
 UI.2
 - [x] make UI contactless
 - [x] fit background to screen
-- [ ] make cute static pixel images: penguin
-- [ ] make cute static pixel images: seal
-- [ ] make cute static pixel images: gull
-- [ ] make cute static pixel images: fish
-- [ ] make cute static pixel images: background
+- [x] cute static pixel image: penguin
+- [x] cute static pixel image: seal
+- [x] cute static pixel image: gull
+- [x] cute static pixel image: fish
+- [x] cute static pixel image: background
 
 UI.3
 - [ ] sprite running animation
@@ -180,3 +185,7 @@ UI.5
 UI.6
 - [ ] opening scene
 - [ ] post-wave animations (female textures, cheering)
+
+UI.7
+- [ ] lighting
+- [ ] movement trails

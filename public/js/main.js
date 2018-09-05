@@ -23,16 +23,18 @@
 
   const CATEGORIES = {
     CREATURE: 0x0001,
-    HERO: 0x0002,
-    GROUND: 0x0004,
-    WALLS: 0x0008,
-    OFFSCREEN: 0x00010,
+    GROUND: 0x0002,
+    HERO: 0x0004,
+    FISH: 0x0008,
+    WALLS: 0x00016,
+    OFFSCREEN: 0x00032,
   }
 
   const MASKS = {
-    CREATURE: CATEGORIES.CREATURE | CATEGORIES.HERO | CATEGORIES.OFFSCREEN | CATEGORIES.GROUND,
-    HERO: CATEGORIES.CREATURE | CATEGORIES.WALLS | CATEGORIES.GROUND,
-    GROUND: CATEGORIES.CREATURE | CATEGORIES.HERO,
+    CREATURE: CATEGORIES.FISH | CATEGORIES.CREATURE | CATEGORIES.HERO | CATEGORIES.OFFSCREEN | CATEGORIES.GROUND,
+    HERO: ~CATEGORIES.FISH,
+    FISH: CATEGORIES.CREATURE | CATEGORIES.GROUND,
+    GROUND: CATEGORIES.FISH | CATEGORIES.CREATURE | CATEGORIES.HERO,
     WALLS: CATEGORIES.HERO,
     OFFSCREEN: CATEGORIES.CREATURE,
   }
@@ -92,8 +94,10 @@
       SPAWN_Y: 0.0,
       SPAWN_SPREAD: 5.0,
       MAX_JUMPS: 1,
-      TEXTURE: PIXI.Texture.fromImage('assets/penguin.png'),
+      TEXTURE: PIXI.Texture.fromImage('assets/male.png'),
       JUMP: 20,
+      BOX_WIDTH: 0.5,
+      BOX_HEIGHT: 1,
     },
     HERO: {
       JUMP: 35,
@@ -104,6 +108,10 @@
       SPRINT_MULTIPLIER: 1.75,
       GLIDE_IMPULSE: 1,
       TEXTURE: PIXI.Texture.fromImage('assets/penguin.png'),
+      BOX_WIDTH: 2.0,
+      BOX_HEIGHT: 2.0,
+      STOMP_BOX_WIDTH: 3.0,
+      STOMP_BOX_HEIGHT: 1.0,
     },
     HEALTH_BAR: {
       X: -40,
@@ -116,6 +124,8 @@
       THROW_Y: 50,
       THROW_INTERVAL: 25,
       TEXTURE: PIXI.Texture.fromImage('assets/fish.png'),
+      BOX_WIDTH: 1,
+      BOX_HEIGHT: 0.6,
     },
     SEAL: {
       SPEED: 5.0,
@@ -127,7 +137,9 @@
       JUMP: 20,
       MAX_JUMPS: 1,
       POINTS: 10,
-      TEXTURE: PIXI.Texture.fromImage('assets/penguin.png'),
+      TEXTURE: PIXI.Texture.fromImage('assets/seal.png'),
+      BOX_WIDTH: 1,
+      BOX_HEIGHT: 0.6,
     },
     GULL: {
       SPEED: 3.0,
@@ -141,6 +153,8 @@
       PROBABILITY: 0.01,
       POINTS: 15,
       TEXTURE: PIXI.Texture.fromImage('assets/penguin.png'),
+      BOX_WIDTH: 2.0,
+      BOX_HEIGHT: 2.0,
     },
     GLOBAL: {
       TIME_STEP: 1 / 50,
@@ -151,9 +165,9 @@
       BORDER_X_LEFT: -40,
       OFFSCREEN_X_RIGHT: 55,
       OFFSCREEN_X_LEFT: -55,
-      BACKGROUND_TEXTURE: PIXI.Texture.fromImage('assets/sierra.jpg'),
-      WAVE_COUNTDOWN_TIME: 400,
-      WAVE_INTERIM_TIME: 130,
+      BACKGROUND_TEXTURE: PIXI.Texture.fromImage('assets/mountains.png'),
+      WAVE_COUNTDOWN_TIME: 200,
+      WAVE_INTERIM_TIME: 1500,
     }
   })
 
@@ -168,7 +182,7 @@
   class Game {
     constructor() {
       this.wave = 0
-      this.paused = false
+      this.paused = true
       this.idPointer = 1
       this.objects = {}
       this.points = 0
@@ -184,6 +198,7 @@
 
     startWaveCountdown() {
       this.waveCountdownTime = SETTINGS.GLOBAL.WAVE_COUNTDOWN_TIME
+      this.waveCountdownInterval = this.waveCountdownTime / 4
     }
 
     waveComplete() {
@@ -299,7 +314,7 @@
     waveCountdown() {
       if (this.waveCountdownTime > 0) {
         this.textDisplays[0].show('GET READY!');
-        this.textDisplays[1].show(Math.floor(this.waveCountdownTime / 25) || 'GO!');
+        this.textDisplays[1].show(Math.floor(this.waveCountdownTime / this.waveCountdownInterval) || 'GO!');
 
         this.waveCountdownTime -= 1
         return true
@@ -366,6 +381,15 @@
       switch (key) {
         case 'P':
           this.paused = !this.paused
+
+          if (!this.waveCountdownTime && this.paused) {
+            this.textDisplays[0].show('PAUSED', {
+              fill: BLUE,
+            })
+          } else if (!this.waveCountdownTime && !this.paused) {
+            this.textDisplays[0].hide()
+          }
+
           break
         case 'UP':
           this.hero.jump()
@@ -938,7 +962,7 @@
         allowSleep : false
       })
 
-      this.body.createFixture(planck.Circle(0.5), {
+      this.body.createFixture(planck.Box(SETTINGS.MALE.BOX_WIDTH, SETTINGS.MALE.BOX_HEIGHT), {
         friction: 0,
         filterCategoryBits: CATEGORIES.CREATURE,
         filterMaskBits: MASKS.CREATURE,
@@ -953,7 +977,6 @@
       this.body.id = this.id
 
       this.sprite = new PIXI.Sprite(SETTINGS.MALE.TEXTURE)
-      this.sprite.scale.set(0.1)
       this.sprite.anchor.set(0.5);
       container.addChild(this.sprite)
     }
@@ -1068,7 +1091,7 @@
         allowSleep : false
       })
 
-      this.body.createFixture(planck.Circle(0.5), {
+      this.body.createFixture(planck.Box(SETTINGS.SEAL.BOX_WIDTH, SETTINGS.SEAL.BOX_HEIGHT), {
         friction: 0,
         filterCategoryBits: CATEGORIES.CREATURE,
         filterMaskBits: MASKS.CREATURE,
@@ -1081,7 +1104,7 @@
       }
 
       this.sprite = new PIXI.Sprite(SETTINGS.SEAL.TEXTURE)
-      this.sprite.scale.set(0.13)
+      this.sprite.scale.set(0.9)
       this.sprite.anchor.set(0.5);
       container.addChild(this.sprite)
     }
@@ -1090,6 +1113,10 @@
       const velocity = this.abducting
         ? this.velocity * -1
         : this.velocity
+
+      this.sprite.scale.x = velocity < 0
+        ? -1
+        : 1
 
       this.body.setLinearVelocity(Vec2(
         velocity,
@@ -1146,7 +1173,7 @@
         allowSleep : true,
       })
 
-      this.body.createFixture(planck.Circle(0.4), {
+      this.body.createFixture(planck.Box(SETTINGS.GULL.BOX_WIDTH, SETTINGS.GULL.BOX_HEIGHT), {
         friction: 0,
         filterCategoryBits: CATEGORIES.CREATURE,
         filterMaskBits: MASKS.CREATURE,
@@ -1161,7 +1188,7 @@
       this.body.id = this.id
       this.untilFlap = SETTINGS.GULL.FLAP_INTERVAL
       this.sprite = new PIXI.Sprite(SETTINGS.GULL.TEXTURE)
-      this.sprite.scale.set(0.13)
+      this.sprite.scale.set(0.9)
       this.sprite.anchor.set(0.5);
       container.addChild(this.sprite)
     }
@@ -1212,7 +1239,6 @@
       ))
 
       this.sprite = new PIXI.Sprite(SETTINGS.FISH.TEXTURE)
-      this.sprite.scale.set(0.13)
       this.sprite.anchor.set(0.5);
       container.addChild(this.sprite)
 
@@ -1220,14 +1246,9 @@
 
       this.game.assignType(this, TYPES.FISH)
 
-      this.body.createFixture(planck.Polygon([
-        Vec2(-1, 0),
-        Vec2(1, 0),
-        Vec2(1, 1),
-        Vec2(-1, 1),
-      ]), {
-        filterCategoryBits: CATEGORIES.CREATURE,
-        filterMaskBits: MASKS.CREATURE,
+      this.body.createFixture(planck.Box(SETTINGS.FISH.BOX_WIDTH, SETTINGS.FISH.BOX_HEIGHT), {
+        filterCategoryBits: CATEGORIES.FISH,
+        filterMaskBits: MASKS.FISH,
       })
 
       this.id = this.game.createId()
@@ -1254,7 +1275,6 @@
       this.direction = RIGHT
 
       this.sprite = new PIXI.Sprite(SETTINGS.HERO.TEXTURE)
-      this.sprite.scale.set(0.2)
       this.sprite.anchor.set(0.5)
       container.addChild(this.sprite)
 
@@ -1268,12 +1288,10 @@
 
       this.game.assignType(this, TYPES.HERO)
 
-      this.body.createFixture(planck.Polygon([
-        Vec2(-1, -1),
-        Vec2(1, -1),
-        Vec2(1, 1),
-        Vec2(-1, 1),
-      ]))
+      this.body.createFixture(planck.Box(SETTINGS.HERO.BOX_WIDTH, SETTINGS.HERO.BOX_HEIGHT), {
+        filterCategoryBits: CATEGORIES.HERO,
+        filterMaskBits: MASKS.HERO,
+      })
 
       this.body.render = {
         stroke: GREEN
@@ -1326,12 +1344,8 @@
         -70)
       )
 
-      this.stompFixture = this.body.createFixture(planck.Polygon([
-        Vec2(-3, 0),
-        Vec2(3, 0),
-        Vec2(3, -1),
-        Vec2(-3, -1),
-      ]), 1.0);
+      this.stompFixture = this.body.createFixture(planck.Box(SETTINGS.HERO.STOMP_BOX_WIDTH, SETTINGS.HERO.STOMP_BOX_HEIGHT), 1.0);
+      this.stompFixture.anchor.set(0, 1)
     }
 
     glide() {
