@@ -73,10 +73,12 @@ GAMEPLAY.9
 - [x] countdown between waves
 
 GAMEPLAY.10
-- [ ] males get dragged away by seals
-- [ ] detect when enemies cross the screen
-- [ ] detect when males cross the screen
-- [ ] display final score when game is over
+- [x] males get dragged away by seals
+- [x] figure out how masks REALLY work, and do that
+- [x] detect when enemies cross the screen
+- [x] detect when males cross the screen
+- [x] display final score when game is over
+- [x] display gameover reason
 
 GAMEPLAY.11
 - [ ] gulls can swoop
@@ -85,13 +87,55 @@ GAMEPLAY.11
 - [ ] gulls change color and fall when killed
 
 GAMEPLAY.12
+- [ ] penguins definitely don't render at all until wave starts
 - [ ] Putin-on-a-Horse
 - [ ] post-wave movement
+- [ ] clean up Game methods
+- [ ] standardize colors (alert, points, success, etc)
+- [ ] display "PAUSED"
 
 GAMEPLAY.DIFFICULT
-- [ ] figure out how masks REALLY work, and do that
 - [ ] splash damage on stomp attack: figure out how to destroy fixtures
 - [ ] fix bird-summoning bug on stomp attack
+- [ ] completely fix destruction order bug
+
+### Audio Todos
+AUDIO.1
+- [ ] basic jump sound
+- [ ] basic glide sound
+- [ ] basic stomp sound
+- [ ] basic damage sound
+
+AUDIO.2
+- [ ] basic abduction sound
+- [ ] basic male death sound
+- [ ] basic seal death sound
+- [ ] basic gull death sound
+- [ ] basic game over sound
+
+AUDIO.3
+- [ ] basic gameplay music
+- [ ] basic gameover music
+- [ ] basic menu music
+
+AUDIO.4
+- [ ] high-quality jump sound
+- [ ] high-quality glide sound
+- [ ] high-quality stomp sound
+- [ ] high-quality damage sound
+
+AUDIO.5
+- [ ] high-quality abduction sound
+- [ ] high-quality male death sound
+- [ ] high-quality seal death sound
+- [ ] high-quality gull death sound
+- [ ] high-quality game over sound
+
+AUDIO.6
+- [ ] high-quality gameplay music
+- [ ] high-quality gameover music
+- [ ] high-quality menu music
+
 
 ### UI Todos
 UI.1

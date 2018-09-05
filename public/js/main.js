@@ -20,13 +20,22 @@
   app.view.style.position = 'absolute';
   app.view.style.border = '1px solid #222222';
 
-  const NON_INTERACTIVE = -1
-  const NON_INTERACTIVE_BITS = 0x0002
-  const NON_INTERACTIVE_MASK = 0xFFFF;
 
-  const INTERACTIVE_SPRITE = 90
-  const INTERACTIVE_SPRITE_BITS = 0x0004
-  const INTERACTIVE_SPRITE_MASK = 0xFFFF ^ NON_INTERACTIVE_BITS;
+  const CATEGORIES = {
+    CREATURE: 0x0001,
+    HERO: 0x0002,
+    GROUND: 0x0004,
+    WALLS: 0x0008,
+    OFFSCREEN: 0x00010,
+  }
+
+  const MASKS = {
+    CREATURE: CATEGORIES.CREATURE | CATEGORIES.HERO | CATEGORIES.OFFSCREEN | CATEGORIES.GROUND,
+    HERO: CATEGORIES.CREATURE | CATEGORIES.WALLS | CATEGORIES.GROUND,
+    GROUND: CATEGORIES.CREATURE | CATEGORIES.HERO,
+    WALLS: CATEGORIES.HERO,
+    OFFSCREEN: CATEGORIES.CREATURE,
+  }
 
   const RED = '#ee1111'
   const BLUE = '#5555ee'
@@ -60,9 +69,10 @@
   const RIGHT = 1
 
   const TYPES = Object.freeze({
-    HERO: 'HERO',
     GROUND: 'GROUND',
     WALL: 'WALL',
+    OFFSCREEN: 'OFFSCREEN',
+    HERO: 'HERO',
     MALE: 'MALE',
     FISH: 'FISH',
     SEAL: 'SEAL',
@@ -74,33 +84,16 @@
     TYPES.GULL
   ]);
 
-  const DEBUG_WAVE_STATS = Object.freeze({
-    [TYPES.SEAL]: {
-      total: 1,
-      created: 0,
-      destroyed: 0,
-    },
-    [TYPES.GULL]: {
-      total: 0,
-      created: 0,
-      destroyed: 0,
-    },
-    [TYPES.MALE]: {
-      total: 20,
-      created: 20,
-      abducted: 0
-    },
-  })
-
   const SETTINGS = Object.freeze({
     MALE: {
+      NUM: 10,
       SPEED: 2.0,
       SPAWN_X: 0.0,
       SPAWN_Y: 0.0,
       SPAWN_SPREAD: 5.0,
       MAX_JUMPS: 1,
       TEXTURE: PIXI.Texture.fromImage('assets/penguin.png'),
-      JUMP: 10,
+      JUMP: 20,
     },
     HERO: {
       JUMP: 35,
@@ -128,10 +121,10 @@
       SPEED: 5.0,
       HEALTH: 1,
       DAMAGE: 1,
-      SPAWN_X: 60,
+      SPAWN_X: 50,
       SPAWN_Y: 5,
       PROBABILITY: 0.01,
-      JUMP: 7,
+      JUMP: 20,
       MAX_JUMPS: 1,
       POINTS: 10,
       TEXTURE: PIXI.Texture.fromImage('assets/penguin.png'),
@@ -140,7 +133,7 @@
       SPEED: 3.0,
       HEALTH: 1,
       DAMAGE: 2,
-      SPAWN_X: 60,
+      SPAWN_X: 50,
       SPAWN_Y: 20,
       FLAP_POWER: 5,
       FLAP_INTERVAL: 45,
@@ -156,8 +149,10 @@
       GRAVITY: -60,
       BORDER_X_RIGHT: 40,
       BORDER_X_LEFT: -40,
+      OFFSCREEN_X_RIGHT: 55,
+      OFFSCREEN_X_LEFT: -55,
       BACKGROUND_TEXTURE: PIXI.Texture.fromImage('assets/sierra.jpg'),
-      WAVE_COUNTDOWN_TIME: 100,
+      WAVE_COUNTDOWN_TIME: 400,
       WAVE_INTERIM_TIME: 130,
     }
   })
@@ -171,8 +166,7 @@
   }
 
   class Game {
-    constructor({ debug = false } = {}) {
-      this.debug = debug
+    constructor() {
       this.wave = 0
       this.paused = false
       this.idPointer = 1
@@ -200,7 +194,8 @@
 
     onWaveComplete() {
       const that = this
-      this.textDisplay.show(`WAVE ${this.wave} COMPLETE!`)
+      this.textDisplays[0].show(`WAVE ${this.wave} COMPLETE!`)
+      this.textDisplays[1].show('NOICE')
       this.paused = true
       this.active = false
 
@@ -228,8 +223,16 @@
     }
 
     destroyEntity(entity) {
+      if (!entity) { // TODO: turn patch into fix
+        return
+      }
+
       if (!entity.alive) {
         return
+      }
+
+      if (entity.abducting) {
+        entity.abducting.abductor = null
       }
 
       entity.alive = false
@@ -262,6 +265,7 @@
 
     onHeroDestroyed() {
       this.active = false
+      this.gameOverReason = 'YOU DIED'
     }
 
     startWave() {
@@ -283,7 +287,9 @@
       this.waveStats[TYPES.MALE].destroyed += 1
       if (this.typeComplete(TYPES.MALE)) {
         this.active = false
+        this.gameOverReason = 'COLONY ANNIHILATED'
       }
+
     }
 
     onStepPauseIndependent() {
@@ -292,7 +298,8 @@
 
     waveCountdown() {
       if (this.waveCountdownTime > 0) {
-        this.textDisplay.show(String(Math.floor(this.waveCountdownTime / 25)));
+        this.textDisplays[0].show('GET READY!');
+        this.textDisplays[1].show(Math.floor(this.waveCountdownTime / 25) || 'GO!');
 
         this.waveCountdownTime -= 1
         return true
@@ -312,7 +319,7 @@
       }
 
       this.world.step(SETTINGS.GLOBAL.TIME_STEP);
-      this.textDisplay.hide()
+      this.textDisplays.forEach(display => display.hide())
 
       this.evaluateCollisions()
       this.evaluateActiveKeys()
@@ -447,7 +454,11 @@
           that.handleEnemyHeroCollision(enemy, point)
         },
         [that.hashTypes(TYPES.SEAL, TYPES.SEAL)]: function(bodies) {
-          if (Math.random() > 0.5) {
+          if (that.objects[bodies[0].id].abducting) {
+            that.objects[bodies[1].id].jump()
+          } else if (that.objects[bodies[1].id].abducting) {
+            that.objects[bodies[0].id].jump()
+          } else if (Math.random() > 0.5) {
             that.objects[bodies[0].id].jump()
           } else {
             that.objects[bodies[1].id].jump()
@@ -472,9 +483,37 @@
             that.objects[bodies[1].id].jump()
           }
         },
+        [that.hashTypes(TYPES.MALE, TYPES.OFFSCREEN)]: function(bodies) {
+          const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id];
+          that.destroyEntity(male.abductor)
+          that.destroyEntity(male)
+        },
+        [that.hashTypes(TYPES.SEAL, TYPES.OFFSCREEN)]: function(bodies) {
+          const seal = that.objects[bodies.find(item => item.type === TYPES.SEAL).id];
+          that.destroyEntity(seal)
+          that.destroyEntity(seal.abducting)
+        },
+        [that.hashTypes(TYPES.GULL, TYPES.OFFSCREEN)]: function(bodies) {
+          // const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id];
+        },
         [that.hashTypes(TYPES.MALE, TYPES.SEAL)]: function(bodies) {
-          that.destroyEntity(that.objects[bodies[0].id])
-          that.destroyEntity(that.objects[bodies[0].id])
+          const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id];
+          const seal = that.objects[bodies.find(item => item.type === TYPES.SEAL).id];
+
+
+          if (seal.abducting) {
+            if (!male.abductor) {
+              male.jump()
+            }
+          } else {
+            if (male.abductor) {
+              if (male.id !== seal.abducting.id) {
+                seal.jump()
+              }
+            } else {
+              seal.abduct(male)
+            }
+          }
         },
       }
     }
@@ -491,14 +530,24 @@
     }
 
     setupDisplay() {
-      this.textDisplay = new Text({
-        x: 0,
-        y: 10,
-        style: {
-          ...BASE_TEXT_STYLE,
-          fill: GREEN,
-        }
-      })
+      this.textDisplays = [
+        new Text({
+          x: 0,
+          y: 10,
+          style: {
+            ...BASE_TEXT_STYLE,
+            fill: GREEN,
+          }
+        }),
+        new Text({
+          x: 0,
+          y: 4,
+          style: {
+            ...BASE_TEXT_STYLE,
+            fill: GREEN,
+          }
+        })
+      ]
 
       this.background = new PIXI.Sprite(SETTINGS.GLOBAL.BACKGROUND_TEXTURE)
       this.background.scale.x = 1.1
@@ -607,9 +656,13 @@
 
     gameOver() {
       this.paused = true
-      this.textDisplay.show('GAME OVER', {
-        fill: RED
+      this.textDisplays[0].show(`GAME OVER: ${this.gameOverReason}`, {
+        fill: RED,
       });
+
+      this.textDisplays[1].show(`SCORE: ${this.points}`, {
+        fill: BLUE,
+      })
     }
 
     resetBodies() {
@@ -627,26 +680,6 @@
     }
 
     getWaveStats() {
-      if (this.debug) {
-        return {
-          [TYPES.SEAL]: {
-            ...DEBUG_WAVE_STATS[TYPES.SEAL],
-          },
-          [TYPES.GULL]: {
-            ...DEBUG_WAVE_STATS[TYPES.GULL],
-          },
-          [TYPES.MALE]: {
-            ...DEBUG_WAVE_STATS[TYPES.MALE],
-          },
-        }
-      }
-
-      let males = 20 - (this.wave / 2)
-
-      if (males < 10) {
-        males = 10
-      }
-
       const seals = enforcePositive(this.wave * 2 + 10)
       const gulls = enforcePositive(this.wave * 3 - 10)
 
@@ -662,8 +695,8 @@
           destroyed: 0
         },
         [TYPES.MALE]: {
-          total: males,
-          created: males,
+          total: SETTINGS.MALE.NUM,
+          created: SETTINGS.MALE.NUM,
           destroyed: 0
         },
       }
@@ -734,28 +767,45 @@
       const graphics = new PIXI.Graphics();
       container.addChild(graphics);
 
+      const offscreenDetectors = this.world.createBody()
       const wall = this.world.createBody()
       const ground = this.world.createBody()
 
       this.assignType(ground, TYPES.GROUND)
+      this.assignType(offscreenDetectors, TYPES.OFFSCREEN)
       this.assignType(wall, TYPES.WALL)
 
       const groundOpts = {
         density: 0.0,
-        friction: 7.5
+        friction: 7.5,
+        filterCategoryBits: CATEGORIES.GROUND,
+        filterMaskBits: MASKS.GROUND,
       }
 
       const wallOpts = {
         density: 0.0,
         friction: 0.0,
-        filterGroupIndex: NON_INTERACTIVE,
-        filterCategoryBits: NON_INTERACTIVE_BITS,
-        filterMaskBits: NON_INTERACTIVE_MASK,
+        filterCategoryBits: CATEGORIES.WALLS,
+        filterMaskBits: MASKS.WALLS,
       }
 
+      const offscreenOpts = {
+        density: 0.0,
+        friction: 0.0,
+        filterCategoryBits: CATEGORIES.OFFSCREEN,
+        filterMaskBits: MASKS.OFFSCREEN,
+      }
+
+      // walls
       this.createBlock(graphics, wall, wallOpts, true, SETTINGS.GLOBAL.BORDER_X_LEFT, -20.0, SETTINGS.GLOBAL.BORDER_X_LEFT, 30.0)
       this.createBlock(graphics, wall, wallOpts, true, SETTINGS.GLOBAL.BORDER_X_RIGHT, -20.0, SETTINGS.GLOBAL.BORDER_X_RIGHT, 30.0)
-      this.createBlock(graphics, wall, wallOpts, true, SETTINGS.GLOBAL.BORDER_X_LEFT, 30.0, SETTINGS.GLOBAL.BORDER_X_RIGHT, 30.0)
+
+      // off-screen detectors
+      this.createBlock(graphics, offscreenDetectors, offscreenOpts, true, SETTINGS.GLOBAL.OFFSCREEN_X_LEFT, -20.0, SETTINGS.GLOBAL.OFFSCREEN_X_LEFT, 30.0)
+      this.createBlock(graphics, offscreenDetectors, offscreenOpts, true, SETTINGS.GLOBAL.OFFSCREEN_X_RIGHT, -20.0, SETTINGS.GLOBAL.OFFSCREEN_X_RIGHT, 30.0)
+
+      // ceiling
+      this.createBlock(graphics, wall, wallOpts, true, SETTINGS.GLOBAL.OFFSCREEN_X_LEFT, 30.0, SETTINGS.GLOBAL.OFFSCREEN_X_RIGHT, 30.0)
       this.createBlock(graphics, ground, groundOpts, true, -100.0, -20.0, 100.0, -20.0)
     }
 
@@ -786,9 +836,7 @@
         this.body = this.game.world.createBody(Vec2(SETTINGS.HEALTH_BAR.X, SETTINGS.HEALTH_BAR.Y));
 
         this.body.createFixture(planck.Box(SETTINGS.HEALTH_BAR.MAX_WIDTH * (health / SETTINGS.HERO.MAX_HEALTH), 0.5), {
-          filterGroupIndex: NON_INTERACTIVE,
-          filterCategoryBits: NON_INTERACTIVE_BITS,
-          filterMaskBits: NON_INTERACTIVE_MASK,
+          filterGroupIndex: 99,
         });
 
         let color
@@ -877,7 +925,7 @@
       super(parent)
       this.velocity = SETTINGS.MALE.SPEED
       this.alive = true
-      this.abducted = false
+      this.abductor = null
 
       this.jumps = SETTINGS.MALE.MAX_JUMPS
 
@@ -892,9 +940,8 @@
 
       this.body.createFixture(planck.Circle(0.5), {
         friction: 0,
-        filterGroupIndex: INTERACTIVE_SPRITE,
-        filterCategoryBits: INTERACTIVE_SPRITE_BITS,
-        filterMaskBits: INTERACTIVE_SPRITE_MASK,
+        filterCategoryBits: CATEGORIES.CREATURE,
+        filterMaskBits: MASKS.CREATURE,
       })
 
       this.body.render = {
@@ -912,7 +959,7 @@
     }
 
     move() {
-      if (this.abducted) {
+      if (this.abductor) {
         return
       }
 
@@ -993,15 +1040,26 @@
         parent,
       })
 
+      this.direction = direction
       this.points = SETTINGS.SEAL.POINTS
-      this.velocity = SETTINGS.SEAL.SPEED
-      if (direction === LEFT) {
-        this.velocity *= -1
-      }
+      this.abducting = false
 
-      const x = direction === LEFT
-        ? SETTINGS.SEAL.SPAWN_X
-        : SETTINGS.SEAL.SPAWN_X * -1
+      this.velocity = direction === RIGHT
+        ? SETTINGS.SEAL.SPEED
+        : SETTINGS.SEAL.SPEED * -1
+
+      this.setBody()
+
+      this.game.assignType(this, TYPES.SEAL)
+      this.body.id = this.id
+
+      this.setTexture()
+    }
+
+    setBody() {
+      const x = this.direction === LEFT
+      ? SETTINGS.SEAL.SPAWN_X
+      : SETTINGS.SEAL.SPAWN_X * -1
 
       this.body = this.game.world.createBody({
         position : Vec2(x, SETTINGS.SEAL.SPAWN_Y),
@@ -1012,18 +1070,15 @@
 
       this.body.createFixture(planck.Circle(0.5), {
         friction: 0,
-        filterGroupIndex: INTERACTIVE_SPRITE,
-        filterCategoryBits: INTERACTIVE_SPRITE_BITS,
-        filterMaskBits: INTERACTIVE_SPRITE_MASK,
+        filterCategoryBits: CATEGORIES.CREATURE,
+        filterMaskBits: MASKS.CREATURE,
       })
+    }
 
+    setTexture() {
       this.body.render = {
         stroke: RED
       }
-
-      this.game.assignType(this, TYPES.SEAL)
-
-      this.body.id = this.id
 
       this.sprite = new PIXI.Sprite(SETTINGS.SEAL.TEXTURE)
       this.sprite.scale.set(0.13)
@@ -1032,17 +1087,31 @@
     }
 
     move() {
+      const velocity = this.abducting
+        ? this.velocity * -1
+        : this.velocity
+
       this.body.setLinearVelocity(Vec2(
-        this.velocity,
+        velocity,
         this.body.getLinearVelocity().y
       ))
     }
 
-    jump() {
-      if (!this.jumps) {
-        return
-      }
+    abduct(male) {
+      this.abducting = male
+      male.abductor = this
 
+      this.game.world.createJoint(planck.RevoluteJoint(
+        {
+          collideConnected: false
+        },
+        this.body,
+        male.body,
+        Vec2(0, 0)
+      ));
+    }
+
+    jump() {
       this.body.setLinearVelocity(Vec2(
         this.body.getLinearVelocity().x,
         SETTINGS.SEAL.JUMP * (Math.random() / 2 + 0.5))
@@ -1079,9 +1148,8 @@
 
       this.body.createFixture(planck.Circle(0.4), {
         friction: 0,
-        filterGroupIndex: INTERACTIVE_SPRITE,
-        filterCategoryBits: INTERACTIVE_SPRITE_BITS,
-        filterMaskBits: INTERACTIVE_SPRITE_MASK,
+        filterCategoryBits: CATEGORIES.CREATURE,
+        filterMaskBits: MASKS.CREATURE,
       })
 
       this.body.render = {
@@ -1158,9 +1226,8 @@
         Vec2(1, 1),
         Vec2(-1, 1),
       ]), {
-        filterGroupIndex: NON_INTERACTIVE,
-        filterCategoryBits: INTERACTIVE_SPRITE_BITS,
-        filterMaskBits: INTERACTIVE_SPRITE_MASK,
+        filterCategoryBits: CATEGORIES.CREATURE,
+        filterMaskBits: MASKS.CREATURE,
       })
 
       this.id = this.game.createId()
