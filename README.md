@@ -67,15 +67,18 @@ GAMEPLAY.9
 - [x] bug: standardize type assignment
 - [x] display wave number
 - [x] refactor: text display prefixes
-- [ ] detect wave completion
-- [ ] display success on wave completion
+- [x] detect wave completion
+- [x] display success on wave completion
+- [x] start new wave on success
+- [x] countdown between waves
 
 GAMEPLAY.10
-- [ ] start new wave on success
-- [ ] countdown between waves
 - [ ] males get dragged away by seals
+- [ ] detect when enemies cross the screen
+- [ ] detect when males cross the screen
+- [ ] display final score when game is over
 
-GALMPLEY.11
+GAMEPLAY.11
 - [ ] gulls can swoop
 - [ ] gulls can carry away males
 - [ ] seals get launched when stomped

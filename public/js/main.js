@@ -69,6 +69,29 @@
     GULL: 'GULL',
   })
 
+  const ENEMY_TYPES = Object.freeze([
+    TYPES.SEAL,
+    TYPES.GULL
+  ]);
+
+  const DEBUG_WAVE_STATS = Object.freeze({
+    [TYPES.SEAL]: {
+      total: 1,
+      created: 0,
+      destroyed: 0,
+    },
+    [TYPES.GULL]: {
+      total: 0,
+      created: 0,
+      destroyed: 0,
+    },
+    [TYPES.MALE]: {
+      total: 20,
+      created: 20,
+      abducted: 0
+    },
+  })
+
   const SETTINGS = Object.freeze({
     MALE: {
       SPEED: 2.0,
@@ -119,8 +142,9 @@
       DAMAGE: 2,
       SPAWN_X: 60,
       SPAWN_Y: 20,
-      FLAP: 7,
+      FLAP_POWER: 5,
       FLAP_INTERVAL: 45,
+      IMPULSE: 1,
       PROBABILITY: 0.01,
       POINTS: 15,
       TEXTURE: PIXI.Texture.fromImage('assets/penguin.png'),
@@ -134,6 +158,7 @@
       BORDER_X_LEFT: -40,
       BACKGROUND_TEXTURE: PIXI.Texture.fromImage('assets/sierra.jpg'),
       WAVE_COUNTDOWN_TIME: 100,
+      WAVE_INTERIM_TIME: 130,
     }
   })
 
@@ -146,22 +171,60 @@
   }
 
   class Game {
-    constructor() {
+    constructor({ debug = false } = {}) {
+      this.debug = debug
       this.wave = 0
       this.paused = false
       this.idPointer = 1
       this.objects = {}
       this.points = 0
       this.active = true
-      this.waveCountdownTime = SETTINGS.GLOBAL.WAVE_COUNTDOWN_TIME
 
       this.setupWorld()
       this.setupDisplay()
       this.createBorders()
-      this.createHero()
       this.setupCollisionHandlers()
       this.setupInteractivity()
       this.startWave()
+    }
+
+    startWaveCountdown() {
+      this.waveCountdownTime = SETTINGS.GLOBAL.WAVE_COUNTDOWN_TIME
+    }
+
+    waveComplete() {
+      return ENEMY_TYPES.reduce((acc, type) => {
+        return acc && this.typeComplete(type)
+      }, true)
+    }
+
+    onWaveComplete() {
+      const that = this
+      this.textDisplay.show(`WAVE ${this.wave} COMPLETE!`)
+      this.paused = true
+      this.active = false
+
+      setTimeout(() => that.startWave(), SETTINGS.GLOBAL.WAVE_INTERIM_TIME)
+    }
+
+    toCreateEnemy(type) {
+      if (Math.random() > SETTINGS[type].PROBABILITY) {
+        return false
+      }
+
+      return this.waveStats[type].created < this.waveStats[type].total
+    }
+
+    onEnemyDestroyed(type) {
+      this.waveStats[type].destroyed +=1
+
+      if (!this.typeComplete(type)) {
+        return
+      }
+
+      if (this.waveComplete()) {
+        this.onWaveComplete()
+      }
     }
 
     destroyEntity(entity) {
@@ -180,8 +243,12 @@
         case TYPES.HERO:
           this.onHeroDestroyed()
           break
+        case TYPES.FISH:
+          break
         default:
-          //nothing
+          if (ENEMY_TYPES.includes(entity.type)) {
+            this.onEnemyDestroyed(entity.type)
+          }
       }
     }
 
@@ -198,24 +265,29 @@
     }
 
     startWave() {
+      this.resetBodies()
+      this.active = true
+      this.paused = false
+
       this.wave += 1
       this.waveStats = this.getWaveStats()
-
       this.waveDisplay.show(this.wave)
 
       this.setupMales()
+      this.createHero()
+
+      this.startWaveCountdown()
     }
 
     onMaleDestroyed() {
-      this.malesLeft -= 1
-      if (!this.malesLeft) {
+      this.waveStats[TYPES.MALE].destroyed += 1
+      if (this.typeComplete(TYPES.MALE)) {
         this.active = false
       }
     }
 
     onStepPauseIndependent() {
-      this.hero.render()
-      this.renderObjects()
+      // nothing yet
     }
 
     waveCountdown() {
@@ -260,6 +332,9 @@
       } else {
         this.hero.fishThrowTime = 0
       }
+
+      this.hero.render()
+      this.renderObjects()
     }
 
     onStep() {
@@ -410,11 +485,9 @@
     }
 
     setupMales() {
-      for (let i = 0; i < this.waveStats.males; i++) {
+      for (let i = 0; i < this.waveStats[TYPES.MALE].total; i++) {
         new Male(this)
       }
-
-      this.malesLeft = this.waveStats.males
     }
 
     setupDisplay() {
@@ -514,26 +587,26 @@
       this.resetCollisions()
     }
 
-    createSeal() {
-      this.waveStats.seals -=1
+    createEnemy(type) {
+      this.waveStats[type].created +=1
       const direction = Math.random() < 0.5
         ? LEFT
         : RIGHT
 
-      new Seal(this, direction)
-    }
-
-    createGull() {
-      this.waveStats.gulls -=1
-      const direction = Math.random() < 0.5
-        ? LEFT
-        : RIGHT
-
-      new Gull(this, direction)
+      switch (type) {
+        case TYPES.SEAL:
+          new Seal(this, direction)
+          break
+        case TYPES.GULL:
+          new Gull(this, direction)
+          break
+        default:
+          //nothing
+      }
     }
 
     gameOver() {
-      this.resetBodies()
+      this.paused = true
       this.textDisplay.show('GAME OVER', {
         fill: RED
       });
@@ -546,11 +619,28 @@
         this.destroyEntity(this.objects[id])
       })
 
-      this.destroyEntity(this.hero)
+      if (this.hero) {
+        this.destroyEntity(this.hero)
+      }
+
       this.objects = {}
     }
 
     getWaveStats() {
+      if (this.debug) {
+        return {
+          [TYPES.SEAL]: {
+            ...DEBUG_WAVE_STATS[TYPES.SEAL],
+          },
+          [TYPES.GULL]: {
+            ...DEBUG_WAVE_STATS[TYPES.GULL],
+          },
+          [TYPES.MALE]: {
+            ...DEBUG_WAVE_STATS[TYPES.MALE],
+          },
+        }
+      }
+
       let males = 20 - (this.wave / 2)
 
       if (males < 10) {
@@ -561,9 +651,21 @@
       const gulls = enforcePositive(this.wave * 3 - 10)
 
       return {
-        seals,
-        gulls,
-        males,
+        [TYPES.SEAL]: {
+          total: seals,
+          created: 0,
+          destroyed: 0
+        },
+        [TYPES.GULL]: {
+          total: gulls,
+          created: 0,
+          destroyed: 0
+        },
+        [TYPES.MALE]: {
+          total: males,
+          created: males,
+          destroyed: 0
+        },
       }
     }
 
@@ -572,14 +674,16 @@
       this.pointDisplay.show(String(this.points))
     }
 
-    spawnEnemies() {
-      if (Math.random() < SETTINGS.SEAL.PROBABILITY && this.waveStats.seals) {
-        this.createSeal()
-      }
+    typeComplete(type) {
+      return this.waveStats[type].destroyed === this.waveStats[type].total
+    }
 
-      if (Math.random() < SETTINGS.GULL.PROBABILITY && this.waveStats.gulls) {
-        this.createGull()
-      }
+    spawnEnemies() {
+      ENEMY_TYPES.forEach((type) => {
+        if (this.toCreateEnemy(type)) {
+          this.createEnemy(type)
+        }
+      })
     }
 
     moveObjects() {
@@ -999,7 +1103,7 @@
       let yVelocity
 
       if (this.untilFlap <= 0) {
-        yVelocity = SETTINGS.GULL.FLAP + Math.random() * 5 - 2.5
+        yVelocity = SETTINGS.GULL.FLAP_POWER + Math.random() * 5 - 2.5
         this.untilFlap = SETTINGS.GULL.FLAP_INTERVAL + Math.random() * 5 - 2.5
       } else {
         yVelocity = this.body.getLinearVelocity().y
@@ -1010,7 +1114,7 @@
         yVelocity
       ))
 
-      var f = this.body.getWorldVector(Vec2(0.0, 1.7))
+      var f = this.body.getWorldVector(Vec2(0.0, SETTINGS.GULL.IMPULSE))
       var p = this.body.getWorldPoint(Vec2(0.0, 2.0))
       this.body.applyLinearImpulse(f, p, true)
     }
