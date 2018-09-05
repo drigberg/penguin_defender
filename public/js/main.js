@@ -157,7 +157,7 @@
       BOX_HEIGHT: 2.0,
     },
     GLOBAL: {
-      TIME_STEP: 1 / 50,
+      TIME_STEP: 1 / 20,
       INVINCIBILITY_INTERVAL: 30,
       SHAKE_THRESHOLD: 20,
       GRAVITY: -60,
@@ -247,7 +247,13 @@
       }
 
       if (entity.abducting) {
-        entity.abducting.abductor = null
+        const male = entity.abducting
+        male.abductor = null
+        male.body.getFixtureList().setFilterData({
+          groupIndex: male.filterData.filterGroupIndex,
+          categoryBits: male.filterData.filterCategoryBits,
+          maskBits: male.filterData.filterMaskBits,
+        })
       }
 
       entity.alive = false
@@ -317,8 +323,10 @@
         this.textDisplays[1].show(Math.floor(this.waveCountdownTime / this.waveCountdownInterval) || 'GO!');
 
         this.waveCountdownTime -= 1
-        return true
+        return this.waveCountdownTime
       }
+
+      return false
     }
 
     onStepPauseDependent() {
@@ -326,6 +334,11 @@
 
       if (countingDown) {
         return
+      } else if (countingDown === 0) {
+        this.hero.sprite.visible = true
+        Object.keys(this.objects).forEach((key) => {
+          this.objects[key].sprite.visible = true
+        })
       }
 
       if (!this.active) {
@@ -355,7 +368,6 @@
         this.hero.fishThrowTime = 0
       }
 
-      this.hero.render()
       this.renderObjects()
     }
 
@@ -838,6 +850,12 @@
     }
 
     renderObjects() {
+      if (this.waveCountdownTime) {
+        return
+      }
+
+      this.hero.render()
+
       Object.keys(this.objects).forEach((id) => {
         this.objects[id].render()
       })
@@ -950,6 +968,12 @@
       this.velocity = SETTINGS.MALE.SPEED
       this.alive = true
       this.abductor = null
+      this.filterData = {
+        friction: 0,
+        filterCategoryBits: CATEGORIES.CREATURE,
+        filterMaskBits: MASKS.CREATURE,
+        filterGroupIndex: 0,
+      }
 
       this.jumps = SETTINGS.MALE.MAX_JUMPS
 
@@ -963,9 +987,7 @@
       })
 
       this.body.createFixture(planck.Box(SETTINGS.MALE.BOX_WIDTH, SETTINGS.MALE.BOX_HEIGHT), {
-        friction: 0,
-        filterCategoryBits: CATEGORIES.CREATURE,
-        filterMaskBits: MASKS.CREATURE,
+        ...this.filterData
       })
 
       this.body.render = {
@@ -978,6 +1000,7 @@
 
       this.sprite = new PIXI.Sprite(SETTINGS.MALE.TEXTURE)
       this.sprite.anchor.set(0.5);
+      this.sprite.visible = false
       container.addChild(this.sprite)
     }
 
@@ -1128,6 +1151,10 @@
       this.abducting = male
       male.abductor = this
 
+      male.body.getFixtureList().setFilterData({
+        filterMaskBits: 0x0000
+      })
+
       this.game.world.createJoint(planck.RevoluteJoint(
         {
           collideConnected: false
@@ -1276,6 +1303,8 @@
 
       this.sprite = new PIXI.Sprite(SETTINGS.HERO.TEXTURE)
       this.sprite.anchor.set(0.5)
+      this.sprite.visible = false
+
       container.addChild(this.sprite)
 
       this.body = this.game.world.createBody({
@@ -1345,7 +1374,6 @@
       )
 
       this.stompFixture = this.body.createFixture(planck.Box(SETTINGS.HERO.STOMP_BOX_WIDTH, SETTINGS.HERO.STOMP_BOX_HEIGHT), 1.0);
-      this.stompFixture.anchor.set(0, 1)
     }
 
     glide() {

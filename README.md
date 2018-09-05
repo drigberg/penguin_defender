@@ -84,7 +84,8 @@ GAMEPLAY.11
 - [x] fix masks
 - [x] fix flying seals
 - [x] display "PAUSED"
-- [ ] penguins definitely don't render at all until wave starts
+- [x] penguins definitely don't render at all until wave starts
+- [x] males don't collide with anything while abducted
 
 GAMEPLAY.12
 - [ ] gulls can swoop
@@ -103,44 +104,6 @@ GAMEPLAY.DIFFICULT
 - [ ] splash damage on stomp attack: figure out how to destroy fixtures
 - [ ] fix bird-summoning bug on stomp attack
 - [ ] completely fix destruction order bug
-
-### Audio Todos
-AUDIO.1
-- [ ] basic jump sound
-- [ ] basic glide sound
-- [ ] basic stomp sound
-- [ ] basic damage sound
-
-AUDIO.2
-- [ ] basic abduction sound
-- [ ] basic male death sound
-- [ ] basic seal death sound
-- [ ] basic gull death sound
-- [ ] basic game over sound
-
-AUDIO.3
-- [ ] basic gameplay music
-- [ ] basic gameover music
-- [ ] basic menu music
-
-AUDIO.4
-- [ ] high-quality jump sound
-- [ ] high-quality glide sound
-- [ ] high-quality stomp sound
-- [ ] high-quality damage sound
-
-AUDIO.5
-- [ ] high-quality abduction sound
-- [ ] high-quality male death sound
-- [ ] high-quality seal death sound
-- [ ] high-quality gull death sound
-- [ ] high-quality game over sound
-
-AUDIO.6
-- [ ] high-quality gameplay music
-- [ ] high-quality gameover music
-- [ ] high-quality menu music
-
 
 ### UI Todos
 UI.1
@@ -189,3 +152,41 @@ UI.6
 UI.7
 - [ ] lighting
 - [ ] movement trails
+
+
+### Audio Todos
+AUDIO.1
+- [ ] basic jump sound
+- [ ] basic glide sound
+- [ ] basic stomp sound
+- [ ] basic damage sound
+
+AUDIO.2
+- [ ] basic abduction sound
+- [ ] basic male death sound
+- [ ] basic seal death sound
+- [ ] basic gull death sound
+- [ ] basic game over sound
+
+AUDIO.3
+- [ ] basic gameplay music
+- [ ] basic gameover music
+- [ ] basic menu music
+
+AUDIO.4
+- [ ] high-quality jump sound
+- [ ] high-quality glide sound
+- [ ] high-quality stomp sound
+- [ ] high-quality damage sound
+
+AUDIO.5
+- [ ] high-quality abduction sound
+- [ ] high-quality male death sound
+- [ ] high-quality seal death sound
+- [ ] high-quality gull death sound
+- [ ] high-quality game over sound
+
+AUDIO.6
+- [ ] high-quality gameplay music
+- [ ] high-quality gameover music
+- [ ] high-quality menu music
