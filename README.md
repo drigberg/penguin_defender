@@ -104,6 +104,7 @@ GAMEPLAY.DIFFICULT
 - [ ] splash damage on stomp attack: figure out how to destroy fixtures
 - [ ] fix bird-summoning bug on stomp attack
 - [ ] completely fix destruction order bug
+- [ ] keep seals from flying
 
 ### UI Todos
 UI.1
@@ -131,29 +132,42 @@ UI.3
 - [x] show restart and menu buttons when game ends
 
 UI.4
-- [ ] sprite running animation
-- [ ] seal running animation
-- [ ] gull flying animation
+- [x] animation: sprite neutral
+- [x] animation: sprite left/right
+- [ ] animation: male neutral
+- [ ] animation: seal running
+- [ ] rename wave => winter
 
 UI.5
-- [ ] resize screen
-- [ ] sprite jump animation
-- [ ] sprite attack animation
-- [ ] sprite death animation
-- [ ] sprite glide animation
+- [ ] animation: sprite attack
+- [ ] animation: sprite death
+- [ ] animation: sprite glide left/right
+- [ ] male animation is faster when abducted
 
 UI.6
-- [ ] enemy attack animation
-- [ ] enemy death animation
-- [ ] snowstorm in background while wave is active
+- [ ] animation: seal attack
+- [ ] animation: seal death
+- [ ] animation: basic gull
+- [ ] animation: fish wiggle
 
 UI.7
-- [ ] opening scene
-- [ ] post-wave animations (female textures, cheering)
+- [ ] snowstorm in background
+- [ ] snowstorm stops with winter's end
+- [ ] responsive screen
 
 UI.8
-- [ ] lighting
+- [ ] switch to better animation library (smoothie?)
 - [ ] movement trails
+
+UI.9
+- [ ] basic lighting
+- [ ] sun rises between winters, sets during countdown
+
+UI.10
+- [ ] opening scene
+- [ ] post-wave animation (female textures, cheering)
+
+
 
 
 ### Audio Todos
