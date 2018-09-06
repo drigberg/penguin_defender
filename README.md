@@ -127,29 +127,31 @@ UI.2
 - [x] cute static pixel image: background
 
 UI.3
+- [x] main menu
+- [x] show restart and menu buttons when game ends
+
+UI.4
 - [ ] sprite running animation
 - [ ] seal running animation
 - [ ] gull flying animation
-- [ ] show menu to start game
-- [ ] show restart and menu buttons when game ends
 
-UI.4
+UI.5
 - [ ] resize screen
 - [ ] sprite jump animation
 - [ ] sprite attack animation
 - [ ] sprite death animation
 - [ ] sprite glide animation
 
-UI.5
+UI.6
 - [ ] enemy attack animation
 - [ ] enemy death animation
 - [ ] snowstorm in background while wave is active
 
-UI.6
+UI.7
 - [ ] opening scene
 - [ ] post-wave animations (female textures, cheering)
 
-UI.7
+UI.8
 - [ ] lighting
 - [ ] movement trails
 

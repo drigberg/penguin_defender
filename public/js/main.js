@@ -13,8 +13,6 @@
   }
 
   const app = new PIXI.Application(window.innerWidth * 0.9, window.innerHeight * 0.9)
-  const container = new PIXI.Container();
-  app.stage.addChild(container);
 
   document.getElementById('content').appendChild(app.view);
   app.view.style.position = 'absolute';
@@ -168,7 +166,10 @@
       BACKGROUND_TEXTURE: PIXI.Texture.fromImage('assets/mountains.png'),
       WAVE_COUNTDOWN_TIME: 200,
       WAVE_INTERIM_TIME: 1500,
-    }
+    },
+    MENU: {
+      TEXTURE: PIXI.Texture.fromImage('assets/mountains.png'),
+    },
   })
 
   const Vec2 = planck.Vec2
@@ -181,6 +182,10 @@
 
   class Game {
     constructor() {
+      this.reset()
+    }
+
+    reset() {
       this.wave = 0
       this.paused = true
       this.idPointer = 1
@@ -188,12 +193,22 @@
       this.points = 0
       this.active = true
 
+      this.setupContainer()
       this.setupWorld()
       this.setupDisplay()
       this.createBorders()
       this.setupCollisionHandlers()
       this.setupInteractivity()
       this.startWave()
+    }
+
+    setupContainer() {
+      if (this.container) {
+        app.stage.removeChild(this.container)
+      }
+
+      this.container = new PIXI.Container();
+      app.stage.addChild(this.container);
     }
 
     startWaveCountdown() {
@@ -258,7 +273,7 @@
 
       entity.alive = false
       this.world.destroyBody(entity.body)
-      container.removeChild(entity.sprite)
+      this.container.removeChild(entity.sprite)
 
       switch (entity.type) {
         case TYPES.MALE:
@@ -571,31 +586,30 @@
           x: 0,
           y: 10,
           style: {
-            ...BASE_TEXT_STYLE,
             fill: GREEN,
-          }
+          },
+          parent: this,
         }),
         new Text({
           x: 0,
           y: 4,
           style: {
-            ...BASE_TEXT_STYLE,
             fill: GREEN,
-          }
+          },
+          parent: this,
         })
       ]
 
       this.background = new PIXI.Sprite(SETTINGS.GLOBAL.BACKGROUND_TEXTURE)
-      this.background.scale.x = 1.1
-      this.background.scale.y = 1.01
       this.background.zOrder = -3
-      container.addChild(this.background)
+      this.container.addChild(this.background)
 
       // must be AFTER background
       this.pointDisplay = new Text({
         prefix: 'SCORE: ',
         x: 35,
         y: 25,
+        parent: this,
       })
 
       this.pointDisplay.show(String(this.points))
@@ -604,7 +618,9 @@
         prefix: 'WAVE: ',
         x: 35,
         y: 20,
+        parent: this,
       })
+
       this.healthBar = new HealthBar(this);
     }
 
@@ -691,13 +707,45 @@
     }
 
     gameOver() {
+      const that = this
       this.paused = true
       this.textDisplays[0].show(`GAME OVER: ${this.gameOverReason}`, {
         fill: RED,
       });
 
-      this.textDisplays[1].show(`SCORE: ${this.points}`, {
-        fill: BLUE,
+      this.healthBar.hide()
+
+      this.resetButton = new Button({
+        x: 0,
+        y: -2,
+        parent: this,
+        style: {
+          fill: GREEN,
+        },
+      })
+
+      this.resetButton.show({
+        text: 'PLAY AGAIN',
+        fn: () => {
+          that.reset()
+        }
+      })
+
+      this.menuButton = new Button({
+        x: SETTINGS.HEALTH_BAR.X,
+        y: SETTINGS.HEALTH_BAR.Y,
+        parent: this,
+        style: {
+          fill: YELLOW,
+        }
+      })
+
+      this.menuButton.show({
+        text: 'MENU',
+        fn: () => {
+          app.stage.removeChild(that.container)
+          new Menu()
+        }
       })
     }
 
@@ -801,7 +849,7 @@
 
     createBorders() {
       const graphics = new PIXI.Graphics();
-      container.addChild(graphics);
+      this.container.addChild(graphics);
 
       const offscreenDetectors = this.world.createBody()
       const wall = this.world.createBody()
@@ -846,7 +894,7 @@
     }
 
     shake() {
-      container.x = (Math.random() * 1.5 - 0.75) * pscale
+      this.container.x = (Math.random() * 1.5 - 0.75) * pscale
     }
 
     renderObjects() {
@@ -866,7 +914,11 @@
     constructor(parent) {
       this.game = parent
       this.graphics = new PIXI.Graphics();
-      container.addChild(this.graphics);
+      this.game.container.addChild(this.graphics);
+    }
+
+    hide() {
+      this.game.container.removeChild(this.graphics);
     }
 
     update(health) {
@@ -918,32 +970,37 @@
       prefix = '',
       x,
       y,
-      style = BASE_TEXT_STYLE
-    })
-      {
+      style,
+      parent
+    }) {
+      this.parent = parent
       this.prefix = prefix
       this.x = x
       this.y = y
-      this.style = style
+      this.style = {
+        ...BASE_TEXT_STYLE,
+        ...style,
+      }
     }
 
     show(text, style) {
-      container.removeChild(this.text)
+      this.parent.container.removeChild(this.text)
 
       this.text = new PIXI.Text(`${this.prefix} ${text}`, {
         ...this.style,
         ...style,
       });
+
       this.text.anchor.set(0.5)
       this.text.x = mpx(this.x)
       this.text.y = mpy(this.y)
 
-      container.addChild(this.text);
+      this.parent.container.addChild(this.text);
     }
 
     hide() {
       if (this.text) {
-        container.removeChild(this.text)
+        this.parent.container.removeChild(this.text)
         this.text = null
       }
     }
@@ -1001,7 +1058,7 @@
       this.sprite = new PIXI.Sprite(SETTINGS.MALE.TEXTURE)
       this.sprite.anchor.set(0.5);
       this.sprite.visible = false
-      container.addChild(this.sprite)
+      this.game.container.addChild(this.sprite)
     }
 
     move() {
@@ -1129,7 +1186,7 @@
       this.sprite = new PIXI.Sprite(SETTINGS.SEAL.TEXTURE)
       this.sprite.scale.set(0.9)
       this.sprite.anchor.set(0.5);
-      container.addChild(this.sprite)
+      this.game.container.addChild(this.sprite)
     }
 
     move() {
@@ -1217,7 +1274,7 @@
       this.sprite = new PIXI.Sprite(SETTINGS.GULL.TEXTURE)
       this.sprite.scale.set(0.9)
       this.sprite.anchor.set(0.5);
-      container.addChild(this.sprite)
+      this.game.container.addChild(this.sprite)
     }
 
     move() {
@@ -1267,7 +1324,7 @@
 
       this.sprite = new PIXI.Sprite(SETTINGS.FISH.TEXTURE)
       this.sprite.anchor.set(0.5);
-      container.addChild(this.sprite)
+      this.game.container.addChild(this.sprite)
 
       this.body.setAngularVelocity(Math.random() * Math.PI * 10 - (Math.PI * 5));
 
@@ -1305,7 +1362,7 @@
       this.sprite.anchor.set(0.5)
       this.sprite.visible = false
 
-      container.addChild(this.sprite)
+      this.game.container.addChild(this.sprite)
 
       this.body = this.game.world.createBody({
         position : Vec2(0, 5.0),
@@ -1428,12 +1485,69 @@
     }
   }
 
-  (function setupGame() {
-    const game = new Game()
+  class Button extends Text {
+    constructor(opts) {
+      super(opts)
+    }
 
-    window.requestAnimationFrame(function() {
-      game.onStep()
-    });
+    show({ text, fn }) {
+      super.show(text)
+
+      this.text.interactive = true
+      this.text.buttonMode = true
+      this.text.on('pointerdown', () => fn())
+    }
+  }
+
+  class Menu {
+    constructor() {
+      const that = this
+      this.container = new PIXI.Container();
+      app.stage.addChild(this.container);
+
+      this.background = new PIXI.Sprite(SETTINGS.MENU.TEXTURE)
+      this.background.zOrder = -3
+
+      this.container.addChild(this.background)
+
+      this.title = new Text({
+        x: 0,
+        y: 10,
+        style: {
+          fill: GREEN,
+        },
+        parent: this,
+      })
+
+      this.startButton = new Button({
+        x: 0,
+        y: 5,
+        parent: this,
+      })
+
+      this.startButton.show({
+        fn: () => {
+          that.startGame()
+        },
+        text: 'PLAY',
+      })
+
+      this.title.show('PENGUIN DEFENDER')
+    }
+
+    startGame() {
+      app.stage.removeChild(this.container)
+
+      const game = new Game()
+
+      window.requestAnimationFrame(function() {
+        game.onStep()
+      });
+    }
+  }
+
+  (function setupGame() {
+    new Menu()
   })()
 })()
 
