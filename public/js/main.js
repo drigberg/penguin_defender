@@ -168,7 +168,7 @@
       WAVE_INTERIM_TIME: 1500,
     },
     MENU: {
-      TEXTURE: PIXI.Texture.fromImage('assets/mountains.png'),
+      TEXTURE: PIXI.Texture.fromImage('assets/menu.png'),
     },
   })
 
@@ -1358,11 +1358,7 @@
       this.sprinting = false
       this.direction = RIGHT
 
-      this.sprite = new PIXI.Sprite(SETTINGS.HERO.TEXTURE)
-      this.sprite.anchor.set(0.5)
-      this.sprite.visible = false
-
-      this.game.container.addChild(this.sprite)
+      this.setupSprite()
 
       this.body = this.game.world.createBody({
         position : Vec2(0, 5.0),
@@ -1387,6 +1383,23 @@
       this.speed = SETTINGS.HERO.SPEED
 
       this.game.healthBar.update(this.health)
+    }
+
+    setupSprite() {
+      const textures = [];
+
+      for (let i = 1; i <= 2; i++) {
+        textures.push(PIXI.Texture.fromFrame(`hero:neutral:${i}.png`));
+      }
+
+      this.sprite = new PIXI.extras.AnimatedSprite(textures);
+
+      this.sprite.anchor.set(0.5)
+      this.sprite.visible = false
+      this.sprite.play();
+      this.sprite.animationSpeed = 0.05
+
+      this.game.container.addChild(this.sprite)
     }
 
     /**
@@ -1547,7 +1560,11 @@
   }
 
   (function setupGame() {
-    new Menu()
+    PIXI.loader
+    .add('spritesheet', '/assets/hero/spritesheets/neutral.json')
+    .load(() => {
+      new Menu()
+    });
   })()
 })()
 
