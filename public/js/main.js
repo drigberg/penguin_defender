@@ -110,7 +110,17 @@
       BOX_HEIGHT: 2.0,
       STOMP_BOX_WIDTH: 3.0,
       STOMP_BOX_HEIGHT: 1.0,
-      ANIMATION_SPEED_STANDARD: 0.03,
+      ANIMATION_SPEED_NEUTRAL: 0.03,
+      ANIMATION_SPEED_RUNNING: 0.06,
+      START_X: 0.0,
+      START_Y: 5.0,
+      MOVEMENT_STATES: {
+        RUNNING: 'RUNNING',
+        GLIDING: 'GLIDING',
+        NEUTRAL: 'NEUTRAL',
+        ATTACKING: 'ATTACKING',
+        JUMPING: 'JUMPING',
+      }
     },
     HEALTH_BAR: {
       X: -40,
@@ -269,7 +279,14 @@
 
       entity.alive = false
       this.world.destroyBody(entity.body)
-      this.container.removeChild(entity.sprite)
+
+      if (entity.sprites) { // TODO: clean this up
+        Object.keys(entity.sprites).forEach((key) => {
+          this.container.removeChild(entity.sprites[key])
+        })
+      } else {
+        this.container.removeChild(entity.sprite)
+      }
 
       switch (entity.type) {
         case TYPES.MALE:
@@ -346,7 +363,7 @@
       if (countingDown) {
         return
       } else if (countingDown === 0) {
-        this.hero.sprite.visible = true
+        this.hero.activeSprite.visible = true
         Object.keys(this.objects).forEach((key) => {
           this.objects[key].sprite.visible = true
         })
@@ -432,6 +449,9 @@
 
     onKeyUp(key) {
       this.keys.down[key] = false
+      if (!this.keys.down.RIGHT && !this.keys.down.LEFT) {
+        this.hero.state.action = SETTINGS.HERO.MOVEMENT_STATES.NEUTRAL
+      }
     }
 
     translateKeyCode(code) {
@@ -1386,17 +1406,21 @@
       this.fishThrowTime = 0
       this.damage = SETTINGS.HERO.DAMAGE
       this.sprinting = false
-      this.direction = RIGHT
+
+      this.state = {
+        airborne: true,
+        action: 'NEUTRAL',
+        direction: RIGHT,
+      }
 
       this.setupSprite()
 
       this.body = this.game.world.createBody({
-        position : Vec2(0, 5.0),
+        position : Vec2(SETTINGS.HERO.START_X, SETTINGS.HERO.START_Y,),
         type : 'dynamic',
         fixedRotation : true,
         allowSleep : false
       })
-
 
       this.game.assignType(this, TYPES.HERO)
 
@@ -1416,20 +1440,41 @@
     }
 
     setupSprite() {
-      const textures = [];
+      const neutralTextures = [];
+      const runningTextures = [];
 
       for (let i = 1; i <= 2; i++) {
-        textures.push(PIXI.Texture.fromFrame(`hero:neutral:${i}.png`));
+        neutralTextures.push(PIXI.Texture.fromFrame(`hero:neutral:${i}.png`));
       }
 
-      this.sprite = new PIXI.extras.AnimatedSprite(textures);
+      for (let i = 1; i <= 2; i++) {
+        runningTextures.push(PIXI.Texture.fromFrame(`hero:running:${i}.png`));
+      }
 
-      this.sprite.anchor.set(0.5)
-      this.sprite.visible = false
-      this.sprite.play();
-      this.sprite.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED_STANDARD
+      this.sprites = {
+        neutral: new PIXI.extras.AnimatedSprite(neutralTextures),
+        running: new PIXI.extras.AnimatedSprite(runningTextures),
+      }
 
-      this.game.container.addChild(this.sprite)
+      this.stateMappings = {
+        [SETTINGS.HERO.MOVEMENT_STATES.ATTACKING]: this.sprites.neutral,
+        [SETTINGS.HERO.MOVEMENT_STATES.GLIDING]: this.sprites.neutral,
+        [SETTINGS.HERO.MOVEMENT_STATES.JUMPING]: this.sprites.neutral,
+        [SETTINGS.HERO.MOVEMENT_STATES.NEUTRAL]: this.sprites.neutral,
+        [SETTINGS.HERO.MOVEMENT_STATES.RUNNING]: this.sprites.running,
+      }
+
+      this.sprites.neutral.anchor.set(0.5)
+      this.sprites.running.anchor.set(0.5)
+      this.sprites.neutral.visible = false
+      this.sprites.running.visible = false
+      this.sprites.neutral.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED_NEUTRAL
+      this.sprites.running.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED_RUNNING
+
+      this.setActiveSprite(false)
+
+      this.game.container.addChild(this.sprites.neutral)
+      this.game.container.addChild(this.sprites.running)
     }
 
     /**
@@ -1460,7 +1505,7 @@
       new Fish({
         x: pos.x,
         y: pos.y,
-        direction: this.direction,
+        direction: this.state.direction,
         parent: this.game,
       })
 
@@ -1468,6 +1513,8 @@
     }
 
     stomp() {
+      this.state.action = SETTINGS.HERO.MOVEMENT_STATES.ATTACKING
+
       this.body.setLinearVelocity(Vec2(
         this.body.getLinearVelocity().x,
         -70)
@@ -1477,6 +1524,7 @@
     }
 
     glide() {
+      this.state.action = SETTINGS.HERO.MOVEMENT_STATES.GLIDING
       this.jumps = 0
 
       const f = this.body.getWorldVector(Vec2(0.0, SETTINGS.HERO.GLIDE_IMPULSE))
@@ -1485,6 +1533,8 @@
     }
 
     land() {
+      this.state.airborne = false
+
       if (this.body.getLinearVelocity().y <= 0) {
         this.jumps = SETTINGS.HERO.MAX_JUMPS
       }
@@ -1498,7 +1548,9 @@
      * @param {Integer} direction - LEFT or RIGHT
      */
     move(direction) {
-      this.direction = direction
+      this.state.direction = direction
+      this.state.action = SETTINGS.HERO.MOVEMENT_STATES.RUNNING
+
       const sprintMultiplier = this.sprinting
         ? SETTINGS.HERO.SPRINT_MULTIPLIER
         : 1
@@ -1510,6 +1562,8 @@
     }
 
     jump() {
+      this.state.airborne = true
+
       if (!this.jumps) {
         return
       }
@@ -1522,9 +1576,32 @@
       this.jumps -= 1
     }
 
+    setActiveSprite(visible = true) {
+      const sprite = this.stateMappings[this.state.action]
+
+
+      if (sprite === this.activeSprite) {
+        this.activeSprite.scale.x = this.state.direction
+        return
+      }
+
+      if (this.activeSprite) {
+        this.activeSprite.visible = false
+        this.activeSprite.stop()
+      }
+
+      this.activeSprite = sprite
+      this.activeSprite.visible = visible
+      this.activeSprite.scale.x = this.state.direction
+      this.activeSprite.play()
+    }
+
     render() {
       const pos = this.body.getPosition()
-      this.sprite.position.set(mpx(pos.x), mpy(pos.y))
+
+      this.setActiveSprite()
+
+      this.activeSprite.position.set(mpx(pos.x), mpy(pos.y))
     }
   }
 
@@ -1591,9 +1668,10 @@
 
   (function setupGame() {
     PIXI.loader
-    .add('hero_spritesheet', '/assets/hero/spritesheets/neutral.json')
-    .add('male_spritesheet', '/assets/male/spritesheets/neutral.json')
-    .add('seal_spritesheet', '/assets/seal/spritesheets/running.json')
+    .add('hero_neutral_spritesheet', '/assets/hero/spritesheets/neutral.json')
+    .add('hero_running_spritesheet', '/assets/hero/spritesheets/running.json')
+    .add('male_neutral_spritesheet', '/assets/male/spritesheets/neutral.json')
+    .add('seal_running_spritesheet', '/assets/seal/spritesheets/running.json')
     .load(() => {
       new Menu()
     });

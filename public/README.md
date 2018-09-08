@@ -104,7 +104,7 @@ GAMEPLAY.DIFFICULT
 
 ### UI Todos
 UI.1
-- [x] static sprite texture
+- [x] static hero texture
 - [x] static fish texture
 - [x] health bar
 - [x] static seal texture
@@ -128,17 +128,18 @@ UI.3
 - [x] show restart and menu buttons when game ends
 
 UI.4
-- [x] animation: sprite neutral
-- [x] animation: sprite left/right
+- [x] animation: hero neutral
 - [x] animation: male neutral
 - [x] male animation is faster when abducted
 - [x] animation: seal running
 - [x] rename wave => winter
 
 UI.5
-- [ ] animation: sprite attack
-- [ ] animation: sprite death
-- [ ] animation: sprite glide left/right
+- [x] animation: hero left/right
+- [x] animation: implement hero states
+- [ ] animation: hero airborne left/right
+- [ ] animation: hero glide left/right
+- [ ] animation: hero attack left/right
 
 UI.6
 - [ ] animation: seal attack
@@ -147,6 +148,7 @@ UI.6
 - [ ] animation: fish wiggle
 
 UI.7
+- [ ] animation: hero death
 - [ ] snowstorm in background
 - [ ] snowstorm stops with winter's end
 - [ ] responsive screen
