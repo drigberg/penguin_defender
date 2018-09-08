@@ -130,15 +130,15 @@ UI.3
 UI.4
 - [x] animation: sprite neutral
 - [x] animation: sprite left/right
-- [ ] animation: male neutral
-- [ ] animation: seal running
-- [ ] rename wave => winter
+- [x] animation: male neutral
+- [x] male animation is faster when abducted
+- [x] animation: seal running
+- [x] rename wave => winter
 
 UI.5
 - [ ] animation: sprite attack
 - [ ] animation: sprite death
 - [ ] animation: sprite glide left/right
-- [ ] male animation is faster when abducted
 
 UI.6
 - [ ] animation: seal attack
@@ -162,8 +162,6 @@ UI.9
 UI.10
 - [ ] opening scene
 - [ ] post-wave animation (female textures, cheering)
-
-
 
 
 ### Audio Todos

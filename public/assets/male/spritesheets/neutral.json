@@ -1,54 +1,54 @@
 {
   "frames": {
-    "hero:neutral:1.png": {
+    "male:neutral:1.png": {
       "frame": {
         "x": 0,
         "y": 0,
-        "w": 48,
-        "h": 48
+        "w": 15,
+        "h": 24
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 48,
-        "h": 48
+        "w": 15,
+        "h": 24
       },
       "sourceSize": {
-        "w": 48,
-        "h": 48
+        "w": 15,
+        "h": 24
       }
     },
-    "hero:neutral:2.png": {
+    "male:neutral:2.png": {
       "frame": {
-        "x": 48,
+        "x": 15,
         "y": 0,
-        "w": 48,
-        "h": 48
+        "w": 15,
+        "h": 24
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
-        "x": 48,
+        "x": 15,
         "y": 0,
-        "w": 48,
+        "w": 15,
         "h": 48
       },
       "sourceSize": {
-        "w": 48,
-        "h": 48
+        "w": 15,
+        "h": 24
       }
     }
   },
   "meta": {
     "app": "http://www.penguindefender.com",
     "version": "1.0",
-    "image": "/assets/hero/spritesheets/neutral_neon.png",
+    "image": "/assets/male/spritesheets/neutral.png",
     "format": "RGBA8888",
     "size": {
-      "w": 96,
-      "h": 48
+      "w": 30,
+      "h": 24
     },
     "scale": "1"
   }

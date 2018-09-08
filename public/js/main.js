@@ -18,7 +18,6 @@
   app.view.style.position = 'absolute';
   app.view.style.border = '1px solid #222222';
 
-
   const CATEGORIES = {
     CREATURE: 0x0001,
     GROUND: 0x0002,
@@ -50,8 +49,7 @@
   const BASE_TEXT_STYLE = new PIXI.TextStyle({
     fontFamily: 'Courier New',
     fontSize: 72,
-    stroke: '#000000',
-    strokeThickness: 5,
+    strokeThickness: 0,
     fontWeight: 'bold',
     fill: BLUE,
   });
@@ -90,18 +88,20 @@
       SPEED: 2.0,
       SPAWN_X: 0.0,
       SPAWN_Y: 0.0,
-      SPAWN_SPREAD: 5.0,
+      SPAWN_SPREAD: 10.0,
       MAX_JUMPS: 1,
-      TEXTURE: PIXI.Texture.fromImage('assets/male.png'),
+      TEXTURE: PIXI.Texture.fromImage('assets/male_neon.png'),
       JUMP: 20,
       BOX_WIDTH: 0.5,
       BOX_HEIGHT: 1,
+      ANIMATION_SPEED_STANDARD: 0.03,
+      ANIMATION_SPEED_STRESSED: 0.1,
     },
     HERO: {
       JUMP: 35,
       MAX_HEALTH: 5,
       DAMAGE: 1,
-      SPEED: 25,
+      SPEED: 15,
       MAX_JUMPS: 3,
       SPRINT_MULTIPLIER: 1.75,
       GLIDE_IMPULSE: 1,
@@ -110,6 +110,7 @@
       BOX_HEIGHT: 2.0,
       STOMP_BOX_WIDTH: 3.0,
       STOMP_BOX_HEIGHT: 1.0,
+      ANIMATION_SPEED_STANDARD: 0.03,
     },
     HEALTH_BAR: {
       X: -40,
@@ -121,12 +122,12 @@
       THROW_X: 20,
       THROW_Y: 50,
       THROW_INTERVAL: 25,
-      TEXTURE: PIXI.Texture.fromImage('assets/fish.png'),
+      TEXTURE: PIXI.Texture.fromImage('assets/fish_neon.png'),
       BOX_WIDTH: 1,
       BOX_HEIGHT: 0.6,
     },
     SEAL: {
-      SPEED: 5.0,
+      SPEED: 3.5,
       HEALTH: 1,
       DAMAGE: 1,
       SPAWN_X: 50,
@@ -135,9 +136,10 @@
       JUMP: 20,
       MAX_JUMPS: 1,
       POINTS: 10,
-      TEXTURE: PIXI.Texture.fromImage('assets/seal.png'),
+      TEXTURE: PIXI.Texture.fromImage('assets/seal_neon.png'),
       BOX_WIDTH: 1,
       BOX_HEIGHT: 0.6,
+      ANIMATION_SPEED_STANDARD: 0.15,
     },
     GULL: {
       SPEED: 3.0,
@@ -163,9 +165,9 @@
       BORDER_X_LEFT: -40,
       OFFSCREEN_X_RIGHT: 55,
       OFFSCREEN_X_LEFT: -55,
-      BACKGROUND_TEXTURE: PIXI.Texture.fromImage('assets/mountains.png'),
-      WAVE_COUNTDOWN_TIME: 200,
-      WAVE_INTERIM_TIME: 1500,
+      BACKGROUND_TEXTURE: PIXI.Texture.fromImage('assets/mountains_neon.png'),
+      WINTER_COUNTDOWN_TIME: 50,
+      WINTER_INTERIM_TIME: 1500,
     },
     MENU: {
       TEXTURE: PIXI.Texture.fromImage('assets/menu.png'),
@@ -186,7 +188,7 @@
     }
 
     reset() {
-      this.wave = 0
+      this.winter = 0
       this.paused = true
       this.idPointer = 1
       this.objects = {}
@@ -199,7 +201,7 @@
       this.createBorders()
       this.setupCollisionHandlers()
       this.setupInteractivity()
-      this.startWave()
+      this.startWinter()
     }
 
     setupContainer() {
@@ -211,25 +213,25 @@
       app.stage.addChild(this.container);
     }
 
-    startWaveCountdown() {
-      this.waveCountdownTime = SETTINGS.GLOBAL.WAVE_COUNTDOWN_TIME
-      this.waveCountdownInterval = this.waveCountdownTime / 4
+    startWinterCountdown() {
+      this.winterCountdownTime = SETTINGS.GLOBAL.WINTER_COUNTDOWN_TIME
+      this.winterCountdownInterval = this.winterCountdownTime / 4
     }
 
-    waveComplete() {
+    winterComplete() {
       return ENEMY_TYPES.reduce((acc, type) => {
         return acc && this.typeComplete(type)
       }, true)
     }
 
-    onWaveComplete() {
+    onWinterComplete() {
       const that = this
-      this.textDisplays[0].show(`WAVE ${this.wave} COMPLETE!`)
+      this.textDisplays[0].show(`WINTER ${this.winter} COMPLETE!`)
       this.textDisplays[1].show('NOICE')
       this.paused = true
       this.active = false
 
-      setTimeout(() => that.startWave(), SETTINGS.GLOBAL.WAVE_INTERIM_TIME)
+      setTimeout(() => that.startWinter(), SETTINGS.GLOBAL.WINTER_INTERIM_TIME)
     }
 
     toCreateEnemy(type) {
@@ -237,18 +239,18 @@
         return false
       }
 
-      return this.waveStats[type].created < this.waveStats[type].total
+      return this.winterStats[type].created < this.winterStats[type].total
     }
 
     onEnemyDestroyed(type) {
-      this.waveStats[type].destroyed +=1
+      this.winterStats[type].destroyed +=1
 
       if (!this.typeComplete(type)) {
         return
       }
 
-      if (this.waveComplete()) {
-        this.onWaveComplete()
+      if (this.winterComplete()) {
+        this.onWinterComplete()
       }
     }
 
@@ -262,13 +264,7 @@
       }
 
       if (entity.abducting) {
-        const male = entity.abducting
-        male.abductor = null
-        male.body.getFixtureList().setFilterData({
-          groupIndex: male.filterData.filterGroupIndex,
-          categoryBits: male.filterData.filterCategoryBits,
-          maskBits: male.filterData.filterMaskBits,
-        })
+        entity.abducting.onLiberation()
       }
 
       entity.alive = false
@@ -304,23 +300,23 @@
       this.gameOverReason = 'YOU DIED'
     }
 
-    startWave() {
+    startWinter() {
       this.resetBodies()
       this.active = true
       this.paused = false
 
-      this.wave += 1
-      this.waveStats = this.getWaveStats()
-      this.waveDisplay.show(this.wave)
+      this.winter += 1
+      this.winterStats = this.getWinterStats()
+      this.winterDisplay.show(this.winter)
 
       this.setupMales()
       this.createHero()
 
-      this.startWaveCountdown()
+      this.startWinterCountdown()
     }
 
     onMaleDestroyed() {
-      this.waveStats[TYPES.MALE].destroyed += 1
+      this.winterStats[TYPES.MALE].destroyed += 1
       if (this.typeComplete(TYPES.MALE)) {
         this.active = false
         this.gameOverReason = 'COLONY ANNIHILATED'
@@ -332,20 +328,20 @@
       // nothing yet
     }
 
-    waveCountdown() {
-      if (this.waveCountdownTime > 0) {
+    winterCountdown() {
+      if (this.winterCountdownTime > 0) {
         this.textDisplays[0].show('GET READY!');
-        this.textDisplays[1].show(Math.floor(this.waveCountdownTime / this.waveCountdownInterval) || 'GO!');
+        this.textDisplays[1].show(Math.floor(this.winterCountdownTime / this.winterCountdownInterval) || 'GO!');
 
-        this.waveCountdownTime -= 1
-        return this.waveCountdownTime
+        this.winterCountdownTime -= 1
+        return this.winterCountdownTime
       }
 
       return false
     }
 
     onStepPauseDependent() {
-      const countingDown = this.waveCountdown()
+      const countingDown = this.winterCountdown()
 
       if (countingDown) {
         return
@@ -409,11 +405,11 @@
         case 'P':
           this.paused = !this.paused
 
-          if (!this.waveCountdownTime && this.paused) {
+          if (!this.winterCountdownTime && this.paused) {
             this.textDisplays[0].show('PAUSED', {
               fill: BLUE,
             })
-          } else if (!this.waveCountdownTime && !this.paused) {
+          } else if (!this.winterCountdownTime && !this.paused) {
             this.textDisplays[0].hide()
           }
 
@@ -528,9 +524,9 @@
           )
         },
         [that.hashTypes(TYPES.MALE, TYPES.MALE)]: function(bodies) {
-          if (Math.random() < 0.5) {
+          if (Math.random() < 0.1) {
             that.objects[bodies[0].id].jump()
-          } else {
+          } else if (Math.random() < 0.1) {
             that.objects[bodies[1].id].jump()
           }
         },
@@ -575,7 +571,7 @@
     }
 
     setupMales() {
-      for (let i = 0; i < this.waveStats[TYPES.MALE].total; i++) {
+      for (let i = 0; i < this.winterStats[TYPES.MALE].total; i++) {
         new Male(this)
       }
     }
@@ -607,16 +603,16 @@
       // must be AFTER background
       this.pointDisplay = new Text({
         prefix: 'SCORE: ',
-        x: 35,
+        x: 30,
         y: 25,
         parent: this,
       })
 
       this.pointDisplay.show(String(this.points))
 
-      this.waveDisplay = new Text({
-        prefix: 'WAVE: ',
-        x: 35,
+      this.winterDisplay = new Text({
+        prefix: 'WINTER: ',
+        x: 30,
         y: 20,
         parent: this,
       })
@@ -689,7 +685,7 @@
     }
 
     createEnemy(type) {
-      this.waveStats[type].created +=1
+      this.winterStats[type].created +=1
       const direction = Math.random() < 0.5
         ? LEFT
         : RIGHT
@@ -763,9 +759,9 @@
       this.objects = {}
     }
 
-    getWaveStats() {
-      const seals = enforcePositive(this.wave * 2 + 10)
-      const gulls = enforcePositive(this.wave * 3 - 10)
+    getWinterStats() {
+      const seals = enforcePositive(this.winter * 2 + 10)
+      const gulls = enforcePositive(this.winter * 3 - 10)
 
       return {
         [TYPES.SEAL]: {
@@ -792,7 +788,7 @@
     }
 
     typeComplete(type) {
-      return this.waveStats[type].destroyed === this.waveStats[type].total
+      return this.winterStats[type].destroyed === this.winterStats[type].total
     }
 
     spawnEnemies() {
@@ -898,7 +894,7 @@
     }
 
     renderObjects() {
-      if (this.waveCountdownTime) {
+      if (this.winterCountdownTime) {
         return
       }
 
@@ -1055,9 +1051,42 @@
 
       this.body.id = this.id
 
-      this.sprite = new PIXI.Sprite(SETTINGS.MALE.TEXTURE)
-      this.sprite.anchor.set(0.5);
+      this.setupSprite()
+    }
+
+    onLiberation() {
+      this.sprite.animationSpeed = SETTINGS.MALE.ANIMATION_SPEED_STANDARD
+      this.abductor = null
+      this.body.getFixtureList().setFilterData({
+        groupIndex: this.filterData.filterGroupIndex,
+        categoryBits: this.filterData.filterCategoryBits,
+        maskBits: this.filterData.filterMaskBits,
+      })
+    }
+
+    onAbduction() {
+      this.abductor = this
+      this.sprite.animationSpeed = SETTINGS.MALE.ANIMATION_SPEED_STRESSED
+
+      this.body.getFixtureList().setFilterData({
+        filterMaskBits: 0x0000
+      })
+    }
+
+    setupSprite() {
+      const textures = [];
+
+      for (let i = 1; i <= 2; i++) {
+        textures.push(PIXI.Texture.fromFrame(`male:neutral:${i}.png`));
+      }
+
+      this.sprite = new PIXI.extras.AnimatedSprite(textures);
+
+      this.sprite.anchor.set(0.5)
       this.sprite.visible = false
+      this.sprite.play();
+      this.sprite.animationSpeed = SETTINGS.MALE.ANIMATION_SPEED_STANDARD
+
       this.game.container.addChild(this.sprite)
     }
 
@@ -1151,15 +1180,31 @@
         ? SETTINGS.SEAL.SPEED
         : SETTINGS.SEAL.SPEED * -1
 
-      this.setBody()
+      this.setupBody()
 
       this.game.assignType(this, TYPES.SEAL)
       this.body.id = this.id
 
-      this.setTexture()
+      this.setupSprite()
     }
 
-    setBody() {
+    setupSprite() {
+      const textures = [];
+
+      for (let i = 1; i <= 4; i++) {
+        textures.push(PIXI.Texture.fromFrame(`seal:running:${i}.png`));
+      }
+
+      this.sprite = new PIXI.extras.AnimatedSprite(textures);
+
+      this.sprite.anchor.set(0.5)
+      this.sprite.gotoAndPlay(Math.floor(Math.random() * 4));
+      this.sprite.animationSpeed = SETTINGS.SEAL.ANIMATION_SPEED_STANDARD
+
+      this.game.container.addChild(this.sprite)
+    }
+
+    setupBody() {
       const x = this.direction === LEFT
       ? SETTINGS.SEAL.SPAWN_X
       : SETTINGS.SEAL.SPAWN_X * -1
@@ -1176,17 +1221,6 @@
         filterCategoryBits: CATEGORIES.CREATURE,
         filterMaskBits: MASKS.CREATURE,
       })
-    }
-
-    setTexture() {
-      this.body.render = {
-        stroke: RED
-      }
-
-      this.sprite = new PIXI.Sprite(SETTINGS.SEAL.TEXTURE)
-      this.sprite.scale.set(0.9)
-      this.sprite.anchor.set(0.5);
-      this.game.container.addChild(this.sprite)
     }
 
     move() {
@@ -1206,11 +1240,7 @@
 
     abduct(male) {
       this.abducting = male
-      male.abductor = this
-
-      male.body.getFixtureList().setFilterData({
-        filterMaskBits: 0x0000
-      })
+      male.onAbduction()
 
       this.game.world.createJoint(planck.RevoluteJoint(
         {
@@ -1397,7 +1427,7 @@
       this.sprite.anchor.set(0.5)
       this.sprite.visible = false
       this.sprite.play();
-      this.sprite.animationSpeed = 0.05
+      this.sprite.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED_STANDARD
 
       this.game.container.addChild(this.sprite)
     }
@@ -1561,7 +1591,9 @@
 
   (function setupGame() {
     PIXI.loader
-    .add('spritesheet', '/assets/hero/spritesheets/neutral.json')
+    .add('hero_spritesheet', '/assets/hero/spritesheets/neutral.json')
+    .add('male_spritesheet', '/assets/male/spritesheets/neutral.json')
+    .add('seal_spritesheet', '/assets/seal/spritesheets/running.json')
     .load(() => {
       new Menu()
     });
