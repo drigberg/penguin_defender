@@ -82,8 +82,10 @@ GAMEPLAY.11
 - [x] display "PAUSED"
 - [x] penguins definitely don't render at all until wave starts
 - [x] males don't collide with anything while abducted
+- [x] display "PAUSED"
 
 GAMEPLAY.12
+- [ ] males and hero don't collide
 - [ ] gulls can swoop
 - [ ] gulls can carry away males
 - [ ] seals get launched when stomped
@@ -94,7 +96,6 @@ GAMEPLAY.13
 - [ ] post-wave movement
 - [ ] clean up Game methods
 - [ ] standardize colors (alert, points, success, etc)
-- [ ] display "PAUSED"
 
 GAMEPLAY.DIFFICULT
 - [ ] splash damage on stomp attack: figure out how to destroy fixtures
@@ -137,25 +138,26 @@ UI.4
 UI.5
 - [x] animation: hero left/right
 - [x] animation: implement hero states
-- [ ] animation: hero airborne left/right
-- [ ] animation: hero glide left/right
-- [ ] animation: hero attack left/right
+- [x] animation: hero speeds up when airborne
+- [x] animation: hero attack
+- [x] hero movement trail
+- [x] prevent trail from showing at game start
 
 UI.6
-- [ ] animation: seal attack
-- [ ] animation: seal death
 - [ ] animation: basic gull
 - [ ] animation: fish wiggle
+- [ ] all entities are destroyed at game over
 
 UI.7
+- [ ] animation: seal attack
+- [ ] animation: seal death
 - [ ] animation: hero death
 - [ ] snowstorm in background
 - [ ] snowstorm stops with winter's end
-- [ ] responsive screen
 
 UI.8
+- [ ] responsive screen
 - [ ] switch to better animation library (smoothie?)
-- [ ] movement trails
 
 UI.9
 - [ ] basic lighting

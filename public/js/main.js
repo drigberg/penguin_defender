@@ -2,7 +2,49 @@
  * Basic surival game created using pixi.js and planck.js
  */
 (function main() {
+  /**
+   * Cubic interpolation based on https://github.com/osuushi/Smooth.js
+   * @param	k
+   * @return
+   */
+  function clipInput(k, arr) {
+    if (k <= 0) {
+      return arr[0];
+    }
+    if (k >= arr.length - 1) {
+      return arr[arr.length - 1];
+    }
+
+    return arr[k];
+  }
+
+  function getTangent(k, factor, array) {
+    return factor * (clipInput(k + 1, array) - clipInput(k - 1, array)) / 2;
+  }
+
+  function cubicInterpolation(array, t, tangentFactor) {
+    if (tangentFactor == null) tangentFactor = 1;
+
+    const k = Math.floor(t);
+    const m = [getTangent(k, tangentFactor, array), getTangent(k + 1, tangentFactor, array)];
+    const p = [clipInput(k, array), clipInput(k + 1, array)];
+    t -= k;
+    const t2 = t * t;
+    const t3 = t * t2;
+    return (2 * t3 - 3 * t2 + 1) * p[0] + (t3 - 2 * t2 + t) * m[0] + ( -2 * t3 + 3 * t2) * p[1] + (t3 - t2) * m[1];
+  }
+
   const pscale = 13;
+
+  function getAnimatedSprite(nameTemplate, max) {
+    const textures = [];
+
+    for (let i = 1; i <= max; i++) {
+      textures.push(PIXI.Texture.fromFrame(nameTemplate.replace('{i}', i)));
+    }
+
+    return new PIXI.extras.AnimatedSprite(textures)
+  }
 
   function mpx(m) {
     return m * pscale + (window.innerWidth / 2.3);
@@ -83,51 +125,60 @@
   ]);
 
   const SETTINGS = Object.freeze({
-    MALE: {
+    MALE: Object.freeze({
       NUM: 10,
       SPEED: 2.0,
       SPAWN_X: 0.0,
       SPAWN_Y: 0.0,
       SPAWN_SPREAD: 10.0,
       MAX_JUMPS: 1,
-      TEXTURE: PIXI.Texture.fromImage('assets/male_neon.png'),
       JUMP: 20,
       BOX_WIDTH: 0.5,
       BOX_HEIGHT: 1,
       ANIMATION_SPEED_STANDARD: 0.03,
       ANIMATION_SPEED_STRESSED: 0.1,
-    },
-    HERO: {
+    }),
+    HERO: Object.freeze({
+      TRAIL: Object.freeze({
+        TEXTURE: PIXI.Texture.fromImage('assets/hero/trail.png'),
+        SMOOTHNESS: 100,
+        LENGTH: 10,
+        THRESHOLD: 20,
+        MIN_VELOCITY: 5,
+      }),
+      ANIMATION_SPEED: Object.freeze({
+        ATTACKING: 0.18,
+        NEUTRAL: 0.03,
+        RUNNING: 0.06,
+        JUMPING: 0.24,
+      }),
+      MOVEMENT_STATES: Object.freeze({
+        RUNNING: 'RUNNING',
+        GLIDING: 'GLIDING',
+        NEUTRAL: 'NEUTRAL',
+        ATTACKING: 'ATTACKING',
+        JUMPING: 'JUMPING',
+      }),
       JUMP: 35,
       MAX_HEALTH: 5,
       DAMAGE: 1,
       SPEED: 15,
       MAX_JUMPS: 3,
       SPRINT_MULTIPLIER: 1.75,
-      GLIDE_IMPULSE: 1,
-      TEXTURE: PIXI.Texture.fromImage('assets/penguin.png'),
+      GLIDE_IMPULSE: 2,
       BOX_WIDTH: 2.0,
       BOX_HEIGHT: 2.0,
       STOMP_BOX_WIDTH: 3.0,
       STOMP_BOX_HEIGHT: 1.0,
-      ANIMATION_SPEED_NEUTRAL: 0.03,
-      ANIMATION_SPEED_RUNNING: 0.06,
       START_X: 0.0,
       START_Y: 5.0,
-      MOVEMENT_STATES: {
-        RUNNING: 'RUNNING',
-        GLIDING: 'GLIDING',
-        NEUTRAL: 'NEUTRAL',
-        ATTACKING: 'ATTACKING',
-        JUMPING: 'JUMPING',
-      }
-    },
-    HEALTH_BAR: {
+    }),
+    HEALTH_BAR: Object.freeze({
       X: -40,
       Y: 26,
       MAX_WIDTH: 10,
-    },
-    FISH: {
+    }),
+    FISH: Object.freeze({
       DAMAGE: 1,
       THROW_X: 20,
       THROW_Y: 50,
@@ -135,8 +186,8 @@
       TEXTURE: PIXI.Texture.fromImage('assets/fish_neon.png'),
       BOX_WIDTH: 1,
       BOX_HEIGHT: 0.6,
-    },
-    SEAL: {
+    }),
+    SEAL: Object.freeze({
       SPEED: 3.5,
       HEALTH: 1,
       DAMAGE: 1,
@@ -146,12 +197,11 @@
       JUMP: 20,
       MAX_JUMPS: 1,
       POINTS: 10,
-      TEXTURE: PIXI.Texture.fromImage('assets/seal_neon.png'),
       BOX_WIDTH: 1,
       BOX_HEIGHT: 0.6,
       ANIMATION_SPEED_STANDARD: 0.15,
-    },
-    GULL: {
+    }),
+    GULL: Object.freeze({
       SPEED: 3.0,
       HEALTH: 1,
       DAMAGE: 2,
@@ -165,8 +215,8 @@
       TEXTURE: PIXI.Texture.fromImage('assets/penguin.png'),
       BOX_WIDTH: 2.0,
       BOX_HEIGHT: 2.0,
-    },
-    GLOBAL: {
+    }),
+    GLOBAL: Object.freeze({
       TIME_STEP: 1 / 20,
       INVINCIBILITY_INTERVAL: 30,
       SHAKE_THRESHOLD: 20,
@@ -178,10 +228,10 @@
       BACKGROUND_TEXTURE: PIXI.Texture.fromImage('assets/mountains_neon.png'),
       WINTER_COUNTDOWN_TIME: 50,
       WINTER_INTERIM_TIME: 1500,
-    },
-    MENU: {
+    }),
+    MENU: Object.freeze({
       TEXTURE: PIXI.Texture.fromImage('assets/menu.png'),
-    },
+    }),
   })
 
   const Vec2 = planck.Vec2
@@ -280,13 +330,7 @@
       entity.alive = false
       this.world.destroyBody(entity.body)
 
-      if (entity.sprites) { // TODO: clean this up
-        Object.keys(entity.sprites).forEach((key) => {
-          this.container.removeChild(entity.sprites[key])
-        })
-      } else {
-        this.container.removeChild(entity.sprite)
-      }
+      entity.destroySprites()
 
       switch (entity.type) {
         case TYPES.MALE:
@@ -1074,6 +1118,11 @@
       this.setupSprite()
     }
 
+
+    destroySprites() {
+      this.game.container.removeChild(this.sprite)
+    }
+
     onLiberation() {
       this.sprite.animationSpeed = SETTINGS.MALE.ANIMATION_SPEED_STANDARD
       this.abductor = null
@@ -1208,6 +1257,10 @@
       this.setupSprite()
     }
 
+    destroySprites() {
+      this.game.container.removeChild(this.sprite)
+    }
+
     setupSprite() {
       const textures = [];
 
@@ -1327,6 +1380,11 @@
       this.game.container.addChild(this.sprite)
     }
 
+
+    destroySprites() {
+      this.parent.container.removeChild(this.sprite)
+    }
+
     move() {
       this.untilFlap -= 1
       let yVelocity
@@ -1343,8 +1401,8 @@
         yVelocity
       ))
 
-      var f = this.body.getWorldVector(Vec2(0.0, SETTINGS.GULL.IMPULSE))
-      var p = this.body.getWorldPoint(Vec2(0.0, 2.0))
+      const f = this.body.getWorldVector(Vec2(0.0, SETTINGS.GULL.IMPULSE))
+      const p = this.body.getWorldPoint(Vec2(0.0, 2.0))
       this.body.applyLinearImpulse(f, p, true)
     }
   }
@@ -1390,10 +1448,73 @@
       this.body.id = this.id
     }
 
+    destroySprites() {
+      this.game.container.removeChild(this.sprite)
+    }
+
     render() {
       const pos = this.body.getPosition()
       this.sprite.position.set(mpx(pos.x), mpy(pos.y))
       this.sprite.rotation = this.body.getAngle()
+    }
+  }
+
+  class Trail {
+    constructor({
+      x = 0,
+      y = 0,
+      texture = SETTINGS.HERO.TRAIL.TEXTURE,
+      smoothness = 100,
+      length = 20,
+      parent,
+    }) {
+      this.texture = texture
+      this.parent = parent
+      this.smoothness = smoothness
+      this.length = length
+      this.points = [];
+
+      this.history = {
+        x: new Array(this.length).fill(mpx(x)),
+        y: new Array(this.length).fill(mpy(y)),
+      }
+
+      this.createRope(x, y)
+    }
+
+    destroy() {
+      this.parent.container.removeChild(this.rope)
+    }
+
+    createRope(x, y) {
+      this.points = [];
+
+      console.log(x, y, mpx(x), mpy(y))
+
+      for (let i = 0; i < this.smoothness; i++) {
+        this.points.push(new PIXI.Point(mpx(x), mpy(y)));
+      }
+
+      this.rope = new PIXI.mesh.Rope(this.texture, this.points);
+      this.rope.blendmode = PIXI.BLEND_MODES.ADD;
+      this.parent.container.addChild(this.rope);
+    }
+
+    update(x, y, show) {
+      this.rope.alpha = show ? 1 : 0
+
+      this.history.x.unshift(x);
+      this.history.y.unshift(y);
+      this.history.x.pop();
+      this.history.y.pop();
+
+      for (let i = 0; i < this.smoothness; i++) {
+        const iterator = i / this.smoothness * this.length
+        const point = this.points[i]
+
+        point.x = cubicInterpolation(this.history.x, iterator);
+        point.y = cubicInterpolation(this.history.y, iterator);
+      }
     }
   }
 
@@ -1416,7 +1537,7 @@
       this.setupSprite()
 
       this.body = this.game.world.createBody({
-        position : Vec2(SETTINGS.HERO.START_X, SETTINGS.HERO.START_Y,),
+        position : Vec2(SETTINGS.HERO.START_X, SETTINGS.HERO.START_Y),
         type : 'dynamic',
         fixedRotation : true,
         allowSleep : false
@@ -1440,41 +1561,51 @@
     }
 
     setupSprite() {
-      const neutralTextures = [];
-      const runningTextures = [];
+      this.trail = new Trail({
+        x: SETTINGS.HERO.START_X,
+        y: SETTINGS.HERO.START_Y,
+        texture: SETTINGS.HERO.TRAIL.TEXTURE,
+        smoothness: SETTINGS.HERO.TRAIL.SMOOTHNESS,
+        length: SETTINGS.HERO.TRAIL.LENGTH,
+        parent: this.game,
+      })
 
-      for (let i = 1; i <= 2; i++) {
-        neutralTextures.push(PIXI.Texture.fromFrame(`hero:neutral:${i}.png`));
-      }
-
-      for (let i = 1; i <= 2; i++) {
-        runningTextures.push(PIXI.Texture.fromFrame(`hero:running:${i}.png`));
-      }
+      const states = SETTINGS.HERO.MOVEMENT_STATES
 
       this.sprites = {
-        neutral: new PIXI.extras.AnimatedSprite(neutralTextures),
-        running: new PIXI.extras.AnimatedSprite(runningTextures),
+        [states.ATTACKING]: getAnimatedSprite('hero:attacking:{i}.png', 4),
+        [states.NEUTRAL]: getAnimatedSprite('hero:neutral:{i}.png', 2),
+        [states.RUNNING]: getAnimatedSprite('hero:running:{i}.png', 2),
       }
 
       this.stateMappings = {
-        [SETTINGS.HERO.MOVEMENT_STATES.ATTACKING]: this.sprites.neutral,
-        [SETTINGS.HERO.MOVEMENT_STATES.GLIDING]: this.sprites.neutral,
-        [SETTINGS.HERO.MOVEMENT_STATES.JUMPING]: this.sprites.neutral,
-        [SETTINGS.HERO.MOVEMENT_STATES.NEUTRAL]: this.sprites.neutral,
-        [SETTINGS.HERO.MOVEMENT_STATES.RUNNING]: this.sprites.running,
+        [states.ATTACKING]: this.sprites[states.ATTACKING],
+        [states.GLIDING]: this.sprites[states.NEUTRAL],
+        [states.JUMPING]: this.sprites[states.JUMPING],
+        [states.NEUTRAL]: this.sprites[states.NEUTRAL],
+        [states.RUNNING]: this.sprites[states.RUNNING],
       }
 
-      this.sprites.neutral.anchor.set(0.5)
-      this.sprites.running.anchor.set(0.5)
-      this.sprites.neutral.visible = false
-      this.sprites.running.visible = false
-      this.sprites.neutral.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED_NEUTRAL
-      this.sprites.running.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED_RUNNING
+      this.sprites.NEUTRAL.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.NEUTRAL]
+      this.sprites.RUNNING.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.RUNNING]
+      this.sprites.ATTACKING.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.ATTACKING]
 
       this.setActiveSprite(false)
 
-      this.game.container.addChild(this.sprites.neutral)
-      this.game.container.addChild(this.sprites.running)
+      Object.keys(this.sprites).forEach((key) => {
+        this.sprites[key].anchor.set(0.5)
+        this.sprites[key].visible = false
+        this.sprites[key].animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[key]
+        this.game.container.addChild(this.sprites[key])
+      })
+    }
+
+    destroySprites() {
+      Object.keys(this.sprites).forEach((key) => {
+        this.game.container.removeChild(this.sprites[key])
+      })
+
+      this.trail.destroy()
     }
 
     /**
@@ -1533,11 +1664,13 @@
     }
 
     land() {
-      this.state.airborne = false
-
-      if (this.body.getLinearVelocity().y <= 0) {
-        this.jumps = SETTINGS.HERO.MAX_JUMPS
+      if (this.body.getLinearVelocity().y > 0) {
+        return
       }
+
+      this.state.airborne = false
+      this.activeSprite.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED.RUNNING
+      this.jumps = SETTINGS.HERO.MAX_JUMPS
 
       if (this.stompFixture) {
         // this.body.destroyFixture(this.stompFixture)
@@ -1562,11 +1695,12 @@
     }
 
     jump() {
-      this.state.airborne = true
-
       if (!this.jumps) {
         return
       }
+
+      this.activeSprite.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED.JUMPING
+      this.state.airborne = true
 
       this.body.setLinearVelocity(Vec2(
         this.body.getLinearVelocity().x,
@@ -1579,7 +1713,6 @@
     setActiveSprite(visible = true) {
       const sprite = this.stateMappings[this.state.action]
 
-
       if (sprite === this.activeSprite) {
         this.activeSprite.scale.x = this.state.direction
         return
@@ -1588,6 +1721,7 @@
       if (this.activeSprite) {
         this.activeSprite.visible = false
         this.activeSprite.stop()
+        sprite.animationSpeed = this.activeSprite.animationSpeed
       }
 
       this.activeSprite = sprite
@@ -1600,8 +1734,9 @@
       const pos = this.body.getPosition()
 
       this.setActiveSprite()
-
       this.activeSprite.position.set(mpx(pos.x), mpy(pos.y))
+
+      this.trail.update(mpx(pos.x), mpy(pos.y), this.state.airborne)
     }
   }
 
@@ -1668,13 +1803,14 @@
 
   (function setupGame() {
     PIXI.loader
-    .add('hero_neutral_spritesheet', '/assets/hero/spritesheets/neutral.json')
-    .add('hero_running_spritesheet', '/assets/hero/spritesheets/running.json')
-    .add('male_neutral_spritesheet', '/assets/male/spritesheets/neutral.json')
-    .add('seal_running_spritesheet', '/assets/seal/spritesheets/running.json')
-    .load(() => {
-      new Menu()
-    });
+      .add('hero_neutral_spritesheet', '/assets/hero/spritesheets/neutral.json')
+      .add('hero_running_spritesheet', '/assets/hero/spritesheets/running.json')
+      .add('hero_attacking_spritesheet', '/assets/hero/spritesheets/attacking.json')
+      .add('male_neutral_spritesheet', '/assets/male/spritesheets/neutral.json')
+      .add('seal_running_spritesheet', '/assets/seal/spritesheets/running.json')
+      .load(() => {
+        new Menu()
+      });
   })()
 })()
 
