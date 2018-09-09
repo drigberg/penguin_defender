@@ -85,23 +85,28 @@ GAMEPLAY.11
 - [x] display "PAUSED"
 
 GAMEPLAY.12
-- [ ] males and hero don't collide
+- [x] all entities are destroyed at game over
+- [x] males and hero don't collide
+- [x] bug fix: keep pairs of seals from flying
+
+GAMEPLAY.13
 - [ ] gulls can swoop
 - [ ] gulls can carry away males
 - [ ] seals get launched when stomped
 - [ ] gulls change color and fall when killed
 
-GAMEPLAY.13
+GAMEPLAY.14
+- [ ] clean up Game methods
+- [ ] clean up settings
 - [ ] Putin-on-a-Horse
 - [ ] post-wave movement
-- [ ] clean up Game methods
 - [ ] standardize colors (alert, points, success, etc)
 
 GAMEPLAY.DIFFICULT
-- [ ] splash damage on stomp attack: figure out how to destroy fixtures
-- [ ] fix bird-summoning bug on stomp attack
-- [ ] completely fix destruction order bug
-- [ ] keep seals from flying
+- [ ] bug fix: splash damage fixture destruction
+- [ ] bug fix: bird-summoning bug on stomp attack
+- [ ] bug fix: fish sometimes throw down or not at all
+- [ ] bug fix: destruction order (see too)
 
 ### UI Todos
 UI.1
@@ -144,9 +149,9 @@ UI.5
 - [x] prevent trail from showing at game start
 
 UI.6
+- [ ] hero splash damage animation
 - [ ] animation: basic gull
 - [ ] animation: fish wiggle
-- [ ] all entities are destroyed at game over
 
 UI.7
 - [ ] animation: seal attack

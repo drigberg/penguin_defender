@@ -60,23 +60,28 @@
   app.view.style.position = 'absolute';
   app.view.style.border = '1px solid #222222';
 
-  const CATEGORIES = {
-    CREATURE: 0x0001,
+  const CATEGORIES = Object.freeze({
+    FOE: 0x0001,
     GROUND: 0x0002,
     HERO: 0x0004,
-    FISH: 0x0008,
-    WALLS: 0x00016,
-    OFFSCREEN: 0x00032,
-  }
+    FRIEND: 0x0008,
+    WALLS: 0x0016,
+    OFFSCREEN: 0x0032,
+  })
 
-  const MASKS = {
-    CREATURE: CATEGORIES.FISH | CATEGORIES.CREATURE | CATEGORIES.HERO | CATEGORIES.OFFSCREEN | CATEGORIES.GROUND,
-    HERO: ~CATEGORIES.FISH,
-    FISH: CATEGORIES.CREATURE | CATEGORIES.GROUND,
-    GROUND: CATEGORIES.FISH | CATEGORIES.CREATURE | CATEGORIES.HERO,
+  const GROUPS = Object.freeze({
+    FOE: -2,
+    HERO: -3,
+  })
+
+  const MASKS = Object.freeze({
+    FOE: CATEGORIES.HERO | CATEGORIES.OFFSCREEN | CATEGORIES.GROUND | CATEGORIES.FRIEND,
+    FRIEND: CATEGORIES.FRIEND | CATEGORIES.FOE | CATEGORIES.OFFSCREEN | CATEGORIES.GROUND,
+    HERO: CATEGORIES.FOE | CATEGORIES.WALLS | CATEGORIES.OFFSCREEN | CATEGORIES.GROUND,
+    GROUND: CATEGORIES.FOE | CATEGORIES.HERO | CATEGORIES.FRIEND,
     WALLS: CATEGORIES.HERO,
-    OFFSCREEN: CATEGORIES.CREATURE,
-  }
+    OFFSCREEN: CATEGORIES.FOE | CATEGORIES.FRIEND,
+  })
 
   const RED = '#ee1111'
   const BLUE = '#5555ee'
@@ -382,7 +387,6 @@
         this.active = false
         this.gameOverReason = 'COLONY ANNIHILATED'
       }
-
     }
 
     onStepPauseIndependent() {
@@ -563,17 +567,6 @@
         [that.hashTypes(TYPES.GULL, TYPES.HERO)]: function(bodies, point) {
           const enemy = that.objects[bodies.find(item => item.type === TYPES.GULL).id];
           that.handleEnemyHeroCollision(enemy, point)
-        },
-        [that.hashTypes(TYPES.SEAL, TYPES.SEAL)]: function(bodies) {
-          if (that.objects[bodies[0].id].abducting) {
-            that.objects[bodies[1].id].jump()
-          } else if (that.objects[bodies[1].id].abducting) {
-            that.objects[bodies[0].id].jump()
-          } else if (Math.random() > 0.5) {
-            that.objects[bodies[0].id].jump()
-          } else {
-            that.objects[bodies[1].id].jump()
-          }
         },
         [that.hashTypes(TYPES.FISH, TYPES.SEAL)]: function(bodies) {
           that.handleEnemyFishCollision(
@@ -774,6 +767,8 @@
       });
 
       this.healthBar.hide()
+
+      this.resetBodies()
 
       this.resetButton = new Button({
         x: 0,
@@ -1085,10 +1080,11 @@
       this.velocity = SETTINGS.MALE.SPEED
       this.alive = true
       this.abductor = null
+
       this.filterData = {
         friction: 0,
-        filterCategoryBits: CATEGORIES.CREATURE,
-        filterMaskBits: MASKS.CREATURE,
+        filterCategoryBits: CATEGORIES.FRIEND,
+        filterMaskBits: MASKS.FRIEND,
         filterGroupIndex: 0,
       }
 
@@ -1097,10 +1093,10 @@
       const x = SETTINGS.MALE.SPAWN_X + (SETTINGS.MALE.SPAWN_SPREAD * Math.random() - SETTINGS.MALE.SPAWN_SPREAD / 2)
 
       this.body = this.game.world.createBody({
-        position : Vec2(x, SETTINGS.MALE.SPAWN_Y),
-        type : 'dynamic',
-        fixedRotation : true,
-        allowSleep : false
+        position: Vec2(x, SETTINGS.MALE.SPAWN_Y),
+        type: 'dynamic',
+        fixedRotation: true,
+        allowSleep: false
       })
 
       this.body.createFixture(planck.Box(SETTINGS.MALE.BOX_WIDTH, SETTINGS.MALE.BOX_HEIGHT), {
@@ -1126,7 +1122,15 @@
     onLiberation() {
       this.sprite.animationSpeed = SETTINGS.MALE.ANIMATION_SPEED_STANDARD
       this.abductor = null
-      this.body.getFixtureList().setFilterData({
+
+      // if called during resetBodies, will be null if seal is
+      // destroyed before abductor
+      const fixtures = this.body.getFixtureList()
+      if (!fixtures) {
+        return
+      }
+
+      fixtures.setFilterData({
         groupIndex: this.filterData.filterGroupIndex,
         categoryBits: this.filterData.filterCategoryBits,
         maskBits: this.filterData.filterMaskBits,
@@ -1283,16 +1287,17 @@
       : SETTINGS.SEAL.SPAWN_X * -1
 
       this.body = this.game.world.createBody({
-        position : Vec2(x, SETTINGS.SEAL.SPAWN_Y),
-        type : 'dynamic',
-        fixedRotation : true,
-        allowSleep : false
+        position: Vec2(x, SETTINGS.SEAL.SPAWN_Y),
+        type: 'dynamic',
+        fixedRotation: true,
+        allowSleep: false
       })
 
       this.body.createFixture(planck.Box(SETTINGS.SEAL.BOX_WIDTH, SETTINGS.SEAL.BOX_HEIGHT), {
         friction: 0,
-        filterCategoryBits: CATEGORIES.CREATURE,
-        filterMaskBits: MASKS.CREATURE,
+        filterCategoryBits: CATEGORIES.FOE,
+        filterMaskBits: MASKS.FOE,
+        filterGroupIndex: GROUPS.FOE,
       })
     }
 
@@ -1354,16 +1359,17 @@
         : SETTINGS.GULL.SPAWN_X * -1
 
       this.body = this.game.world.createBody({
-        position : Vec2(x, SETTINGS.GULL.SPAWN_Y),
-        type : 'dynamic',
-        fixedRotation : true,
-        allowSleep : true,
+        position: Vec2(x, SETTINGS.GULL.SPAWN_Y),
+        type: 'dynamic',
+        fixedRotation: true,
+        allowSleep: true,
       })
 
       this.body.createFixture(planck.Box(SETTINGS.GULL.BOX_WIDTH, SETTINGS.GULL.BOX_HEIGHT), {
         friction: 0,
-        filterCategoryBits: CATEGORIES.CREATURE,
-        filterMaskBits: MASKS.CREATURE,
+        filterCategoryBits: CATEGORIES.FOE,
+        filterMaskBits: MASKS.FOE,
+        filterGroupIndex: GROUPS.FOE,
       })
 
       this.body.render = {
@@ -1419,10 +1425,10 @@
       this.game = parent
 
       this.body = this.game.world.createBody({
-        position : Vec2(x, y),
-        type : 'dynamic',
-        fixedRotation : false,
-        allowSleep : false
+        position: Vec2(x, y),
+        type: 'dynamic',
+        fixedRotation: false,
+        allowSleep: false
       })
 
       this.body.setLinearVelocity(Vec2(
@@ -1439,8 +1445,9 @@
       this.game.assignType(this, TYPES.FISH)
 
       this.body.createFixture(planck.Box(SETTINGS.FISH.BOX_WIDTH, SETTINGS.FISH.BOX_HEIGHT), {
-        filterCategoryBits: CATEGORIES.FISH,
-        filterMaskBits: MASKS.FISH,
+        filterCategoryBits: CATEGORIES.HERO,
+        filterMaskBits: MASKS.HERO,
+        filterGroupIndex: GROUPS.HERO,
       })
 
       this.id = this.game.createId()
@@ -1489,8 +1496,6 @@
     createRope(x, y) {
       this.points = [];
 
-      console.log(x, y, mpx(x), mpy(y))
-
       for (let i = 0; i < this.smoothness; i++) {
         this.points.push(new PIXI.Point(mpx(x), mpy(y)));
       }
@@ -1537,10 +1542,10 @@
       this.setupSprite()
 
       this.body = this.game.world.createBody({
-        position : Vec2(SETTINGS.HERO.START_X, SETTINGS.HERO.START_Y),
-        type : 'dynamic',
-        fixedRotation : true,
-        allowSleep : false
+        position: Vec2(SETTINGS.HERO.START_X, SETTINGS.HERO.START_Y),
+        type: 'dynamic',
+        fixedRotation: true,
+        allowSleep: false
       })
 
       this.game.assignType(this, TYPES.HERO)
@@ -1548,6 +1553,7 @@
       this.body.createFixture(planck.Box(SETTINGS.HERO.BOX_WIDTH, SETTINGS.HERO.BOX_HEIGHT), {
         filterCategoryBits: CATEGORIES.HERO,
         filterMaskBits: MASKS.HERO,
+        filterGroupIndex: GROUPS.HERO,
       })
 
       this.body.render = {
