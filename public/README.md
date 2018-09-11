@@ -90,23 +90,32 @@ GAMEPLAY.12
 - [x] bug fix: keep pairs of seals from flying
 
 GAMEPLAY.13
+- [x] bug fix: destruction order (see too)
+- [x] bug fix: fish sometimes throw down or not at all
+- [x] bug fix: splash damage fixture destruction
+- [ ] bug fix: slow-down with planck v0.2.2
+- [ ] bug fix: stomp doesn't always appear to work
+- [ ] stomp sprite
+- [x] gulls can carry away males
 - [ ] gulls can swoop
-- [ ] gulls can carry away males
-- [ ] seals get launched when stomped
-- [ ] gulls change color and fall when killed
 
 GAMEPLAY.14
 - [ ] clean up Game methods
 - [ ] clean up settings
-- [ ] Putin-on-a-Horse
-- [ ] post-wave movement
+- [ ] refine movement
+
+GAMEPLAY.15
+- [ ] gulls change color and fall when killed
+- [ ] seals get launched offscreen when stomped
 - [ ] standardize colors (alert, points, success, etc)
+- [ ] post-wave movement
+
+GAMEPLAY.16
+- [ ] Putin-on-a-Horse
+- [ ] foxes
 
 GAMEPLAY.DIFFICULT
-- [ ] bug fix: splash damage fixture destruction
 - [ ] bug fix: bird-summoning bug on stomp attack
-- [ ] bug fix: fish sometimes throw down or not at all
-- [ ] bug fix: destruction order (see too)
 
 ### UI Todos
 UI.1
