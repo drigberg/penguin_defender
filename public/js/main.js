@@ -171,10 +171,10 @@
       MAX_JUMPS: 3,
       SPRINT_MULTIPLIER: 1.75,
       GLIDE_IMPULSE: 2,
-      BOX_WIDTH: 2.0,
+      BOX_WIDTH: 1.5,
       BOX_HEIGHT: 2.0,
-      STOMP_BOX_WIDTH: 3.0,
-      STOMP_BOX_HEIGHT: 1.0,
+      STOMP_BOX_WIDTH: 8.0,
+      STOMP_BOX_HEIGHT: 0.5,
       START_X: 0.0,
       START_Y: 5.0,
     }),
@@ -202,19 +202,20 @@
       JUMP: 20,
       MAX_JUMPS: 1,
       POINTS: 10,
-      BOX_WIDTH: 1,
-      BOX_HEIGHT: 0.6,
+      BOX_WIDTH: 2,
+      BOX_HEIGHT: 1,
       ANIMATION_SPEED_STANDARD: 0.15,
     }),
     GULL: Object.freeze({
       SPEED: 3.0,
       HEALTH: 1,
-      DAMAGE: 2,
+      DAMAGE: 1.5,
       SPAWN_X: 50,
       SPAWN_Y: 20,
-      FLAP_POWER: 5,
-      FLAP_INTERVAL: 45,
-      IMPULSE: 1,
+      FLAP_POWER: 2,
+      FLAP_INTERVAL: 8,
+      SWOOP_DURATION: 75,
+      IMPULSE: 2.5,
       PROBABILITY: 0.01,
       POINTS: 15,
       TEXTURE: PIXI.Texture.fromImage('assets/penguin.png'),
@@ -222,7 +223,7 @@
       BOX_HEIGHT: 2.0,
     }),
     GLOBAL: Object.freeze({
-      TIME_STEP: 1 / 20,
+      TIME_STEP: 1 / 30,
       INVINCIBILITY_INTERVAL: 30,
       SHAKE_THRESHOLD: 20,
       GRAVITY: -60,
@@ -314,9 +315,7 @@
         return
       }
 
-      if (this.winterComplete()) {
-        this.onWinterComplete()
-      }
+      this.enemyTypeDestroyed = true
     }
 
     destroyEntity(entity) {
@@ -350,6 +349,25 @@
           if (ENEMY_TYPES.includes(entity.type)) {
             this.onEnemyDestroyed(entity.type)
           }
+      }
+    }
+
+    deferDestroyFixture(entity, key) {
+      this.deferDestroy.fixtures.push({ entity, key })
+    }
+
+    destroyDeferred() {
+      this.deferDestroy.fixtures.forEach(({ entity, key }) => {
+        if (entity[key]) {
+          entity.body.destroyFixture(entity[key])
+          entity[key] = null
+        }
+      })
+    }
+
+    resetDeferredForDestroy() {
+      this.deferDestroy = {
+        fixtures: []
       }
     }
 
@@ -417,11 +435,8 @@
         })
       }
 
-      if (!this.active) {
-        this.gameOver()
-        return
-      }
-
+      this.resetDeferredForDestroy()
+      this.enemyTypeDestroyed = false
       this.world.step(SETTINGS.GLOBAL.TIME_STEP);
       this.textDisplays.forEach(display => display.hide())
 
@@ -429,6 +444,7 @@
       this.evaluateActiveKeys()
       this.spawnEnemies()
       this.moveObjects()
+      this.destroyDeferred()
 
       if (this.hero.invincibilityTime) {
         if (this.hero.invincibilityTime > SETTINGS.GLOBAL.SHAKE_THRESHOLD) {
@@ -442,6 +458,15 @@
         this.hero.fishThrowTime -= 1
       } else {
         this.hero.fishThrowTime = 0
+      }
+
+      if (!this.active) {
+        this.gameOver()
+        return
+      }
+
+      if (this.enemyTypeDestroyed && this.winterComplete()) {
+        this.onWinterComplete()
       }
 
       this.renderObjects()
@@ -497,7 +522,7 @@
 
     onKeyUp(key) {
       this.keys.down[key] = false
-      if (!this.keys.down.RIGHT && !this.keys.down.LEFT) {
+      if (!this.keys.down.RIGHT && !this.keys.down.LEFT && this.hero.state.action !== SETTINGS.HERO.MOVEMENT_STATES.ATTACKING) {
         this.hero.state.action = SETTINGS.HERO.MOVEMENT_STATES.NEUTRAL
       }
     }
@@ -560,9 +585,11 @@
         [that.hashTypes(TYPES.GROUND, TYPES.MALE)]: function(bodies) {
           that.objects[bodies.find(item => item.type === TYPES.MALE).id].jumps = SETTINGS.MALE.MAX_JUMPS
         },
-        [that.hashTypes(TYPES.HERO, TYPES.SEAL)]: function(bodies, point) {
+        [that.hashTypes(TYPES.HERO, TYPES.SEAL)]: function(bodies, point, fixtures) {
+          const stomp = Boolean(fixtures.find(item => item.stomp === true))
           const enemy = that.objects[bodies.find(item => item.type === TYPES.SEAL).id];
-          that.handleEnemyHeroCollision(enemy, point)
+
+          that.handleEnemyHeroCollision(enemy, point, stomp)
         },
         [that.hashTypes(TYPES.GULL, TYPES.HERO)]: function(bodies, point) {
           const enemy = that.objects[bodies.find(item => item.type === TYPES.GULL).id];
@@ -598,7 +625,21 @@
           that.destroyEntity(seal.abducting)
         },
         [that.hashTypes(TYPES.GULL, TYPES.OFFSCREEN)]: function(bodies) {
-          // const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id];
+          const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id];
+          that.destroyEntity(gull)
+          that.destroyEntity(gull.abducting)
+        },
+        [that.hashTypes(TYPES.MALE, TYPES.GULL)]: function(bodies) {
+          const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id];
+          const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id];
+
+          if (gull.abducting) {
+            if (!male.abductor) {
+              male.jump()
+            }
+          } else {
+            gull.abduct(male)
+          }
         },
         [that.hashTypes(TYPES.MALE, TYPES.SEAL)]: function(bodies) {
           const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id];
@@ -610,13 +651,7 @@
               male.jump()
             }
           } else {
-            if (male.abductor) {
-              if (male.id !== seal.abducting.id) {
-                seal.jump()
-              }
-            } else {
-              seal.abduct(male)
-            }
+            seal.abduct(male)
           }
         },
       }
@@ -709,8 +744,8 @@
       })
     }
 
-    handleEnemyHeroCollision(enemy, point) {
-      if (point.normal.y < 0 && Math.abs(point.normal.y) - Math.abs(point.normal.x) > 0.5) {
+    handleEnemyHeroCollision(enemy, point, stomp) {
+      if (stomp || Math.abs(point.normal.y) === 1) {
         enemy.takeDamage(this.hero.damage)
         this.hero.jumps = SETTINGS.HERO.MAX_JUMPS
       } else {
@@ -724,19 +759,27 @@
     }
 
     evaluateCollisions() {
-      this.collisions.forEach((point) => {
-        const bodies = [
-          point.fixtureA.getBody(),
-          point.fixtureB.getBody(),
+      for (let i = 0; i < this.collisions.length; i++) {
+        const point = this.collisions[i]
+
+        const fixtures = [
+          point.fixtureA,
+          point.fixtureB,
         ]
+
+        const bodies = fixtures.map(fixture => fixture.getBody())
+
+        if (!bodies[0] || !bodies[1]) {
+          continue
+        }
 
         const key = this.hashTypes(...bodies.map(item => item.type))
 
         const handler = this.collisionHandlers[key]
         if (handler) {
-          handler(bodies, point)
+          handler(bodies, point, fixtures)
         }
-      })
+      }
 
       this.resetCollisions()
     }
@@ -1348,13 +1391,33 @@
         parent,
       })
 
+      this.direction = direction
       this.points = SETTINGS.GULL.POINTS
       this.velocity = SETTINGS.GULL.SPEED
+      this.abducting = false
+
       if (direction === LEFT) {
         this.velocity *= -1
       }
 
-      const x = direction === LEFT
+      this.setupBody()
+      this.setupSprite()
+
+      this.game.assignType(this, TYPES.GULL)
+
+      this.body.id = this.id
+      this.untilFlap = SETTINGS.GULL.FLAP_INTERVAL
+    }
+
+    setupSprite() {
+      this.sprite = new PIXI.Sprite(SETTINGS.GULL.TEXTURE)
+      this.sprite.scale.set(0.9)
+      this.sprite.anchor.set(0.5);
+      this.game.container.addChild(this.sprite)
+    }
+
+    setupBody() {
+      const x = this.direction === LEFT
         ? SETTINGS.GULL.SPAWN_X
         : SETTINGS.GULL.SPAWN_X * -1
 
@@ -1375,20 +1438,28 @@
       this.body.render = {
         stroke: BLUE
       }
-
-      this.game.assignType(this, TYPES.GULL)
-
-      this.body.id = this.id
-      this.untilFlap = SETTINGS.GULL.FLAP_INTERVAL
-      this.sprite = new PIXI.Sprite(SETTINGS.GULL.TEXTURE)
-      this.sprite.scale.set(0.9)
-      this.sprite.anchor.set(0.5);
-      this.game.container.addChild(this.sprite)
     }
 
+    abduct(male) {
+      this.abducting = male
+      male.onAbduction()
+
+      this.game.world.createJoint(planck.RevoluteJoint(
+        {
+          collideConnected: false
+        },
+        this.body,
+        male.body,
+        Vec2(0, 0)
+      ));
+
+      const f = this.body.getWorldVector(Vec2(0.0, 300))
+      const p = this.body.getWorldPoint(Vec2(0.0, 2.0))
+      this.body.applyLinearImpulse(f, p, true)
+    }
 
     destroySprites() {
-      this.parent.container.removeChild(this.sprite)
+      this.game.container.removeChild(this.sprite)
     }
 
     move() {
@@ -1444,12 +1515,13 @@
 
       this.game.assignType(this, TYPES.FISH)
 
-      this.body.createFixture(planck.Box(SETTINGS.FISH.BOX_WIDTH, SETTINGS.FISH.BOX_HEIGHT), {
+      const boxOpts = {
         filterCategoryBits: CATEGORIES.HERO,
         filterMaskBits: MASKS.HERO,
         filterGroupIndex: GROUPS.HERO,
-      })
+      }
 
+      this.body.createFixture(planck.Box(SETTINGS.FISH.BOX_WIDTH, SETTINGS.FISH.BOX_HEIGHT), boxOpts)
       this.id = this.game.createId()
       this.game.objects[this.id] = this
       this.body.id = this.id
@@ -1532,6 +1604,11 @@
       this.fishThrowTime = 0
       this.damage = SETTINGS.HERO.DAMAGE
       this.sprinting = false
+      this.bodyOpts = {
+        filterCategoryBits: CATEGORIES.HERO,
+        filterMaskBits: MASKS.HERO,
+        filterGroupIndex: GROUPS.HERO,
+      }
 
       this.state = {
         airborne: true,
@@ -1550,11 +1627,7 @@
 
       this.game.assignType(this, TYPES.HERO)
 
-      this.body.createFixture(planck.Box(SETTINGS.HERO.BOX_WIDTH, SETTINGS.HERO.BOX_HEIGHT), {
-        filterCategoryBits: CATEGORIES.HERO,
-        filterMaskBits: MASKS.HERO,
-        filterGroupIndex: GROUPS.HERO,
-      })
+      this.body.createFixture(planck.Box(SETTINGS.HERO.BOX_WIDTH, SETTINGS.HERO.BOX_HEIGHT), this.bodyOpts)
 
       this.body.render = {
         stroke: GREEN
@@ -1657,7 +1730,22 @@
         -70)
       )
 
-      this.stompFixture = this.body.createFixture(planck.Box(SETTINGS.HERO.STOMP_BOX_WIDTH, SETTINGS.HERO.STOMP_BOX_HEIGHT), 1.0);
+      const top = SETTINGS.HERO.BOX_HEIGHT * -1
+      const left = SETTINGS.HERO.STOMP_BOX_WIDTH * -0.5
+      const right = SETTINGS.HERO.STOMP_BOX_WIDTH * 0.5
+      const height = SETTINGS.HERO.STOMP_BOX_HEIGHT
+
+      this.stompFixture = this.body.createFixture(
+        planck.Polygon([
+          Vec2(left, top),
+          Vec2(right, top),
+          Vec2(right, top - height),
+          Vec2(left, top - height),
+        ]),
+        this.bodyOpts
+      )
+
+      this.stompFixture.stomp = true
     }
 
     glide() {
@@ -1670,8 +1758,13 @@
     }
 
     land() {
-      if (this.body.getLinearVelocity().y > 0) {
+      const vel = this.body.getLinearVelocity()
+      if (vel.y > 0) {
         return
+      }
+
+      if (this.state.action === SETTINGS.HERO.MOVEMENT_STATES.ATTACKING) {
+        this.state.action = SETTINGS.HERO.MOVEMENT_STATES.NEUTRAL
       }
 
       this.state.airborne = false
@@ -1679,7 +1772,7 @@
       this.jumps = SETTINGS.HERO.MAX_JUMPS
 
       if (this.stompFixture) {
-        // this.body.destroyFixture(this.stompFixture)
+        this.game.deferDestroyFixture(this, 'stompFixture')
       }
     }
 
@@ -1688,7 +1781,9 @@
      */
     move(direction) {
       this.state.direction = direction
-      this.state.action = SETTINGS.HERO.MOVEMENT_STATES.RUNNING
+      if (this.state.action !== SETTINGS.HERO.MOVEMENT_STATES.ATTACKING) {
+        this.state.action = SETTINGS.HERO.MOVEMENT_STATES.RUNNING
+      }
 
       const sprintMultiplier = this.sprinting
         ? SETTINGS.HERO.SPRINT_MULTIPLIER

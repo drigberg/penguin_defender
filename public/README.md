@@ -90,23 +90,40 @@ GAMEPLAY.12
 - [x] bug fix: keep pairs of seals from flying
 
 GAMEPLAY.13
-- [ ] gulls can swoop
-- [ ] gulls can carry away males
-- [ ] seals get launched when stomped
-- [ ] gulls change color and fall when killed
+- [x] bug fix: destruction order (see too)
+- [x] bug fix: fish sometimes throw down or not at all
+- [x] bug fix: splash damage fixture destruction
+- [x] bug fix: slow-down with planck v0.2.2
+- [x] bug fix: stomp doesn't always appear to work
+- [x] bug fix: stomp "collides" above ground
+- [x] dive sprite
+- [ ] bug fix: stomp animation disappears
+- [ ] bug fix: stomp animation can render on ground
 
 GAMEPLAY.14
+- [ ] rename "stomp/attack" to "dive/diving"
+- [x] gulls can carry away males
+- [ ] gulls can swoop
+
+GAMEPLAY.15
 - [ ] clean up Game methods
 - [ ] clean up settings
-- [ ] Putin-on-a-Horse
-- [ ] post-wave movement
+- [ ] separate all pixi and planck methods
+- [ ] make testbed only differ by testbed and hidden pixi, not commented
+- [ ] refine movement
+
+GAMEPLAY.16
+- [ ] gulls change color and fall when killed
+- [ ] seals get launched offscreen when stomped
 - [ ] standardize colors (alert, points, success, etc)
+- [ ] post-wave movement
+
+GAMEPLAY.17
+- [ ] Putin-on-a-Horse
+- [ ] foxes
 
 GAMEPLAY.DIFFICULT
-- [ ] bug fix: splash damage fixture destruction
 - [ ] bug fix: bird-summoning bug on stomp attack
-- [ ] bug fix: fish sometimes throw down or not at all
-- [ ] bug fix: destruction order (see too)
 
 ### UI Todos
 UI.1
