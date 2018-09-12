@@ -171,10 +171,10 @@
       MAX_JUMPS: 3,
       SPRINT_MULTIPLIER: 1.75,
       GLIDE_IMPULSE: 2,
-      BOX_WIDTH: 2.0,
+      BOX_WIDTH: 1.5,
       BOX_HEIGHT: 2.0,
-      STOMP_BOX_WIDTH: 20.0,
-      STOMP_BOX_HEIGHT: 3.0,
+      STOMP_BOX_WIDTH: 8.0,
+      STOMP_BOX_HEIGHT: 0.5,
       START_X: 0.0,
       START_Y: 5.0,
     }),
@@ -202,19 +202,20 @@
       JUMP: 20,
       MAX_JUMPS: 1,
       POINTS: 10,
-      BOX_WIDTH: 1,
-      BOX_HEIGHT: 0.6,
+      BOX_WIDTH: 2,
+      BOX_HEIGHT: 1,
       ANIMATION_SPEED_STANDARD: 0.15,
     }),
     GULL: Object.freeze({
       SPEED: 3.0,
       HEALTH: 1,
-      DAMAGE: 2,
+      DAMAGE: 1.5,
       SPAWN_X: 50,
       SPAWN_Y: 20,
-      FLAP_POWER: 5,
-      FLAP_INTERVAL: 45,
-      IMPULSE: 1,
+      FLAP_POWER: 2,
+      FLAP_INTERVAL: 8,
+      SWOOP_DURATION: 75,
+      IMPULSE: 2.5,
       PROBABILITY: 0.01,
       POINTS: 15,
       TEXTURE: PIXI.Texture.fromImage('assets/penguin.png'),
@@ -222,7 +223,7 @@
       BOX_HEIGHT: 2.0,
     }),
     GLOBAL: Object.freeze({
-      TIME_STEP: 1 / 20,
+      TIME_STEP: 1 / 30,
       INVINCIBILITY_INTERVAL: 30,
       SHAKE_THRESHOLD: 20,
       GRAVITY: -60,
@@ -521,7 +522,7 @@
 
     onKeyUp(key) {
       this.keys.down[key] = false
-      if (!this.keys.down.RIGHT && !this.keys.down.LEFT) {
+      if (!this.keys.down.RIGHT && !this.keys.down.LEFT && this.hero.state.action !== SETTINGS.HERO.MOVEMENT_STATES.ATTACKING) {
         this.hero.state.action = SETTINGS.HERO.MOVEMENT_STATES.NEUTRAL
       }
     }
@@ -744,7 +745,7 @@
     }
 
     handleEnemyHeroCollision(enemy, point, stomp) {
-      if (stomp || point.normal < 0) {
+      if (stomp || Math.abs(point.normal.y) === 1) {
         enemy.takeDamage(this.hero.damage)
         this.hero.jumps = SETTINGS.HERO.MAX_JUMPS
       } else {
@@ -1729,7 +1730,21 @@
         -70)
       )
 
-      this.stompFixture = this.body.createFixture(planck.Box(SETTINGS.HERO.STOMP_BOX_WIDTH, SETTINGS.HERO.STOMP_BOX_HEIGHT), this.bodyOpts);
+      const top = SETTINGS.HERO.BOX_HEIGHT * -1
+      const left = SETTINGS.HERO.STOMP_BOX_WIDTH * -0.5
+      const right = SETTINGS.HERO.STOMP_BOX_WIDTH * 0.5
+      const height = SETTINGS.HERO.STOMP_BOX_HEIGHT
+
+      this.stompFixture = this.body.createFixture(
+        planck.Polygon([
+          Vec2(left, top),
+          Vec2(right, top),
+          Vec2(right, top - height),
+          Vec2(left, top - height),
+        ]),
+        this.bodyOpts
+      )
+
       this.stompFixture.stomp = true
     }
 
@@ -1743,8 +1758,13 @@
     }
 
     land() {
-      if (this.body.getLinearVelocity().y > 0) {
+      const vel = this.body.getLinearVelocity()
+      if (vel.y > 0) {
         return
+      }
+
+      if (this.state.action === SETTINGS.HERO.MOVEMENT_STATES.ATTACKING) {
+        this.state.action = SETTINGS.HERO.MOVEMENT_STATES.NEUTRAL
       }
 
       this.state.airborne = false
@@ -1761,7 +1781,9 @@
      */
     move(direction) {
       this.state.direction = direction
-      this.state.action = SETTINGS.HERO.MOVEMENT_STATES.RUNNING
+      if (this.state.action !== SETTINGS.HERO.MOVEMENT_STATES.ATTACKING) {
+        this.state.action = SETTINGS.HERO.MOVEMENT_STATES.RUNNING
+      }
 
       const sprintMultiplier = this.sprinting
         ? SETTINGS.HERO.SPRINT_MULTIPLIER

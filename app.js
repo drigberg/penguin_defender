@@ -10,6 +10,10 @@ app.get("/", function (req, res){
     res.render("index");
 });
 
+app.get("/testbed", function (req, res){
+    res.render("testbed");
+});
+
 app.listen(PORT, function(err){
     console.log(`Server is running on port ${PORT}`);
 });
