@@ -121,6 +121,7 @@ GAMEPLAY.16
 - [ ] post-wave movement
 
 GAMEPLAY.17
+- [ ] high-score management
 - [ ] Putin-on-a-Horse
 - [ ] foxes
 
@@ -171,6 +172,7 @@ UI.6
 UI.7
 - [ ] snowstorm in background
 - [ ] snowstorm stops with winter's end
+- [ ] high score display with input
 
 UI.8
 - [ ] responsive screen

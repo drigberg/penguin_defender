@@ -6,13 +6,17 @@ app.use(express.static("public"));
 app.set("views", "./views");
 app.set("view engine", "pug");
 
-app.get("/", function (req, res){
+app.get("/", function (req, res) {
     res.render("index");
 });
 
-app.get("/testbed", function (req, res){
+app.get("/testbed", function (req, res) {
     res.render("testbed");
 });
+
+app.get("/playground", function (req, res) {
+    res.render("playground")
+})
 
 app.listen(PORT, function(err){
     console.log(`Server is running on port ${PORT}`);
