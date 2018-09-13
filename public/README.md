@@ -103,6 +103,8 @@ GAMEPLAY.13
 GAMEPLAY.14
 - [x] gulls can carry away males
 - [x] refine gull flying
+- [x] bug fix: bird-summoning bug on stomp attack
+- [x] bug fix: double-stomp
 
 GAMEPLAY.15
 - [ ] rename "stomp/attack" to "dive/diving"
@@ -121,9 +123,6 @@ GAMEPLAY.16
 GAMEPLAY.17
 - [ ] Putin-on-a-Horse
 - [ ] foxes
-
-GAMEPLAY.DIFFICULT
-- [ ] bug fix: bird-summoning bug on stomp attack
 
 ### UI Todos
 UI.1
@@ -170,9 +169,6 @@ UI.6
 - [x] animation: basic gull
 
 UI.7
-- [ ] animation: seal attack
-- [ ] animation: seal death
-- [ ] animation: hero death
 - [ ] snowstorm in background
 - [ ] snowstorm stops with winter's end
 
@@ -188,6 +184,13 @@ UI.10
 - [ ] opening scene
 - [ ] post-wave animation (female textures, cheering)
 
+UI.MAYBE
+- [ ] animation: seal attack
+- [ ] animation: gull attack
+- [ ] animation: gull death
+- [ ] animation: seal death
+- [ ] animation: hero death
+- [ ] animation: fish wriggle
 
 ### Audio Todos
 AUDIO.1

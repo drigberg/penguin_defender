@@ -219,6 +219,7 @@
         FLAP_POWER: 2.1,
         FLAP_INTERVAL: 15,
         ABDUCTING_FLAP_POWER: 30,
+        UNBURDENED_FLYAWAY_FLAP_POWER: 6,
         SWOOP_DURATION: 75,
         IMPULSE: 0.85,
         PROBABILITY: 0.01,
@@ -588,6 +589,10 @@
           },
           [that.hashTypes(TYPES.FISH, TYPES.GROUND)]: function(bodies) {
             that.destroyEntity(that.objects[bodies.find(item => item.type === TYPES.FISH).id])
+          },
+          [that.hashTypes(TYPES.GULL, TYPES.GROUND)]: function(bodies) {
+            const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id];
+            gull.flyAway()
           },
           [that.hashTypes(TYPES.GROUND, TYPES.SEAL)]: function(bodies) {
             that.objects[bodies.find(item => item.type === TYPES.SEAL).id].jumps = SETTINGS.SEAL.MAX_JUMPS
@@ -1455,11 +1460,17 @@
         }
       }
 
+      flyAway() {
+        this.flapPower = this.abducting
+          ? SETTINGS.GULL.ABDUCTING_FLAP_POWER
+          : SETTINGS.GULL.UNBURDENED_FLYAWAY_FLAP_POWER
+      }
+
       abduct(male) {
         this.abducting = male
         male.onAbduction()
 
-        this.flapPower = SETTINGS.GULL.ABDUCTING_FLAP_POWER
+        this.flyAway()
 
         this.game.world.createJoint(planck.RevoluteJoint(
           {
@@ -1736,6 +1747,10 @@
       }
 
       stomp() {
+        if (this.stompFixture) {
+          return
+        }
+
         this.state.action = SETTINGS.HERO.MOVEMENT_STATES.ATTACKING
 
         this.body.setLinearVelocity(Vec2(

@@ -188,7 +188,7 @@
       THROW_X: 20,
       THROW_Y: 50,
       THROW_INTERVAL: 25,
-      TEXTURE: PIXI.Texture.fromImage('assets/fish_neon.png'),
+      TEXTURE: PIXI.Texture.fromImage('assets/fish.png'),
       BOX_WIDTH: 1,
       BOX_HEIGHT: 0.6,
     }),
@@ -215,6 +215,7 @@
       FLAP_POWER: 2.1,
       FLAP_INTERVAL: 15,
       ABDUCTING_FLAP_POWER: 30,
+      UNBURDENED_FLYAWAY_FLAP_POWER: 6,
       SWOOP_DURATION: 75,
       IMPULSE: 1.5,
       PROBABILITY: 0.01,
@@ -232,7 +233,7 @@
       BORDER_X_LEFT: -40,
       OFFSCREEN_X_RIGHT: 55,
       OFFSCREEN_X_LEFT: -55,
-      BACKGROUND_TEXTURE: PIXI.Texture.fromImage('assets/mountains_neon.png'),
+      BACKGROUND_TEXTURE: PIXI.Texture.fromImage('assets/mountains.png'),
       WINTER_COUNTDOWN_TIME: 50,
       WINTER_INTERIM_TIME: 1500,
     }),
@@ -579,6 +580,10 @@
         },
         [that.hashTypes(TYPES.FISH, TYPES.GROUND)]: function(bodies) {
           that.destroyEntity(that.objects[bodies.find(item => item.type === TYPES.FISH).id])
+        },
+        [that.hashTypes(TYPES.GULL, TYPES.GROUND)]: function(bodies) {
+          const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id];
+          gull.flyAway()
         },
         [that.hashTypes(TYPES.GROUND, TYPES.SEAL)]: function(bodies) {
           that.objects[bodies.find(item => item.type === TYPES.SEAL).id].jumps = SETTINGS.SEAL.MAX_JUMPS
@@ -1423,7 +1428,8 @@
       this.sprite = new PIXI.extras.AnimatedSprite(textures);
 
       this.sprite.anchor.set(0.5)
-      this.sprite.play();
+      this.sprite.gotoAndPlay(Math.floor(Math.random() * 2));
+
       this.sprite.scale.x = this.direction
       this.sprite.animationSpeed = SETTINGS.GULL.ANIMATION_SPEED_FLYING
 
@@ -1454,15 +1460,17 @@
       }
     }
 
-    swoop() {
-
+    flyAway() {
+      this.flapPower = this.abducting
+        ? SETTINGS.GULL.ABDUCTING_FLAP_POWER
+        : SETTINGS.GULL.UNBURDENED_FLYAWAY_FLAP_POWER
     }
 
     abduct(male) {
       this.abducting = male
       male.onAbduction()
 
-      this.flapPower = SETTINGS.GULL.ABDUCTING_FLAP_POWER
+      this.flyAway()
 
       this.game.world.createJoint(planck.RevoluteJoint(
         {
@@ -1739,6 +1747,10 @@
     }
 
     stomp() {
+      if (this.stompFixture) {
+        return
+      }
+
       this.state.action = SETTINGS.HERO.MOVEMENT_STATES.ATTACKING
 
       this.body.setLinearVelocity(Vec2(
