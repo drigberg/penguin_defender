@@ -1,0 +1,55 @@
+{
+  "frames": {
+    "gull:flying:1.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 21
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 21
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 21
+      }
+    },
+    "gull:flying:2.png": {
+      "frame": {
+        "x": 48,
+        "y": 0,
+        "w": 48,
+        "h": 21
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 48,
+        "y": 0,
+        "w": 48,
+        "h": 21
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 21
+      }
+    }
+  },
+  "meta": {
+    "app": "http://www.penguindefender.com",
+    "version": "1.0",
+    "image": "/assets/gull/spritesheets/flying.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 96,
+      "h": 21
+    },
+    "scale": "1"
+  }
+}
