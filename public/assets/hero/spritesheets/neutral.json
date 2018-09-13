@@ -44,7 +44,7 @@
   "meta": {
     "app": "http://www.penguindefender.com",
     "version": "1.0",
-    "image": "/assets/hero/spritesheets/neutral_neon.png",
+    "image": "/assets/hero/spritesheets/neutral.png",
     "format": "RGBA8888",
     "size": {
       "w": 96,
