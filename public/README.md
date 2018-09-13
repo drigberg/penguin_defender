@@ -97,15 +97,17 @@ GAMEPLAY.13
 - [x] bug fix: stomp doesn't always appear to work
 - [x] bug fix: stomp "collides" above ground
 - [x] dive sprite
-- [ ] bug fix: stomp animation disappears
-- [ ] bug fix: stomp animation can render on ground
+- [x] bug fix: stomp animation disappears
+- [x] bug fix: stomp animation can render on ground
 
 GAMEPLAY.14
-- [ ] rename "stomp/attack" to "dive/diving"
 - [x] gulls can carry away males
-- [ ] gulls can swoop
+- [x] refine gull flying
+- [x] bug fix: bird-summoning bug on stomp attack
+- [x] bug fix: double-stomp
 
 GAMEPLAY.15
+- [ ] rename "stomp/attack" to "dive/diving"
 - [ ] clean up Game methods
 - [ ] clean up settings
 - [ ] separate all pixi and planck methods
@@ -121,9 +123,6 @@ GAMEPLAY.16
 GAMEPLAY.17
 - [ ] Putin-on-a-Horse
 - [ ] foxes
-
-GAMEPLAY.DIFFICULT
-- [ ] bug fix: bird-summoning bug on stomp attack
 
 ### UI Todos
 UI.1
@@ -166,14 +165,10 @@ UI.5
 - [x] prevent trail from showing at game start
 
 UI.6
-- [ ] hero splash damage animation
-- [ ] animation: basic gull
-- [ ] animation: fish wiggle
+- [x] hero splash damage animation
+- [x] animation: basic gull
 
 UI.7
-- [ ] animation: seal attack
-- [ ] animation: seal death
-- [ ] animation: hero death
 - [ ] snowstorm in background
 - [ ] snowstorm stops with winter's end
 
@@ -189,6 +184,13 @@ UI.10
 - [ ] opening scene
 - [ ] post-wave animation (female textures, cheering)
 
+UI.MAYBE
+- [ ] animation: seal attack
+- [ ] animation: gull attack
+- [ ] animation: gull death
+- [ ] animation: seal death
+- [ ] animation: hero death
+- [ ] animation: fish wriggle
 
 ### Audio Todos
 AUDIO.1

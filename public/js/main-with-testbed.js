@@ -216,15 +216,17 @@
         DAMAGE: 1.5,
         SPAWN_X: 50,
         SPAWN_Y: 20,
-        FLAP_POWER: 2,
-        FLAP_INTERVAL: 8,
+        FLAP_POWER: 2.1,
+        FLAP_INTERVAL: 15,
+        ABDUCTING_FLAP_POWER: 30,
+        UNBURDENED_FLYAWAY_FLAP_POWER: 6,
         SWOOP_DURATION: 75,
-        IMPULSE: 2.5,
+        IMPULSE: 0.85,
         PROBABILITY: 0.01,
         POINTS: 15,
-        TEXTURE: PIXI.Texture.fromImage('assets/penguin.png'),
-        BOX_WIDTH: 2.0,
-        BOX_HEIGHT: 2.0,
+        BOX_WIDTH: 1.5,
+        BOX_HEIGHT: 0.6,
+        ANIMATION_SPEED_FLYING: 0.1,
       }),
       GLOBAL: Object.freeze({
         TIME_STEP: 1 / 40,
@@ -258,7 +260,7 @@
       }
 
       reset() {
-        this.winter = 0
+        this.winter = 10
         this.paused = true
         this.idPointer = 1
         this.objects = {}
@@ -587,6 +589,10 @@
           },
           [that.hashTypes(TYPES.FISH, TYPES.GROUND)]: function(bodies) {
             that.destroyEntity(that.objects[bodies.find(item => item.type === TYPES.FISH).id])
+          },
+          [that.hashTypes(TYPES.GULL, TYPES.GROUND)]: function(bodies) {
+            const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id];
+            gull.flyAway()
           },
           [that.hashTypes(TYPES.GROUND, TYPES.SEAL)]: function(bodies) {
             that.objects[bodies.find(item => item.type === TYPES.SEAL).id].jumps = SETTINGS.SEAL.MAX_JUMPS
@@ -1407,6 +1413,9 @@
         this.velocity = SETTINGS.GULL.SPEED
         this.abducting = false
 
+        this.flapPower = SETTINGS.GULL.FLAP_POWER
+        this.flapInterval = SETTINGS.GULL.FLAP_INTERVAL
+
         if (direction === LEFT) {
           this.velocity *= -1
         }
@@ -1417,7 +1426,7 @@
         this.game.assignType(this, TYPES.GULL)
 
         this.body.id = this.id
-        this.untilFlap = SETTINGS.GULL.FLAP_INTERVAL
+        this.untilFlap = this.flapInterval
       }
 
       setupSprite() {
@@ -1451,9 +1460,17 @@
         }
       }
 
+      flyAway() {
+        this.flapPower = this.abducting
+          ? SETTINGS.GULL.ABDUCTING_FLAP_POWER
+          : SETTINGS.GULL.UNBURDENED_FLYAWAY_FLAP_POWER
+      }
+
       abduct(male) {
         this.abducting = male
         male.onAbduction()
+
+        this.flyAway()
 
         this.game.world.createJoint(planck.RevoluteJoint(
           {
@@ -1463,10 +1480,6 @@
           male.body,
           Vec2(0, 0)
         ));
-
-        const f = this.body.getWorldVector(Vec2(0.0, 300))
-        const p = this.body.getWorldPoint(Vec2(0.0, 2.0))
-        this.body.applyLinearImpulse(f, p, true)
       }
 
       destroySprites() {
@@ -1478,8 +1491,8 @@
         let yVelocity
 
         if (this.untilFlap <= 0) {
-          yVelocity = SETTINGS.GULL.FLAP_POWER + Math.random() * 5 - 2.5
-          this.untilFlap = SETTINGS.GULL.FLAP_INTERVAL + Math.random() * 5 - 2.5
+          yVelocity = this.flapPower + Math.random() * 1 - 0.5
+          this.untilFlap = this.flapInterval
         } else {
           yVelocity = this.body.getLinearVelocity().y
         }
@@ -1734,6 +1747,10 @@
       }
 
       stomp() {
+        if (this.stompFixture) {
+          return
+        }
+
         this.state.action = SETTINGS.HERO.MOVEMENT_STATES.ATTACKING
 
         this.body.setLinearVelocity(Vec2(
