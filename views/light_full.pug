@@ -1,0 +1,41 @@
+doctype html
+html(lang="en")
+  body
+    table
+      tr
+        td
+          h2 Background
+          canvas(width="400" height="300" id="bg")
+        td
+      tr
+        td
+          h2 White objects
+          canvas(width="400" height="300" id="whiteobj")
+        td
+      tr
+        td
+          h2 Light shadow casting
+          canvas(width="400" height="300" id="lightcast")
+        td
+      tr
+        td
+          h2 Light rendering
+          canvas(width="400" height="300" id="lightonly")
+        td
+      tr
+        td
+          h2 Light rendering with shadows
+          canvas(width="400" height="300" id="light")
+        td
+      tr
+        td
+          h2 Dark mask
+          canvas(width="400" height="300" id="mask")
+        td
+      tr
+        td
+          h2 Result
+          canvas(width="400" height="300" id="all")
+        td
+    script(type="text/javascript" src="/js/illuminated.min.js")
+    script(src="/js/demos/illuminate/full.js")

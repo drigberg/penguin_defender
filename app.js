@@ -14,8 +14,12 @@ app.get("/testbed", function (req, res) {
     res.render("testbed");
 });
 
-app.get("/playground", function (req, res) {
-    res.render("playground")
+app.get("/light", function (req, res) {
+    res.render("light_simple")
+})
+
+app.get("/light/full", function (req, res) {
+    res.render("light_full")
 })
 
 app.listen(PORT, function(err){
