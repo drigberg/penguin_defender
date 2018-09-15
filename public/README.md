@@ -115,14 +115,16 @@ GAMEPLAY.15
 - [ ] refine movement
 
 GAMEPLAY.16
-- [ ] gulls change color and fall when killed
-- [ ] seals get launched offscreen when stomped
+- [ ] gulls fall when killed, are destroyed offscreen
+- [ ] seals fall when killed, are destroyed offscreen
+- [ ] fish fall after collisions, are destroyed offscreen
 - [ ] standardize colors (alert, points, success, etc)
 - [ ] post-wave movement
 
 GAMEPLAY.17
 - [ ] Putin-on-a-Horse
-- [ ] foxes
+- [ ] wolves
+- [ ] caribou
 
 ### UI Todos
 UI.1
@@ -168,31 +170,29 @@ UI.6
 - [x] hero splash damage animation
 - [x] animation: basic gull
 
+
 UI.7
+- [x] basic lighting
+- [x] shadows
+- [x] sprite normals: seal
+- [x] sprite normals: male
+- [x] sprite normals: gull
+- [ ] sprite normals: fish
+- [ ] sprite normals: hero
+
+UI.8
 - [ ] get rid of Menu, incorporate into Game
+- [ ] extra sun rises between winters, sets during countdown
 - [ ] snowstorm in background
 - [ ] snowstorm stops with winter's end
 
-UI.8
+UI.9
 - [ ] responsive screen
 - [ ] switch to better animation library (smoothie?)
-
-UI.9
-- [x] basic lighting
-- [x] spotlight on hero
-- [ ] sun rises between winters, sets during countdown
 
 UI.10
 - [ ] opening scene
 - [ ] post-wave animation (female textures, cheering)
-
-UI.MAYBE
-- [ ] animation: seal attack
-- [ ] animation: gull attack
-- [ ] animation: gull death
-- [ ] animation: seal death
-- [ ] animation: hero death
-- [ ] animation: fish wriggle
 
 ### Audio Todos
 AUDIO.1

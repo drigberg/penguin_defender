@@ -84,7 +84,7 @@
   "meta": {
     "app": "http://www.penguindefender.com",
     "version": "1.0",
-    "image": "/assets/seal/spritesheets/running.normal.masked.colorized.png",
+    "image": "/assets/seal/spritesheets/running.normal.masked.png",
     "format": "RGBA8888",
     "size": {
       "w": 128,
