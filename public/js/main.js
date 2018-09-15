@@ -3,62 +3,8 @@
  */
 (function main() {
   /**
-   * Cubic interpolation based on https://github.com/osuushi/Smooth.js
-   * @param	k
-   * @return
+   * Constants
    */
-  function clipInput(k, arr) {
-    if (k <= 0) {
-      return arr[0];
-    }
-    if (k >= arr.length - 1) {
-      return arr[arr.length - 1];
-    }
-
-    return arr[k];
-  }
-
-  function getTangent(k, factor, array) {
-    return factor * (clipInput(k + 1, array) - clipInput(k - 1, array)) / 2;
-  }
-
-  function cubicInterpolation(array, t, tangentFactor) {
-    if (tangentFactor == null) tangentFactor = 1;
-
-    const k = Math.floor(t);
-    const m = [getTangent(k, tangentFactor, array), getTangent(k + 1, tangentFactor, array)];
-    const p = [clipInput(k, array), clipInput(k + 1, array)];
-    t -= k;
-    const t2 = t * t;
-    const t3 = t * t2;
-    return (2 * t3 - 3 * t2 + 1) * p[0] + (t3 - 2 * t2 + t) * m[0] + ( -2 * t3 + 3 * t2) * p[1] + (t3 - t2) * m[1];
-  }
-
-  const pscale = 13;
-
-  function getAnimatedSprite(nameTemplate, max) {
-    const textures = [];
-
-    for (let i = 1; i <= max; i++) {
-      textures.push(PIXI.Texture.fromFrame(nameTemplate.replace('{i}', i)));
-    }
-
-    return new PIXI.extras.AnimatedSprite(textures)
-  }
-
-  function mpx(m) {
-    return m * pscale + (window.innerWidth / 2.3);
-  }
-
-  function mpy(m) {
-    return window.innerHeight * 0.5 - (m * pscale);
-  }
-
-  const app = new PIXI.Application(window.innerWidth * 0.9, window.innerHeight * 0.9)
-
-  document.getElementById('content').appendChild(app.view);
-  app.view.style.position = 'absolute';
-  app.view.style.border = '1px solid #222222';
 
   const CATEGORIES = Object.freeze({
     FOE: 0x0001,
@@ -112,6 +58,9 @@
 
   const LEFT = -1
   const RIGHT = 1
+
+  const UP = -1
+  const DOWN = 1
 
   const TYPES = Object.freeze({
     GROUND: 'GROUND',
@@ -224,6 +173,10 @@
       BOX_HEIGHT: 0.6,
       ANIMATION_SPEED_FLYING: 0.1,
     }),
+    SUN: Object.freeze({
+      MIN_X: 100,
+      MAX_X: 400,
+    }),
     GLOBAL: Object.freeze({
       TIME_STEP: 1 / 30,
       INVINCIBILITY_INTERVAL: 30,
@@ -233,7 +186,8 @@
       BORDER_X_LEFT: -40,
       OFFSCREEN_X_RIGHT: 55,
       OFFSCREEN_X_LEFT: -55,
-      BACKGROUND_TEXTURE: PIXI.Texture.fromImage('assets/mountains.png'),
+      BACKGROUND_PATH: 'assets/mountains.png',
+      BACKGROUND_NORMAL_PATH: 'assets/mountains.normal.clouds.light.png',
       WINTER_COUNTDOWN_TIME: 50,
       WINTER_INTERIM_TIME: 1500,
     }),
@@ -241,6 +195,32 @@
       TEXTURE: PIXI.Texture.fromImage('assets/menu.png'),
     }),
   })
+
+  /**
+   * PIXI setup
+   */
+
+  const app = new PIXI.Application({
+    backgroundColor: 0x000000,
+    width: window.innerWidth * 0.9,
+    height: window.innerHeight * 0.9,
+  });
+
+  document.getElementById('content').appendChild(app.view);
+  app.view.style.position = 'absolute';
+  app.view.style.border = '1px solid #222222';
+
+  function resetStage() {
+    if (app.stage) {
+      app.stage.destroy(true)
+    }
+
+    app.stage = new PIXI.display.Stage()
+  }
+
+  /**
+   * Helper functions
+   */
 
   const Vec2 = planck.Vec2
 
@@ -250,6 +230,68 @@
       : 0
   }
 
+  /**
+   * Cubic interpolation based on https://github.com/osuushi/Smooth.js
+   * @param	k
+   * @return
+   */
+  function clipInput(k, arr) {
+    if (k <= 0) {
+      return arr[0];
+    }
+    if (k >= arr.length - 1) {
+      return arr[arr.length - 1];
+    }
+
+    return arr[k];
+  }
+
+  function getTangent(k, factor, array) {
+    return factor * (clipInput(k + 1, array) - clipInput(k - 1, array)) / 2;
+  }
+
+  function cubicInterpolation(array, t, tangentFactor) {
+    if (tangentFactor == null) tangentFactor = 1;
+
+    const k = Math.floor(t);
+    const m = [getTangent(k, tangentFactor, array), getTangent(k + 1, tangentFactor, array)];
+    const p = [clipInput(k, array), clipInput(k + 1, array)];
+    t -= k;
+    const t2 = t * t;
+    const t3 = t * t2;
+    return (2 * t3 - 3 * t2 + 1) * p[0] + (t3 - 2 * t2 + t) * m[0] + ( -2 * t3 + 3 * t2) * p[1] + (t3 - t2) * m[1];
+  }
+
+  const pscale = 13;
+
+  /**
+   * Build sprite from spritesheet data
+   */
+  function getAnimatedSprite(nameTemplate, max) {
+    const textures = [];
+
+    for (let i = 1; i <= max; i++) {
+      textures.push(PIXI.Texture.fromFrame(nameTemplate.replace('{i}', i)));
+    }
+
+    return new PIXI.extras.AnimatedSprite(textures)
+  }
+
+  /**
+   * Scaling for render
+   */
+
+  function mpx(m) {
+    return m * pscale + (window.innerWidth / 2.3);
+  }
+
+  function mpy(m) {
+    return window.innerHeight * 0.5 - (m * pscale);
+  }
+
+  /**
+   * Game
+   */
   class Game {
     constructor() {
       this.reset()
@@ -277,8 +319,48 @@
         app.stage.removeChild(this.container)
       }
 
+      resetStage()
+
+      const background = PIXI.Sprite.fromImage(SETTINGS.GLOBAL.BACKGROUND_PATH);
+      background.parentGroup = PIXI.lights.diffuseGroup;
+      const backgroundNormals = PIXI.Sprite.fromImage(SETTINGS.GLOBAL.BACKGROUND_NORMAL_PATH);
+      backgroundNormals.parentGroup = PIXI.lights.normalGroup;
+
+      background.width = app.screen.width;
+      background.height = app.screen.height;
+
+      background.zOrder = -3
+      backgroundNormals.zOrder = -3
+
+      backgroundNormals.width = app.screen.width;
+      backgroundNormals.height = app.screen.height;
+
+      this.directionalLight = new PIXI.lights.DirectionalLight(0xffffff, 0.9, new PIXI.Point(300, 300));
+
+      this.spotlight = new PIXI.lights.PointLight(0xff3333, 10)
+      this.spotlight.x = 200;
+      this.spotlight.y = 300;
+      this.spotlightDirection = {
+        x: LEFT,
+      }
+
+      // Create a background container
       this.container = new PIXI.Container();
-      app.stage.addChild(this.container);
+      this.container.addChild(
+          background,
+          backgroundNormals,
+          this.directionalLight,
+          this.spotlight,
+      );
+
+      app.stage.addChild(
+          // put all layers for deferred rendering of normals
+          new PIXI.display.Layer(PIXI.lights.diffuseGroup),
+          new PIXI.display.Layer(PIXI.lights.normalGroup),
+          new PIXI.display.Layer(PIXI.lights.lightGroup),
+          // Add the lights and images
+          this.container
+      );
     }
 
     startWinterCountdown() {
@@ -409,8 +491,13 @@
       }
     }
 
+    moveSun() {
+      this.spotlight.color = `0x${String(Math.floor(50 - this.spotlight.x * (50 / app.screen.width))).padStart(2, '0')}${String(Math.floor(this.spotlight.x * (100 / app.screen.width))).padStart(2, '0')}ff`
+      this.spotlight.x = this.hero.activeSprite.x - 100
+    }
+
     onStepPauseIndependent() {
-      // nothing yet
+      this.moveSun()
     }
 
     winterCountdown() {
@@ -693,10 +780,6 @@
           parent: this,
         })
       ]
-
-      this.background = new PIXI.Sprite(SETTINGS.GLOBAL.BACKGROUND_TEXTURE)
-      this.background.zOrder = -3
-      this.container.addChild(this.background)
 
       // must be AFTER background
       this.pointDisplay = new Text({
@@ -1283,6 +1366,9 @@
     render() {
       const pos = this.body.getPosition()
       this.sprite.position.set(mpx(pos.x), mpy(pos.y))
+      if (this.spriteNormals) {
+        this.spriteNormals.position.set(mpx(pos.x), mpy(pos.y))
+      }
     }
   }
 
@@ -1312,22 +1398,27 @@
 
     destroySprites() {
       this.game.container.removeChild(this.sprite)
+      this.game.container.removeChild(this.spriteNormals)
     }
 
     setupSprite() {
-      const textures = [];
-
-      for (let i = 1; i <= 4; i++) {
-        textures.push(PIXI.Texture.fromFrame(`seal:running:${i}.png`));
-      }
-
-      this.sprite = new PIXI.extras.AnimatedSprite(textures);
-
-      this.sprite.anchor.set(0.5)
-      this.sprite.gotoAndPlay(Math.floor(Math.random() * 4));
+      const animationStartIndex = Math.floor(Math.random() * 4)
+      this.sprite = getAnimatedSprite('seal:running:{i}.png', 4)
+      this.sprite.gotoAndPlay(animationStartIndex);
       this.sprite.animationSpeed = SETTINGS.SEAL.ANIMATION_SPEED_STANDARD
+      this.sprite.parentGroup = PIXI.lights.diffuseGroup;
+      this.sprite.anchor.set(0.5)
 
-      this.game.container.addChild(this.sprite)
+      this.spriteNormals = getAnimatedSprite('seal:running:normal:{i}.png', 4)
+      this.spriteNormals.gotoAndPlay(animationStartIndex);
+      this.spriteNormals.animationSpeed = SETTINGS.SEAL.ANIMATION_SPEED_STANDARD
+      this.spriteNormals.parentGroup = PIXI.lights.normalGroup;
+      this.spriteNormals.anchor.set(0.5)
+
+      this.game.container.addChild(
+        this.sprite,
+        this.spriteNormals,
+      )
     }
 
     setupBody() {
@@ -1358,6 +1449,8 @@
       this.sprite.scale.x = velocity < 0
         ? -1
         : 1
+
+      this.spriteNormals.scale.x = this.sprite.scale.x
 
       this.body.setLinearVelocity(Vec2(
         velocity,
@@ -1886,13 +1979,31 @@
   class Menu {
     constructor() {
       const that = this
+
+      resetStage()
+
+      const diffuse = PIXI.Sprite.fromImage('assets/BGTextureTest.jpg');
+      const normals = PIXI.Sprite.fromImage('assets/BGTextureNORM.jpg');
+      diffuse.parentGroup = PIXI.lights.diffuseGroup;
+      normals.parentGroup = PIXI.lights.normalGroup;
+
+      const light = new PIXI.lights.PointLight(0xffffff, 1);
+      light.x = app.screen.width / 2;
+      light.y = app.screen.height / 2;
+
       this.container = new PIXI.Container();
-      app.stage.addChild(this.container);
+      this.container.addChild(
+          normals,
+          diffuse,
+          light
+      );
 
-      this.background = new PIXI.Sprite(SETTINGS.MENU.TEXTURE)
-      this.background.zOrder = -3
-
-      this.container.addChild(this.background)
+      app.stage.addChild(
+          new PIXI.display.Layer(PIXI.lights.diffuseGroup),
+          new PIXI.display.Layer(PIXI.lights.normalGroup),
+          new PIXI.display.Layer(PIXI.lights.lightGroup),
+          this.container
+      );
 
       this.title = new Text({
         x: 0,
@@ -1937,6 +2048,7 @@
       .add('hero_attacking_spritesheet', '/assets/hero/spritesheets/attacking.json')
       .add('male_neutral_spritesheet', '/assets/male/spritesheets/neutral.json')
       .add('seal_running_spritesheet', '/assets/seal/spritesheets/running.json')
+      .add('seal_running_normal_spritesheet', '/assets/seal/spritesheets/running.normal.json')
       .add('gull_flying_spritesheet', '/assets/gull/spritesheets/flying.json')
       .load(() => {
         new Menu()

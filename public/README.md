@@ -169,6 +169,7 @@ UI.6
 - [x] animation: basic gull
 
 UI.7
+- [ ] get rid of Menu, incorporate into Game
 - [ ] snowstorm in background
 - [ ] snowstorm stops with winter's end
 
@@ -177,7 +178,8 @@ UI.8
 - [ ] switch to better animation library (smoothie?)
 
 UI.9
-- [ ] basic lighting
+- [x] basic lighting
+- [x] spotlight on hero
 - [ ] sun rises between winters, sets during countdown
 
 UI.10
