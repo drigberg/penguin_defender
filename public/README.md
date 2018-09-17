@@ -1,5 +1,4 @@
 ### QUEUE
-- LOGIC.16
 - AUDIO.1
 - AUDIO.2
 
@@ -119,12 +118,14 @@ LOGIC.15
 LOGIC.16
 - [x] get rid of Menu, incorporate into Game
 - [x] bug fix: fish appears at origin when created
+
+LOGIC.17
 - [ ] settings: shadows on/off
 - [ ] settings: music on/off
 - [ ] settings: sound effects on/off
 - [ ] settings: song selection
 
-LOGIC.17
+LOGIC.18
 - [ ] light class: implement fade method
 - [ ] lights fade to black upon death
 - [ ] lights fade in when created
@@ -133,19 +134,19 @@ LOGIC.17
 - [ ] bug fix: "from top" calculation
 - [ ] new enemy (bank: wolves, caribou, walrus, Putin-on-horse, lumberjack)
 
-LOGIC.18
+LOGIC.19
 - [ ] eslint
 - [ ] make testbed only differ by testbed and hidden pixi, not commented
 - [ ] refine movement
 
-LOGIC.19
+LOGIC.20
 - [ ] gulls fall when killed, are destroyed offscreen
 - [ ] seals fall when killed, are destroyed offscreen
 - [ ] fish fall after collisions, are destroyed offscreen
 - [ ] standardize colors (alert, points, success, etc)
 - [ ] post-wave movement
 
-LOGIC.20
+LOGIC.21
 - [ ] orca summons
 - [ ] hero.lives
 - [ ] males don't regenerate back to max each winter
