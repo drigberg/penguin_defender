@@ -70,24 +70,31 @@
     GULL: 'GULL',
   })
 
-  const ENEMY_TYPES = Object.freeze([
-    TYPES.SEAL,
-    TYPES.GULL
-  ]);
-
-  const SETTINGS = Object.freeze({
+  const CONSTANTS = Object.freeze({
+    ENEMY_TYPES: Object.freeze([
+      TYPES.SEAL,
+      TYPES.GULL
+    ]),
     MALE: Object.freeze({
+      SPAWN: Object.freeze({
+        X: 0,
+        Y: 0,
+        SPREAD: 10.0,
+      }),
+      JUMP: Object.freeze({
+        MAGNITUDE: 20,
+        MAX: 1,
+      }),
+      HITBOX: Object.freeze({
+        WIDTH: 0.5,
+        HEIGHT: 1,
+      }),
+      ANIMATION_SPEED: Object.freeze({
+        STANDARD: 0.03,
+        STRESSED: 0.1,
+      }),
       NUM: 10,
       SPEED: 2.0,
-      SPAWN_X: 0.0,
-      SPAWN_Y: 0.0,
-      SPAWN_SPREAD: 10.0,
-      MAX_JUMPS: 1,
-      JUMP: 20,
-      BOX_WIDTH: 0.5,
-      BOX_HEIGHT: 1,
-      ANIMATION_SPEED_STANDARD: 0.03,
-      ANIMATION_SPEED_STRESSED: 0.1,
     }),
     HERO: Object.freeze({
       TRAIL: Object.freeze({
@@ -110,19 +117,34 @@
         DIVING: 'DIVING',
         JUMPING: 'JUMPING',
       }),
-      JUMP: 35,
-      MAX_HEALTH: 5,
+      JUMP: Object.freeze({
+        MAGNITUDE: 35,
+        MAX: 3,
+      }),
+      HEALTH: Object.freeze({
+        MAX: 5,
+      }),
+      HITBOX: Object.freeze({
+        WIDTH: 1.5,
+        HEIGHT: 2.0,
+      }),
+      DIVE: Object.freeze({
+        HITBOX: Object.freeze({
+          WIDTH: 8.0,
+          HEIGHT: 0.5,
+        }),
+      }),
+      SPAWN: Object.freeze({
+        X: 0.0,
+        Y: 5.0,
+      }),
+      GLIDE: Object.freeze({
+        IMPULSE: 2,
+      }),
+      INVINCIBILITY_INTERVAL: 30,
       DAMAGE: 1,
       SPEED: 15,
-      MAX_JUMPS: 3,
-      SPRINT_MULTIPLIER: 1.75,
-      GLIDE_IMPULSE: 2,
-      BOX_WIDTH: 1.5,
-      BOX_HEIGHT: 2.0,
-      DIVE_BOX_WIDTH: 8.0,
-      DIVE_BOX_HEIGHT: 0.5,
-      START_X: 0.0,
-      START_Y: 5.0,
+      THROW_INTERVAL: 25,
     }),
     HEALTH_BAR: Object.freeze({
       X: -40,
@@ -130,66 +152,95 @@
       MAX_WIDTH: 10,
     }),
     FISH: Object.freeze({
+      HITBOX: Object.freeze({
+        WIDTH: 1,
+        HEIGHT: 0.6,
+      }),
+      LAUNCH_VELOCITY: Object.freeze({
+        X: 20,
+        Y: 50,
+      }),
       DAMAGE: 1,
-      THROW_X: 20,
-      THROW_Y: 50,
-      THROW_INTERVAL: 25,
-      BOX_WIDTH: 1,
-      BOX_HEIGHT: 0.6,
     }),
     SEAL: Object.freeze({
+      SPAWN: Object.freeze({
+        X: 50,
+        Y: 5,
+        PROBABILITY: 0.01,
+      }),
+      JUMP: Object.freeze({
+        MAGNITUDE: 20,
+        MAX: 1,
+      }),
+      HITBOX: Object.freeze({
+        WIDTH: 2,
+        HEIGHT: 1,
+      }),
+      ANIMATION_SPEED: Object.freeze({
+        STANDARD: 0.15,
+      }),
+      POINTS: 10,
       SPEED: 3.5,
       HEALTH: 1,
       DAMAGE: 1,
-      SPAWN_X: 50,
-      SPAWN_Y: 5,
-      PROBABILITY: 0.01,
-      JUMP: 20,
-      MAX_JUMPS: 1,
-      POINTS: 10,
-      BOX_WIDTH: 2,
-      BOX_HEIGHT: 1,
-      ANIMATION_SPEED_STANDARD: 0.15,
     }),
     GULL: Object.freeze({
+      SPAWN: Object.freeze({
+        X: 50,
+        Y: 20,
+        PROBABILITY: 0.01,
+      }),
+      FLAP: Object.freeze({
+        STANDARD: Object.freeze({
+          POWER: 2.1,
+          INTERVAL: 15,
+        }),
+        ABDUCTING: Object.freeze({
+          POWER: 30,
+          INTERVAL: 15,
+        }),
+        FLYAWAY: Object.freeze({
+          POWER: 6,
+          INTERVAL: 15,
+        }),
+      }),
+      HITBOX: Object.freeze({
+        WIDTH: 1.5,
+        HEIGHT: 0.6,
+      }),
+      ANIMATION_SPEED: Object.freeze({
+        STANDARD: 0.1,
+      }),
       SPEED: 3.0,
       HEALTH: 1,
       DAMAGE: 1.5,
-      SPAWN_X: 50,
-      SPAWN_Y: 20,
-      FLAP_POWER: 2.1,
-      FLAP_INTERVAL: 15,
-      ABDUCTING_FLAP_POWER: 30,
-      UNBURDENED_FLYAWAY_FLAP_POWER: 6,
-      SWOOP_DURATION: 75,
       IMPULSE: 1.5,
-      PROBABILITY: 0.01,
       POINTS: 15,
-      BOX_WIDTH: 1.5,
-      BOX_HEIGHT: 0.6,
-      ANIMATION_SPEED_FLYING: 0.1,
     }),
-    SUN: Object.freeze({
-      MIN_X: 100,
-      MAX_X: 400,
+    SHAKE: Object.freeze({
+      DURATION: 20,
+      MAGNITUDE: 1.5,
     }),
-    GLOBAL: Object.freeze({
-      TIME_STEP: 1 / 30,
-      INVINCIBILITY_INTERVAL: 30,
-      SHAKE_THRESHOLD: 20,
-      GRAVITY: -60,
-      BORDER_X_RIGHT: 40,
-      BORDER_X_LEFT: -40,
-      OFFSCREEN_X_RIGHT: 55,
-      OFFSCREEN_X_LEFT: -55,
-      BACKGROUND_PATH: 'assets/mountains.png',
-      BACKGROUND_NORMAL_PATH: 'assets/mountains.normal.clouds.light.png',
-      WINTER_COUNTDOWN_TIME: 50,
-      WINTER_INTERIM_TIME: 1500,
+    BORDER: Object.freeze({
+      LEFT: -40,
+      RIGHT: 40,
+      TOP: 30,
     }),
-    MENU: Object.freeze({
-      TEXTURE: PIXI.Texture.fromImage('assets/menu.png'),
+    OFFSCREEN: Object.freeze({
+      LEFT: -55,
+      RIGHT: 55,
+      BOTTOM: -20,
     }),
+    BACKGROUND: Object.freeze({
+      DIFFUSE: 'assets/mountains.png',
+      NORMAL: 'assets/mountains.normal.clouds.light.png',
+    }),
+    WINTER: Object.freeze({
+      COUNTDOWN: 50,
+      INTERIM: 1500,
+    }),
+    TIME_STEP: 1 / 30,
+    GRAVITY: -60,
   })
 
   /**
@@ -351,12 +402,12 @@
       // resetStage()
 
       // move into single background object
-      const backgroundDiffuse = PIXI.Sprite.fromImage(SETTINGS.GLOBAL.BACKGROUND_PATH, true);
+      const backgroundDiffuse = new PIXI.Sprite.fromImage(CONSTANTS.BACKGROUND.DIFFUSE, true);
       backgroundDiffuse.width = app.screen.width;
       backgroundDiffuse.height = app.screen.height;
       backgroundDiffuse.zOrder = -3
 
-      const backgroundNormals = PIXI.Sprite.fromImage(SETTINGS.GLOBAL.BACKGROUND_NORMAL_PATH);
+      const backgroundNormals = new PIXI.Sprite.fromImage(CONSTANTS.BACKGROUND.NORMAL);
       backgroundNormals.width = app.screen.width;
       backgroundNormals.height = app.screen.height;
       backgroundNormals.zOrder = -3
@@ -387,12 +438,12 @@
     }
 
     startWinterCountdown() {
-      this.winterCountdownTime = SETTINGS.GLOBAL.WINTER_COUNTDOWN_TIME
+      this.winterCountdownTime = CONSTANTS.WINTER.COUNTDOWN
       this.winterCountdownInterval = this.winterCountdownTime / 4
     }
 
     winterComplete() {
-      return ENEMY_TYPES.reduce((acc, type) => {
+      return CONSTANTS.ENEMY_TYPES.reduce((acc, type) => {
         return acc && this.typeComplete(type)
       }, true)
     }
@@ -404,11 +455,11 @@
       this.paused = true
       this.active = false
 
-      setTimeout(() => that.startWinter(), SETTINGS.GLOBAL.WINTER_INTERIM_TIME)
+      setTimeout(() => that.startWinter(), CONSTANTS.WINTER.INTERIM)
     }
 
     toCreateEnemy(type) {
-      if (Math.random() > SETTINGS[type].PROBABILITY) {
+      if (Math.random() > CONSTANTS[type].SPAWN.PROBABILITY) {
         return false
       }
 
@@ -453,7 +504,7 @@
         case TYPES.FISH:
           break
         default:
-          if (ENEMY_TYPES.includes(entity.type)) {
+          if (CONSTANTS.ENEMY_TYPES.includes(entity.type)) {
             this.onEnemyDestroyed(entity.type)
           }
       }
@@ -549,7 +600,7 @@
 
       this.resetDeferredForDestroy()
       this.enemyTypeDestroyed = false
-      this.world.step(SETTINGS.GLOBAL.TIME_STEP);
+      this.world.step(CONSTANTS.TIME_STEP);
       this.textDisplays.forEach(display => display.hide())
 
       this.evaluateCollisions()
@@ -559,7 +610,7 @@
       this.destroyDeferred()
 
       if (this.hero.invincibilityTime) {
-        if (this.hero.invincibilityTime > SETTINGS.GLOBAL.SHAKE_THRESHOLD) {
+        if (this.hero.invincibilityTime > CONSTANTS.SHAKE.DURATION) {
           this.shake()
         }
 
@@ -634,8 +685,8 @@
 
     onKeyUp(key) {
       this.keys.down[key] = false
-      if (!this.keys.down.RIGHT && !this.keys.down.LEFT && this.hero.state.action !== SETTINGS.HERO.MOVEMENT_STATES.DIVING) {
-        this.hero.state.action = SETTINGS.HERO.MOVEMENT_STATES.NEUTRAL
+      if (!this.keys.down.RIGHT && !this.keys.down.LEFT && this.hero.state.action !== CONSTANTS.HERO.MOVEMENT_STATES.DIVING) {
+        this.hero.state.action = CONSTANTS.HERO.MOVEMENT_STATES.NEUTRAL
       }
     }
 
@@ -696,10 +747,10 @@
           gull.flyAway()
         },
         [that.hashTypes(TYPES.GROUND, TYPES.SEAL)]: function(bodies) {
-          that.objects[bodies.find(item => item.type === TYPES.SEAL).id].jumps = SETTINGS.SEAL.MAX_JUMPS
+          that.objects[bodies.find(item => item.type === TYPES.SEAL).id].jumps = CONSTANTS.SEAL.JUMP.MAX
         },
         [that.hashTypes(TYPES.GROUND, TYPES.MALE)]: function(bodies) {
-          that.objects[bodies.find(item => item.type === TYPES.MALE).id].jumps = SETTINGS.MALE.MAX_JUMPS
+          that.objects[bodies.find(item => item.type === TYPES.MALE).id].jumps = CONSTANTS.MALE.JUMP.MAX
         },
         [that.hashTypes(TYPES.HERO, TYPES.SEAL)]: function(bodies, point, fixtures) {
           const dive = Boolean(fixtures.find(item => item.dive === true))
@@ -827,7 +878,7 @@
     setupWorld() {
       const that = this
       this.world = new planck.World({
-        gravity: Vec2(0, SETTINGS.GLOBAL.GRAVITY)
+        gravity: Vec2(0, CONSTANTS.GRAVITY)
       })
 
       this.world.on('pre-solve', function (contact, oldManifold) {
@@ -859,7 +910,7 @@
     handleEnemyHeroCollision(enemy, point, dive) {
       if (dive || Math.abs(point.normal.y) === 1) {
         enemy.takeDamage(this.hero.damage)
-        this.hero.jumps = SETTINGS.HERO.MAX_JUMPS
+        this.hero.jumps = CONSTANTS.HERO.JUMP.MAX
       } else {
         this.hero.takeDamage(enemy.damage)
       }
@@ -942,8 +993,8 @@
       })
 
       this.menuButton = new Button({
-        x: SETTINGS.HEALTH_BAR.X,
-        y: SETTINGS.HEALTH_BAR.Y,
+        x: CONSTANTS.HEALTH_BAR.X,
+        y: CONSTANTS.HEALTH_BAR.Y,
         parent: this,
         style: {
           fill: YELLOW,
@@ -989,8 +1040,8 @@
           destroyed: 0
         },
         [TYPES.MALE]: {
-          total: SETTINGS.MALE.NUM,
-          created: SETTINGS.MALE.NUM,
+          total: CONSTANTS.MALE.NUM,
+          created: CONSTANTS.MALE.NUM,
           destroyed: 0
         },
       }
@@ -1006,7 +1057,7 @@
     }
 
     spawnEnemies() {
-      ENEMY_TYPES.forEach((type) => {
+      CONSTANTS.ENEMY_TYPES.forEach((type) => {
         if (this.toCreateEnemy(type)) {
           this.createEnemy(type)
         }
@@ -1091,20 +1142,22 @@
       }
 
       // walls
-      this.createBlock(graphics, wall, wallOpts, true, SETTINGS.GLOBAL.BORDER_X_LEFT, -20.0, SETTINGS.GLOBAL.BORDER_X_LEFT, 30.0)
-      this.createBlock(graphics, wall, wallOpts, true, SETTINGS.GLOBAL.BORDER_X_RIGHT, -20.0, SETTINGS.GLOBAL.BORDER_X_RIGHT, 30.0)
+      this.createBlock(graphics, wall, wallOpts, true, CONSTANTS.BORDER.LEFT, CONSTANTS.OFFSCREEN.BOTTOM, CONSTANTS.BORDER.LEFT, CONSTANTS.BORDER.TOP)
+      this.createBlock(graphics, wall, wallOpts, true, CONSTANTS.BORDER.RIGHT, CONSTANTS.OFFSCREEN.BOTTOM, CONSTANTS.BORDER.RIGHT, CONSTANTS.BORDER.TOP)
 
       // off-screen detectors
-      this.createBlock(graphics, offscreenDetectors, offscreenOpts, true, SETTINGS.GLOBAL.OFFSCREEN_X_LEFT, -20.0, SETTINGS.GLOBAL.OFFSCREEN_X_LEFT, 30.0)
-      this.createBlock(graphics, offscreenDetectors, offscreenOpts, true, SETTINGS.GLOBAL.OFFSCREEN_X_RIGHT, -20.0, SETTINGS.GLOBAL.OFFSCREEN_X_RIGHT, 30.0)
+      this.createBlock(graphics, offscreenDetectors, offscreenOpts, true, CONSTANTS.OFFSCREEN.LEFT, CONSTANTS.OFFSCREEN.BOTTOM, CONSTANTS.OFFSCREEN.LEFT, CONSTANTS.BORDER.TOP)
+      this.createBlock(graphics, offscreenDetectors, offscreenOpts, true, CONSTANTS.OFFSCREEN.RIGHT, CONSTANTS.OFFSCREEN.BOTTOM, CONSTANTS.OFFSCREEN.RIGHT, CONSTANTS.BORDER.TOP)
 
       // ceiling
-      this.createBlock(graphics, wall, wallOpts, true, SETTINGS.GLOBAL.OFFSCREEN_X_LEFT, 30.0, SETTINGS.GLOBAL.OFFSCREEN_X_RIGHT, 30.0)
-      this.createBlock(graphics, ground, groundOpts, true, -100.0, -20.0, 100.0, -20.0)
+      this.createBlock(graphics, wall, wallOpts, true, CONSTANTS.OFFSCREEN.LEFT, CONSTANTS.BORDER.TOP, CONSTANTS.OFFSCREEN.RIGHT, CONSTANTS.BORDER.TOP)
+
+      // ground
+      this.createBlock(graphics, ground, groundOpts, true, -100.0, CONSTANTS.OFFSCREEN.BOTTOM, 100.0, CONSTANTS.OFFSCREEN.BOTTOM)
     }
 
     shake() {
-      this.container.x = (Math.random() * 1.5 - 0.75) * pscale
+      this.container.x = (Math.random() * CONSTANTS.SHAKE.MAGNITUDE - CONSTANTS.SHAKE.MAGNITUDE / 2) * pscale
     }
 
     renderObjects() {
@@ -1137,19 +1190,19 @@
       }
 
       if (health) {
-        this.body = this.game.world.createBody(Vec2(SETTINGS.HEALTH_BAR.X, SETTINGS.HEALTH_BAR.Y));
+        this.body = this.game.world.createBody(Vec2(CONSTANTS.HEALTH_BAR.X, CONSTANTS.HEALTH_BAR.Y));
 
-        this.body.createFixture(planck.Box(SETTINGS.HEALTH_BAR.MAX_WIDTH * (health / SETTINGS.HERO.MAX_HEALTH), 0.5), {
+        this.body.createFixture(planck.Box(CONSTANTS.HEALTH_BAR.MAX_WIDTH * (health / CONSTANTS.HERO.HEALTH.MAX), 0.5), {
           filterGroupIndex: 99,
         });
 
         let color
         let bitColor
 
-        if (health > SETTINGS.HERO.MAX_HEALTH * 0.67) {
+        if (health > CONSTANTS.HERO.HEALTH.MAX * 0.67) {
           color = GREEN
           bitColor = BIT_GREEN
-        } else if (health > SETTINGS.HERO.MAX_HEALTH * 0.33) {
+        } else if (health > CONSTANTS.HERO.HEALTH.MAX * 0.33) {
           color = YELLOW
           bitColor = BIT_YELLOW
         } else {
@@ -1161,10 +1214,10 @@
 
         this.game.createBlockDisplay(
           this.graphics,
-          SETTINGS.HEALTH_BAR.X,
-          SETTINGS.HEALTH_BAR.Y,
-          SETTINGS.HEALTH_BAR.X + (SETTINGS.HEALTH_BAR.MAX_WIDTH * (health / SETTINGS.HERO.MAX_HEALTH)),
-          SETTINGS.HEALTH_BAR.Y + 2,
+          CONSTANTS.HEALTH_BAR.X,
+          CONSTANTS.HEALTH_BAR.Y,
+          CONSTANTS.HEALTH_BAR.X + (CONSTANTS.HEALTH_BAR.MAX_WIDTH * (health / CONSTANTS.HERO.HEALTH.MAX)),
+          CONSTANTS.HEALTH_BAR.Y + 2,
           bitColor
         )
 
@@ -1232,7 +1285,7 @@
   class Male extends Friend {
     constructor(parent) {
       super(parent)
-      this.velocity = SETTINGS.MALE.SPEED
+      this.velocity = CONSTANTS.MALE.SPEED
       this.alive = true
       this.abductor = null
 
@@ -1243,18 +1296,18 @@
         filterGroupIndex: 0,
       }
 
-      this.jumps = SETTINGS.MALE.MAX_JUMPS
+      this.jumps = CONSTANTS.MALE.JUMP.MAX
 
-      const x = SETTINGS.MALE.SPAWN_X + (SETTINGS.MALE.SPAWN_SPREAD * Math.random() - SETTINGS.MALE.SPAWN_SPREAD / 2)
+      const x = CONSTANTS.MALE.SPAWN.X + (CONSTANTS.MALE.SPAWN.SPREAD * Math.random() - CONSTANTS.MALE.SPAWN.SPREAD / 2)
 
       this.body = this.game.world.createBody({
-        position: Vec2(x, SETTINGS.MALE.SPAWN_Y),
+        position: Vec2(x, CONSTANTS.MALE.SPAWN.Y),
         type: 'dynamic',
         fixedRotation: true,
         allowSleep: false
       })
 
-      this.body.createFixture(planck.Box(SETTINGS.MALE.BOX_WIDTH, SETTINGS.MALE.BOX_HEIGHT), {
+      this.body.createFixture(planck.Box(CONSTANTS.MALE.HITBOX.WIDTH, CONSTANTS.MALE.HITBOX.HEIGHT), {
         ...this.filterData
       })
 
@@ -1275,7 +1328,7 @@
     }
 
     onLiberation() {
-      this.sprite.animationSpeed = SETTINGS.MALE.ANIMATION_SPEED_STANDARD
+      this.sprite.animationSpeed = CONSTANTS.MALE.ANIMATION_SPEED.STANDARD
       this.abductor = null
 
       // if called during resetBodies, will be null if seal is
@@ -1294,7 +1347,7 @@
 
     onAbduction() {
       this.abductor = this
-      this.sprite.animationSpeed = SETTINGS.MALE.ANIMATION_SPEED_STRESSED
+      this.sprite.animationSpeed = CONSTANTS.MALE.ANIMATION_SPEED.STRESSED
 
       this.body.getFixtureList().setFilterData({
         filterMaskBits: 0x0000
@@ -1305,17 +1358,17 @@
       const animationStartIndex = Math.floor(Math.random() * 2)
       const sprite = getAnimatedSprite('male:neutral:{i}.png', 2)
       sprite.gotoAndPlay(animationStartIndex);
-      sprite.animationSpeed = SETTINGS.MALE.ANIMATION_SPEED_STANDARD
+      sprite.animationSpeed = CONSTANTS.MALE.ANIMATION_SPEED.STANDARD
       sprite.anchor.set(0.5)
 
       const spriteNormals = getAnimatedSprite('male:neutral:normal:{i}.png', 2)
       spriteNormals.gotoAndPlay(animationStartIndex);
-      spriteNormals.animationSpeed = SETTINGS.MALE.ANIMATION_SPEED_STANDARD
+      spriteNormals.animationSpeed = CONSTANTS.MALE.ANIMATION_SPEED.STANDARD
       spriteNormals.anchor.set(0.5)
 
       const spriteShadows = getAnimatedSprite('male:neutral:{i}.png', 2)
       spriteShadows.gotoAndPlay(animationStartIndex);
-      spriteShadows.animationSpeed = SETTINGS.MALE.ANIMATION_SPEED_STANDARD
+      spriteShadows.animationSpeed = CONSTANTS.MALE.ANIMATION_SPEED.STANDARD
       spriteShadows.anchor.set(0.5)
 
       this.sprite = assembleBasicSprite(sprite, spriteNormals, spriteShadows)
@@ -1332,12 +1385,12 @@
       const velocity = this.body.getLinearVelocity()
       if (pos.x < -1) {
         this.body.setLinearVelocity(Vec2(
-          SETTINGS.MALE.SPEED,
+          CONSTANTS.MALE.SPEED,
           velocity.y
         ))
       } else if (pos.x > 1) {
         this.body.setLinearVelocity(Vec2(
-          SETTINGS.MALE.SPEED * -1,
+          CONSTANTS.MALE.SPEED * -1,
           velocity.y
         ))
       }
@@ -1350,7 +1403,7 @@
 
       this.body.setLinearVelocity(Vec2(
         this.body.getLinearVelocity().x,
-        SETTINGS.MALE.JUMP * (Math.random() / 2 + 0.5))
+        CONSTANTS.MALE.JUMP.MAGNITUDE * (Math.random() / 2 + 0.5))
       )
 
       this.jumps -= 1
@@ -1382,7 +1435,7 @@
       }
 
       this.health -= damage
-      this.invincibilityTime = SETTINGS.GLOBAL.INVINCIBILITY_INTERVAL
+      this.invincibilityTime = CONSTANTS.HERO.INVINCIBILITY_INTERVAL
 
       if (this.health <= 0) {
         this.game.world.destroyBody(this.body)
@@ -1403,18 +1456,18 @@
   class Seal extends Foe {
     constructor(parent, direction) {
       super({
-        damage: SETTINGS.SEAL.DAMAGE,
-        health: SETTINGS.SEAL.HEALTH,
+        damage: CONSTANTS.SEAL.DAMAGE,
+        health: CONSTANTS.SEAL.HEALTH,
         parent,
       })
 
       this.direction = direction
-      this.points = SETTINGS.SEAL.POINTS
+      this.points = CONSTANTS.SEAL.POINTS
       this.abducting = false
 
       this.velocity = direction === RIGHT
-        ? SETTINGS.SEAL.SPEED
-        : SETTINGS.SEAL.SPEED * -1
+        ? CONSTANTS.SEAL.SPEED
+        : CONSTANTS.SEAL.SPEED * -1
 
       this.setupBody()
 
@@ -1433,17 +1486,17 @@
       const animationStartIndex = Math.floor(Math.random() * 4)
       const sprite = getAnimatedSprite('seal:running:{i}.png', 4)
       sprite.gotoAndPlay(animationStartIndex);
-      sprite.animationSpeed = SETTINGS.SEAL.ANIMATION_SPEED_STANDARD
+      sprite.animationSpeed = CONSTANTS.SEAL.ANIMATION_SPEED.STANDARD
       sprite.anchor.set(0.5)
 
       const spriteNormals = getAnimatedSprite('seal:running:normal:{i}.png', 4)
       spriteNormals.gotoAndPlay(animationStartIndex);
-      spriteNormals.animationSpeed = SETTINGS.SEAL.ANIMATION_SPEED_STANDARD
+      spriteNormals.animationSpeed = CONSTANTS.SEAL.ANIMATION_SPEED.STANDARD
       spriteNormals.anchor.set(0.5)
 
       const spriteShadows = getAnimatedSprite('seal:running:{i}.png', 4)
       spriteShadows.gotoAndPlay(animationStartIndex);
-      spriteShadows.animationSpeed = SETTINGS.SEAL.ANIMATION_SPEED_STANDARD
+      spriteShadows.animationSpeed = CONSTANTS.SEAL.ANIMATION_SPEED.STANDARD
       spriteShadows.anchor.set(0.5)
 
       this.sprite = assembleBasicSprite(sprite, spriteNormals, spriteShadows)
@@ -1452,17 +1505,17 @@
 
     setupBody() {
       const x = this.direction === LEFT
-      ? SETTINGS.SEAL.SPAWN_X
-      : SETTINGS.SEAL.SPAWN_X * -1
+      ? CONSTANTS.SEAL.SPAWN.X
+      : CONSTANTS.SEAL.SPAWN.X * -1
 
       this.body = this.game.world.createBody({
-        position: Vec2(x, SETTINGS.SEAL.SPAWN_Y),
+        position: Vec2(x, CONSTANTS.SEAL.SPAWN.Y),
         type: 'dynamic',
         fixedRotation: true,
         allowSleep: false
       })
 
-      this.body.createFixture(planck.Box(SETTINGS.SEAL.BOX_WIDTH, SETTINGS.SEAL.BOX_HEIGHT), {
+      this.body.createFixture(planck.Box(CONSTANTS.SEAL.HITBOX.WIDTH, CONSTANTS.SEAL.HITBOX.HEIGHT), {
         friction: 0,
         filterCategoryBits: CATEGORIES.FOE,
         filterMaskBits: MASKS.FOE,
@@ -1502,7 +1555,7 @@
     jump() {
       this.body.setLinearVelocity(Vec2(
         this.body.getLinearVelocity().x,
-        SETTINGS.SEAL.JUMP * (Math.random() / 2 + 0.5))
+        CONSTANTS.SEAL.JUMP.MAGNITUDE * (Math.random() / 2 + 0.5))
       )
 
       this.jumps -= 1
@@ -1512,18 +1565,18 @@
   class Gull extends Foe {
     constructor(parent, direction) {
       super({
-        damage: SETTINGS.GULL.DAMAGE,
-        health: SETTINGS.GULL.HEALTH,
+        damage: CONSTANTS.GULL.DAMAGE,
+        health: CONSTANTS.GULL.HEALTH,
         parent,
       })
 
       this.direction = direction
-      this.points = SETTINGS.GULL.POINTS
-      this.velocity = SETTINGS.GULL.SPEED
+      this.points = CONSTANTS.GULL.POINTS
+      this.velocity = CONSTANTS.GULL.SPEED
       this.abducting = false
 
-      this.flapPower = SETTINGS.GULL.FLAP_POWER
-      this.flapInterval = SETTINGS.GULL.FLAP_INTERVAL
+      this.flapPower = CONSTANTS.GULL.FLAP.STANDARD.POWER
+      this.flapInterval = CONSTANTS.GULL.FLAP.STANDARD.INTERVAL
 
       if (direction === LEFT) {
         this.velocity *= -1
@@ -1542,17 +1595,17 @@
       const animationStartIndex = Math.floor(Math.random() * 2)
       const spriteDiffuse = getAnimatedSprite('gull:flying:{i}.png', 2)
       spriteDiffuse.gotoAndPlay(animationStartIndex);
-      spriteDiffuse.animationSpeed = SETTINGS.GULL.ANIMATION_SPEED_FLYING
+      spriteDiffuse.animationSpeed = CONSTANTS.GULL.ANIMATION_SPEED.STANDARD
       spriteDiffuse.anchor.set(0.5)
 
       const spriteNormals = getAnimatedSprite('gull:flying:normal:{i}.png', 2)
       spriteNormals.gotoAndPlay(animationStartIndex);
-      spriteNormals.animationSpeed = SETTINGS.GULL.ANIMATION_SPEED_FLYING
+      spriteNormals.animationSpeed = CONSTANTS.GULL.ANIMATION_SPEED.STANDARD
       spriteNormals.anchor.set(0.5)
 
       const spriteShadows = getAnimatedSprite('gull:flying:{i}.png', 2)
       spriteShadows.gotoAndPlay(animationStartIndex);
-      spriteShadows.animationSpeed = SETTINGS.GULL.ANIMATION_SPEED_FLYING
+      spriteShadows.animationSpeed = CONSTANTS.GULL.ANIMATION_SPEED.STANDARD
       spriteShadows.anchor.set(0.5)
 
       this.sprite = assembleBasicSprite(spriteDiffuse, spriteNormals, spriteShadows)
@@ -1562,17 +1615,17 @@
 
     setupBody() {
       const x = this.direction === LEFT
-        ? SETTINGS.GULL.SPAWN_X
-        : SETTINGS.GULL.SPAWN_X * -1
+        ? CONSTANTS.GULL.SPAWN.X
+        : CONSTANTS.GULL.SPAWN.X * -1
 
       this.body = this.game.world.createBody({
-        position: Vec2(x, SETTINGS.GULL.SPAWN_Y),
+        position: Vec2(x, CONSTANTS.GULL.SPAWN.Y),
         type: 'dynamic',
         fixedRotation: true,
         allowSleep: true,
       })
 
-      this.body.createFixture(planck.Box(SETTINGS.GULL.BOX_WIDTH, SETTINGS.GULL.BOX_HEIGHT), {
+      this.body.createFixture(planck.Box(CONSTANTS.GULL.HITBOX.WIDTH, CONSTANTS.GULL.HITBOX.HEIGHT), {
         friction: 0,
         filterCategoryBits: CATEGORIES.FOE,
         filterMaskBits: MASKS.FOE,
@@ -1585,9 +1638,12 @@
     }
 
     flyAway() {
-      this.flapPower = this.abducting
-        ? SETTINGS.GULL.ABDUCTING_FLAP_POWER
-        : SETTINGS.GULL.UNBURDENED_FLYAWAY_FLAP_POWER
+      const stats = this.abducting
+        ? CONSTANTS.GULL.FLAP.ABDUCTING
+        : CONSTANTS.GULL.FLAP.FLYAWAY
+
+      this.flapPower = stats.POWER
+      this.flapInterval = stats.INTERVAL
     }
 
     abduct(male) {
@@ -1626,7 +1682,7 @@
         yVelocity
       ))
 
-      const f = this.body.getWorldVector(Vec2(0.0, SETTINGS.GULL.IMPULSE))
+      const f = this.body.getWorldVector(Vec2(0.0, CONSTANTS.GULL.IMPULSE))
       const p = this.body.getWorldPoint(Vec2(0.0, 2.0))
       this.body.applyLinearImpulse(f, p, true)
     }
@@ -1640,7 +1696,7 @@
       parent,
     }) {
       this.alive = true
-      this.damage = SETTINGS.FISH.DAMAGE
+      this.damage = CONSTANTS.FISH.DAMAGE
       this.game = parent
 
       this.body = this.game.world.createBody({
@@ -1651,8 +1707,8 @@
       })
 
       this.body.setLinearVelocity(Vec2(
-        SETTINGS.FISH.THROW_X * direction,
-        SETTINGS.FISH.THROW_Y
+        CONSTANTS.FISH.LAUNCH_VELOCITY.X * direction,
+        CONSTANTS.FISH.LAUNCH_VELOCITY.Y
       ))
 
       this.setupSprite()
@@ -1667,7 +1723,7 @@
         filterGroupIndex: GROUPS.HERO,
       }
 
-      this.body.createFixture(planck.Box(SETTINGS.FISH.BOX_WIDTH, SETTINGS.FISH.BOX_HEIGHT), boxOpts)
+      this.body.createFixture(planck.Box(CONSTANTS.FISH.HITBOX.WIDTH, CONSTANTS.FISH.HITBOX.HEIGHT), boxOpts)
       this.id = this.game.createId()
       this.game.objects[this.id] = this
       this.body.id = this.id
@@ -1702,7 +1758,7 @@
     constructor({
       x = 0,
       y = 0,
-      texture = SETTINGS.HERO.TRAIL.TEXTURE,
+      texture = CONSTANTS.HERO.TRAIL.TEXTURE,
       smoothness = 100,
       length = 20,
       parent,
@@ -1759,11 +1815,10 @@
     constructor(parent) {
       this.game = parent
       this.alive = true
-      this.health = SETTINGS.HERO.MAX_HEALTH
+      this.health = CONSTANTS.HERO.HEALTH.MAX
       this.invincibilityTime = 0
       this.fishThrowTime = 0
-      this.damage = SETTINGS.HERO.DAMAGE
-      this.sprinting = false
+      this.damage = CONSTANTS.HERO.DAMAGE
       this.bodyOpts = {
         filterCategoryBits: CATEGORIES.HERO,
         filterMaskBits: MASKS.HERO,
@@ -1779,7 +1834,7 @@
       this.setupSprite()
 
       this.body = this.game.world.createBody({
-        position: Vec2(SETTINGS.HERO.START_X, SETTINGS.HERO.START_Y),
+        position: Vec2(CONSTANTS.HERO.SPAWN.X, CONSTANTS.HERO.SPAWN.Y),
         type: 'dynamic',
         fixedRotation: true,
         allowSleep: false
@@ -1787,35 +1842,35 @@
 
       this.game.assignType(this, TYPES.HERO)
 
-      this.body.createFixture(planck.Box(SETTINGS.HERO.BOX_WIDTH, SETTINGS.HERO.BOX_HEIGHT), this.bodyOpts)
+      this.body.createFixture(planck.Box(CONSTANTS.HERO.HITBOX.WIDTH, CONSTANTS.HERO.HITBOX.HEIGHT), this.bodyOpts)
 
       this.body.render = {
         stroke: GREEN
       }
 
-      this.jumps = SETTINGS.HERO.MAX_JUMPS
-      this.speed = SETTINGS.HERO.SPEED
+      this.jumps = CONSTANTS.HERO.JUMP.MAX
+      this.speed = CONSTANTS.HERO.SPEED
 
       this.game.healthBar.update(this.health)
     }
 
     getNeutralSprite() {
-      const states = SETTINGS.HERO.MOVEMENT_STATES
+      const states = CONSTANTS.HERO.MOVEMENT_STATES
 
       const animationStartIndex = Math.floor(Math.random() * 2)
       const spriteDiffuse = getAnimatedSprite('hero:neutral:{i}.png', 2)
       spriteDiffuse.gotoAndPlay(animationStartIndex);
-      spriteDiffuse.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.NEUTRAL]
+      spriteDiffuse.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.NEUTRAL]
       spriteDiffuse.anchor.set(0.5)
 
       const spriteNormals = getAnimatedSprite('hero:neutral:normal:{i}.png', 2)
       spriteNormals.gotoAndPlay(animationStartIndex);
-      spriteNormals.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.NEUTRAL]
+      spriteNormals.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.NEUTRAL]
       spriteNormals.anchor.set(0.5)
 
       const spriteShadows = getAnimatedSprite('hero:neutral:{i}.png', 2)
       spriteShadows.gotoAndPlay(animationStartIndex);
-      spriteShadows.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.NEUTRAL]
+      spriteShadows.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.NEUTRAL]
       spriteShadows.anchor.set(0.5)
 
       const sprite = assembleBasicSprite(spriteDiffuse, spriteNormals, spriteShadows)
@@ -1825,22 +1880,22 @@
     }
 
     getRunningSprite() {
-      const states = SETTINGS.HERO.MOVEMENT_STATES
+      const states = CONSTANTS.HERO.MOVEMENT_STATES
 
       const animationStartIndex = Math.floor(Math.random() * 2)
       const spriteDiffuse = getAnimatedSprite('hero:running:{i}.png', 2)
       spriteDiffuse.gotoAndPlay(animationStartIndex);
-      spriteDiffuse.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.RUNNING]
+      spriteDiffuse.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.RUNNING]
       spriteDiffuse.anchor.set(0.5)
 
       const spriteNormals = getAnimatedSprite('hero:running:normal:{i}.png', 2)
       spriteNormals.gotoAndPlay(animationStartIndex);
-      spriteNormals.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.RUNNING]
+      spriteNormals.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.RUNNING]
       spriteNormals.anchor.set(0.5)
 
       const spriteShadows = getAnimatedSprite('hero:running:{i}.png', 2)
       spriteShadows.gotoAndPlay(animationStartIndex);
-      spriteShadows.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.RUNNING]
+      spriteShadows.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.RUNNING]
       spriteShadows.anchor.set(0.5)
 
       const sprite = assembleBasicSprite(spriteDiffuse, spriteNormals, spriteShadows)
@@ -1850,22 +1905,22 @@
     }
 
     getDivingSprite() {
-      const states = SETTINGS.HERO.MOVEMENT_STATES
+      const states = CONSTANTS.HERO.MOVEMENT_STATES
 
       const animationStartIndex = Math.floor(Math.random() * 4)
       const spriteDiffuse = getAnimatedSprite('hero:diving:{i}.png', 4)
       spriteDiffuse.gotoAndPlay(animationStartIndex);
-      spriteDiffuse.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.DIVING]
+      spriteDiffuse.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.DIVING]
       spriteDiffuse.anchor.set(0.5)
 
       const spriteNormals = getAnimatedSprite('hero:diving:normal:{i}.png', 4)
       spriteNormals.gotoAndPlay(animationStartIndex);
-      spriteNormals.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.DIVING]
+      spriteNormals.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.DIVING]
       spriteNormals.anchor.set(0.5)
 
       const spriteShadows = getAnimatedSprite('hero:diving:{i}.png', 4)
       spriteShadows.gotoAndPlay(animationStartIndex);
-      spriteShadows.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.DIVING]
+      spriteShadows.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.DIVING]
       spriteShadows.anchor.set(0.5)
 
       const sprite = assembleBasicSprite(spriteDiffuse, spriteNormals, spriteShadows)
@@ -1876,15 +1931,15 @@
 
     setupSprite() {
       this.trail = new Trail({
-        x: SETTINGS.HERO.START_X,
-        y: SETTINGS.HERO.START_Y,
-        texture: SETTINGS.HERO.TRAIL.TEXTURE,
-        smoothness: SETTINGS.HERO.TRAIL.SMOOTHNESS,
-        length: SETTINGS.HERO.TRAIL.LENGTH,
+        x: CONSTANTS.HERO.SPAWN.X,
+        y: CONSTANTS.HERO.SPAWN.Y,
+        texture: CONSTANTS.HERO.TRAIL.TEXTURE,
+        smoothness: CONSTANTS.HERO.TRAIL.SMOOTHNESS,
+        length: CONSTANTS.HERO.TRAIL.LENGTH,
         parent: this.game,
       })
 
-      const states = SETTINGS.HERO.MOVEMENT_STATES
+      const states = CONSTANTS.HERO.MOVEMENT_STATES
 
       this.sprites = {
         [states.DIVING]: this.getDivingSprite(),
@@ -1920,7 +1975,7 @@
       }
 
       this.health -= damage
-      this.invincibilityTime = SETTINGS.GLOBAL.INVINCIBILITY_INTERVAL
+      this.invincibilityTime = CONSTANTS.HERO.INVINCIBILITY_INTERVAL
 
       if (this.health <= 0) {
         this.game.destroyEntity(this)
@@ -1943,7 +1998,7 @@
         parent: this.game,
       })
 
-      this.fishThrowTime = SETTINGS.FISH.THROW_INTERVAL
+      this.fishThrowTime = CONSTANTS.HERO.THROW_INTERVAL
     }
 
     dive() {
@@ -1951,17 +2006,17 @@
         return
       }
 
-      this.state.action = SETTINGS.HERO.MOVEMENT_STATES.DIVING
+      this.state.action = CONSTANTS.HERO.MOVEMENT_STATES.DIVING
 
       this.body.setLinearVelocity(Vec2(
         this.body.getLinearVelocity().x,
         -70)
       )
 
-      const top = SETTINGS.HERO.BOX_HEIGHT * -1
-      const left = SETTINGS.HERO.DIVE_BOX_WIDTH * -0.5
-      const right = SETTINGS.HERO.DIVE_BOX_WIDTH * 0.5
-      const height = SETTINGS.HERO.DIVE_BOX_HEIGHT
+      const top = CONSTANTS.HERO.HITBOX.HEIGHT * -1
+      const left = CONSTANTS.HERO.DIVE.HITBOX.WIDTH * -0.5
+      const right = CONSTANTS.HERO.DIVE.HITBOX.WIDTH * 0.5
+      const height = CONSTANTS.HERO.DIVE.HITBOX.HEIGHT
 
       this.diveFixture = this.body.createFixture(
         planck.Polygon([
@@ -1977,10 +2032,10 @@
     }
 
     glide() {
-      this.state.action = SETTINGS.HERO.MOVEMENT_STATES.GLIDING
+      this.state.action = CONSTANTS.HERO.MOVEMENT_STATES.GLIDING
       this.jumps = 0
 
-      const f = this.body.getWorldVector(Vec2(0.0, SETTINGS.HERO.GLIDE_IMPULSE))
+      const f = this.body.getWorldVector(Vec2(0.0, CONSTANTS.HERO.GLIDE.IMPULSE))
       const p = this.body.getWorldPoint(Vec2(0.0, 0.0))
       this.body.applyLinearImpulse(f, p, true)
     }
@@ -1991,13 +2046,13 @@
         return
       }
 
-      if (this.state.action === SETTINGS.HERO.MOVEMENT_STATES.DIVING) {
-        this.state.action = SETTINGS.HERO.MOVEMENT_STATES.NEUTRAL
+      if (this.state.action === CONSTANTS.HERO.MOVEMENT_STATES.DIVING) {
+        this.state.action = CONSTANTS.HERO.MOVEMENT_STATES.NEUTRAL
       }
 
       this.state.airborne = false
-      this.activeSprite.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED.RUNNING
-      this.jumps = SETTINGS.HERO.MAX_JUMPS
+      this.activeSprite.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED.RUNNING
+      this.jumps = CONSTANTS.HERO.JUMP.MAX
 
       if (this.diveFixture) {
         this.game.deferDestroyFixture(this, 'diveFixture')
@@ -2009,16 +2064,12 @@
      */
     move(direction) {
       this.state.direction = direction
-      if (this.state.action !== SETTINGS.HERO.MOVEMENT_STATES.DIVING) {
-        this.state.action = SETTINGS.HERO.MOVEMENT_STATES.RUNNING
+      if (this.state.action !== CONSTANTS.HERO.MOVEMENT_STATES.DIVING) {
+        this.state.action = CONSTANTS.HERO.MOVEMENT_STATES.RUNNING
       }
 
-      const sprintMultiplier = this.sprinting
-        ? SETTINGS.HERO.SPRINT_MULTIPLIER
-        : 1
-
       this.body.setLinearVelocity(Vec2(
-        direction * this.speed * sprintMultiplier,
+        direction * this.speed,
         this.body.getLinearVelocity().y)
       )
     }
@@ -2028,12 +2079,12 @@
         return
       }
 
-      this.activeSprite.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED.JUMPING
+      this.activeSprite.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED.JUMPING
       this.state.airborne = true
 
       this.body.setLinearVelocity(Vec2(
         this.body.getLinearVelocity().x,
-        SETTINGS.HERO.JUMP)
+        CONSTANTS.HERO.JUMP.MAGNITUDE)
       )
 
       this.jumps -= 1
@@ -2093,8 +2144,8 @@
 
       // resetStage()
 
-      const diffuse = PIXI.Sprite.fromImage('assets/mountains.png');
-      const normals = PIXI.Sprite.fromImage('assets/mountains.normal.clouds.light.png');
+      const diffuse = new PIXI.Sprite.fromImage(CONSTANTS.BACKGROUND.DIFFUSE);
+      const normals = new PIXI.Sprite.fromImage(CONSTANTS.BACKGROUND.NORMAL);
       diffuse.parentGroup = PIXI.lights.diffuseGroup;
       normals.parentGroup = PIXI.lights.normalGroup;
 

@@ -113,8 +113,9 @@ GAMEPLAY.14
 
 GAMEPLAY.15
 - [x] rename "stomp/attack" to "dive/diving"
+- [x] clean up settings
+- [ ] rename settings -> constants
 - [ ] clean up Game methods
-- [ ] clean up settings
 - [ ] separate all pixi and planck methods
 
 GAMEPLAY.16
