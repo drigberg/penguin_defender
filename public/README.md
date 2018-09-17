@@ -1,11 +1,11 @@
 ### QUEUE
-- GAMEPLAY.15
-- GAMEPLAY.16
+- LOGIC.15
+- LOGIC.16
 - AUDIO.1
 - AUDIO.2
 
 ### Gameplay Todos
-GAMEPLAY.1
+LOGIC.1
 - [x] sprite can move left/right
 - [x] sprite can jump
 - [x] code is separated cleanly
@@ -14,20 +14,20 @@ GAMEPLAY.1
 - [x] enemies move on their own
 - [x] enemies can pass through walls
 
-GAMEPLAY.2
+LOGIC.2
 - [x] enemies do damage upon collisions
 - [x] invincibility for one second after being hit
 - [x] sprite disappears if dead
 - [x] enemies can take damage when attacked
 - [x] enemies disappear if dead
 
-GAMEPLAY.3
+LOGIC.3
 - [x] fine-tune movement
 - [x] sprint
 - [x] only damage enemies if actually on top
 - [x] triple-jump bug: restores to 2 while leaving ground
 
-GAMEPLAY.4
+LOGIC.4
 - [x] damage effect: screen shakes? character flashes/dims?
 - [x] new enemy class
 - [x] fish class
@@ -35,19 +35,19 @@ GAMEPLAY.4
 - [x] allow fish to damage enemies
 - [x] add and use sprite.direction
 
-GAMEPLAY.5
+LOGIC.5
 - [x] seals jump when piled up
 - [x] differentiate enemy types
 - [x] health bar
 - [x] reset when game ends
 
-GAMEPLAY.6
+LOGIC.6
 - [x] three flaps
 - [x] glide/sprint
 - [x] allow more keys: F for stomp, G for glide
 - [x] use masks for ignoring collisions
 
-GAMEPLAY.7
+LOGIC.7
 - [x] use one map for all objects besides sprite
 - [x] rename sprite ==> hero to avoid naming confusing
 - [x] males huddle up in the center
@@ -55,14 +55,14 @@ GAMEPLAY.7
 - [x] males get killed by seals
 - [x] refactor: as few globals as possible
 
-GAMEPLAY.8
+LOGIC.8
 - [x] hide testbed
 - [x] isolate render/move
 - [x] allow pause
 - [x] refactor: type hashing
 - [x] refactor: entity destruction
 
-GAMEPLAY.9
+LOGIC.9
 - [x] detection for how many males have been lost / are still left
 - [x] defined waves with level formula
 - [x] bug: standardize type assignment
@@ -73,7 +73,7 @@ GAMEPLAY.9
 - [x] start new wave on success
 - [x] countdown between waves
 
-GAMEPLAY.10
+LOGIC.10
 - [x] males get dragged away by seals
 - [x] figure out how masks REALLY work, and do that
 - [x] detect when enemies cross the screen
@@ -81,7 +81,7 @@ GAMEPLAY.10
 - [x] display final score when game is over
 - [x] display gameover reason
 
-GAMEPLAY.11
+LOGIC.11
 - [x] fix masks
 - [x] fix flying seals
 - [x] display "PAUSED"
@@ -89,12 +89,12 @@ GAMEPLAY.11
 - [x] males don't collide with anything while abducted
 - [x] display "PAUSED"
 
-GAMEPLAY.12
+LOGIC.12
 - [x] all entities are destroyed at game over
 - [x] males and hero don't collide
 - [x] bug fix: keep pairs of seals from flying
 
-GAMEPLAY.13
+LOGIC.13
 - [x] bug fix: destruction order (see too)
 - [x] bug fix: fish sometimes throw down or not at all
 - [x] bug fix: splash damage fixture destruction
@@ -105,43 +105,50 @@ GAMEPLAY.13
 - [x] bug fix: stomp animation disappears
 - [x] bug fix: stomp animation can render on ground
 
-GAMEPLAY.14
+LOGIC.14
 - [x] gulls can carry away males
 - [x] refine gull flying
 - [x] bug fix: bird-summoning bug on stomp attack
 - [x] bug fix: double-stomp
 
-GAMEPLAY.15
+LOGIC.15
 - [x] rename "stomp/attack" to "dive/diving"
 - [x] clean up settings
-- [ ] rename settings -> constants
-- [ ] clean up Game methods
-- [ ] separate all pixi and planck methods
+- [x] rename settings -> constants
+- [x] clean up Game methods
 
-GAMEPLAY.16
+LOGIC.16
 - [ ] get rid of Menu, incorporate into Game
 - [ ] settings: shadows on/off
 - [ ] settings: music on/off
 - [ ] settings: sound effects on/off
 - [ ] settings: song selection
 
-GAMEPLAY.17
+LOGIC.17
+- [ ] light class: implement fade method
+- [ ] lights fade to black upon death
+- [ ] lights fade in when created
+- [ ] blink while invincible
 - [ ] bounce off of enemies
 - [ ] bug fix: "from top" calculation
 - [ ] new enemy (bank: wolves, caribou, walrus, Putin-on-horse, lumberjack)
 
-GAMEPLAY.18
+LOGIC.18
+- [ ] eslint
 - [ ] make testbed only differ by testbed and hidden pixi, not commented
 - [ ] refine movement
 
-GAMEPLAY.19
+LOGIC.19
 - [ ] gulls fall when killed, are destroyed offscreen
 - [ ] seals fall when killed, are destroyed offscreen
 - [ ] fish fall after collisions, are destroyed offscreen
 - [ ] standardize colors (alert, points, success, etc)
 - [ ] post-wave movement
 
-
+LOGIC.20
+- [ ] orca summons
+- [ ] hero.lives
+- [ ] males don't regenerate back to max each winter
 
 ### UI Todos
 UI.1
@@ -212,7 +219,10 @@ UI.10
 - [ ] enemy 4 assets (walrus?)
 
 UI.11
+- [ ] more congrulation text options
 - [ ] controls screen
+- [ ] high score table
+- [ ] high score table input
 
 UI.12
 - [ ] enhance hero assets

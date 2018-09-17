@@ -45,7 +45,7 @@
     strokeThickness: 0,
     fontWeight: 'bold',
     fill: BLUE,
-  });
+  })
 
   const KEY_CODE_MAP = {
     39: 'RIGHT',
@@ -218,7 +218,7 @@
       POINTS: 15,
     }),
     SHAKE: Object.freeze({
-      DURATION: 20,
+      DURATION: 10,
       MAGNITUDE: 1.5,
     }),
     BORDER: Object.freeze({
@@ -251,14 +251,14 @@
     backgroundColor: 0x000000,
     width: window.innerWidth * 0.9,
     height: window.innerHeight * 0.9,
-  });
+  })
 
-  stage = PIXI.shadows.init(app);
-  PIXI.shadows.filter.ambientLight = 0.3;
+  stage = PIXI.shadows.init(app)
+  PIXI.shadows.filter.ambientLight = 0.3
 
-  document.getElementById('content').appendChild(app.view);
-  app.view.style.position = 'absolute';
-  app.view.style.border = '1px solid #222222';
+  document.getElementById('content').appendChild(app.view)
+  app.view.style.position = 'absolute'
+  app.view.style.border = '1px solid #222222'
 
 
   /**
@@ -266,37 +266,38 @@
    */
 
   function assembleBasicSprite(diffuseSprite, normalSprite, shadowSprite) {
-    const container = new PIXI.Container();
+    const container = new PIXI.Container()
 
-    diffuseSprite.parentGroup = PIXI.lights.diffuseGroup;
-    container.addChild(diffuseSprite);
+    diffuseSprite.parentGroup = PIXI.lights.diffuseGroup
+    container.addChild(diffuseSprite)
 
-    normalSprite.parentGroup = PIXI.lights.normalGroup;
-    container.addChild(normalSprite);
+    normalSprite.parentGroup = PIXI.lights.normalGroup
+    container.addChild(normalSprite)
 
     if (shadowSprite) {
-      shadowSprite.parentGroup = PIXI.shadows.casterGroup;
-        container.addChild(shadowSprite);
+      shadowSprite.parentGroup = PIXI.shadows.casterGroup
+        container.addChild(shadowSprite)
     }
 
-    return container;
+    return container
   }
 
-  function createShadowCastingLight(radius, intensity, color) {
-    const container = new PIXI.Container();
+  function createShadowCastingLight(radius, intensity, color, point) {
+    const container = new PIXI.Container()
+    container.position.set(point.x, point.y)
 
-    const pixiLight = new PIXI.lights.PointLight(color, intensity);
-    container.addChild(pixiLight);
+    const pixiLight = new PIXI.lights.PointLight(color, intensity)
+    container.addChild(pixiLight)
 
-    const shadow = new PIXI.shadows.Shadow(radius, 0.2);
+    const shadow = new PIXI.shadows.Shadow(radius, 0.2)
     shadow.pointCount = 5
     shadow.range = 1000
     shadow.scatterRange = 4
     shadow.radialResolution = 600
     shadow.depthResolution = 1
-    container.addChild(shadow);
+    container.addChild(shadow)
 
-    return container;
+    return container
 }
 
   const Vec2 = planck.Vec2
@@ -314,41 +315,41 @@
    */
   function clipInput(k, arr) {
     if (k <= 0) {
-      return arr[0];
+      return arr[0]
     }
     if (k >= arr.length - 1) {
-      return arr[arr.length - 1];
+      return arr[arr.length - 1]
     }
 
-    return arr[k];
+    return arr[k]
   }
 
   function getTangent(k, factor, array) {
-    return factor * (clipInput(k + 1, array) - clipInput(k - 1, array)) / 2;
+    return factor * (clipInput(k + 1, array) - clipInput(k - 1, array)) / 2
   }
 
   function cubicInterpolation(array, t, tangentFactor) {
-    if (tangentFactor == null) tangentFactor = 1;
+    if (tangentFactor == null) tangentFactor = 1
 
-    const k = Math.floor(t);
-    const m = [getTangent(k, tangentFactor, array), getTangent(k + 1, tangentFactor, array)];
-    const p = [clipInput(k, array), clipInput(k + 1, array)];
-    t -= k;
-    const t2 = t * t;
-    const t3 = t * t2;
-    return (2 * t3 - 3 * t2 + 1) * p[0] + (t3 - 2 * t2 + t) * m[0] + ( -2 * t3 + 3 * t2) * p[1] + (t3 - t2) * m[1];
+    const k = Math.floor(t)
+    const m = [getTangent(k, tangentFactor, array), getTangent(k + 1, tangentFactor, array)]
+    const p = [clipInput(k, array), clipInput(k + 1, array)]
+    t -= k
+    const t2 = t * t
+    const t3 = t * t2
+    return (2 * t3 - 3 * t2 + 1) * p[0] + (t3 - 2 * t2 + t) * m[0] + ( -2 * t3 + 3 * t2) * p[1] + (t3 - t2) * m[1]
   }
 
-  const pscale = 13;
+  const pscale = 13
 
   /**
    * Build sprite from spritesheet data
    */
   function getAnimatedSprite(nameTemplate, max) {
-    const textures = [];
+    const textures = []
 
     for (let i = 1; i <= max; i++) {
-      textures.push(PIXI.Texture.fromFrame(nameTemplate.replace('{i}', i)));
+      textures.push(PIXI.Texture.fromFrame(nameTemplate.replace('{i}', i)))
     }
 
     return new PIXI.extras.AnimatedSprite(textures)
@@ -359,11 +360,11 @@
    */
 
   function mpx(m) {
-    return m * pscale + (window.innerWidth / 2.3);
+    return m * pscale + (window.innerWidth / 2.3)
   }
 
   function mpy(m) {
-    return window.innerHeight * 0.5 - (m * pscale);
+    return window.innerHeight * 0.5 - (m * pscale)
   }
 
   /**
@@ -374,14 +375,17 @@
       this.reset()
     }
 
-    reset() {
+    resetStats() {
       this.winter = 6
       this.paused = true
       this.idPointer = 1
       this.objects = {}
       this.points = 0
-      this.active = true
+      this.over = false
+    }
 
+    reset() {
+      this.resetStats()
       this.setupContainer()
       this.setupWorld()
       this.setupDisplay()
@@ -391,50 +395,41 @@
       this.startWinter()
     }
 
+    createBackground() {
+      const sprites = [
+        new PIXI.Sprite.fromImage(CONSTANTS.BACKGROUND.DIFFUSE, true),
+        new PIXI.Sprite.fromImage(CONSTANTS.BACKGROUND.NORMAL, true),
+      ]
+
+      sprites.forEach((sprite) => {
+        sprite.width = app.screen.width
+        sprite.height = app.screen.height
+        sprite.zOrder = -3
+      })
+
+      return assembleBasicSprite(...sprites)
+    }
+
+    createLights() {
+      return [
+        new PIXI.lights.AmbientLight(null, 10),
+        new PIXI.lights.DirectionalLight(null, 10, new PIXI.Point(300, 300)),
+        createShadowCastingLight(1000, 20, 0x1111cc, new PIXI.Point(0, 0)),
+      ]
+    }
+
     setupContainer() {
       if (this.container) {
         stage.removeChild(this.container)
       }
 
       this.container = new PIXI.Container()
-      stage.addChild(this.container)
-
-      // resetStage()
-
-      // move into single background object
-      const backgroundDiffuse = new PIXI.Sprite.fromImage(CONSTANTS.BACKGROUND.DIFFUSE, true);
-      backgroundDiffuse.width = app.screen.width;
-      backgroundDiffuse.height = app.screen.height;
-      backgroundDiffuse.zOrder = -3
-
-      const backgroundNormals = new PIXI.Sprite.fromImage(CONSTANTS.BACKGROUND.NORMAL);
-      backgroundNormals.width = app.screen.width;
-      backgroundNormals.height = app.screen.height;
-      backgroundNormals.zOrder = -3
-
-      const background = assembleBasicSprite(backgroundDiffuse, backgroundNormals)
-
-      this.ambientLight = new PIXI.lights.AmbientLight(null, 10)
-      this.directionalLight = new PIXI.lights.DirectionalLight(null, 10, new PIXI.Point(300, 300));
-
-      this.shadowCastingLight = createShadowCastingLight(1000, 20, 0x1111cc);
-      this.shadowCastingLight.position.set(0, 0);
-
       this.container.addChild(
-        background,
-        this.ambientLight,
-        this.directionalLight,
-        this.shadowCastingLight,
-      );
+        this.createBackground(),
+        ...this.createLights(),
+      )
 
-      // app.stage.addChild(
-      //     // put all layers for deferred rendering of normals
-      //     new PIXI.display.Layer(PIXI.lights.diffuseGroup),
-      //     new PIXI.display.Layer(PIXI.lights.normalGroup),
-      //     new PIXI.display.Layer(PIXI.lights.lightGroup),
-      //     // Add the lights and images
-      //     this.container
-      // );
+      stage.addChild(this.container)
     }
 
     startWinterCountdown() {
@@ -453,9 +448,13 @@
       this.textDisplays[0].show(`WINTER ${this.winter} COMPLETE!`)
       this.textDisplays[1].show('NOICE')
       this.paused = true
-      this.active = false
+      this.over = true
 
       setTimeout(() => that.startWinter(), CONSTANTS.WINTER.INTERIM)
+    }
+
+    typeComplete(type) {
+      return this.winterStats[type].destroyed === this.winterStats[type].total
     }
 
     toCreateEnemy(type) {
@@ -538,13 +537,14 @@
     }
 
     onHeroDestroyed() {
-      this.active = false
+      this.over = true
       this.gameOverReason = 'YOU DIED'
     }
 
     startWinter() {
       this.resetBodies()
-      this.active = true
+
+      this.over = false
       this.paused = false
 
       this.winter += 1
@@ -560,24 +560,15 @@
     onMaleDestroyed() {
       this.winterStats[TYPES.MALE].destroyed += 1
       if (this.typeComplete(TYPES.MALE)) {
-        this.active = false
+        this.over = true
         this.gameOverReason = 'COLONY ANNIHILATED'
       }
     }
 
-    moveSun() {
-      this.spotlight.color = `0x${String(Math.floor(50 - this.spotlight.x * (50 / app.screen.width))).padStart(2, '0')}${String(Math.floor(this.spotlight.x * (100 / app.screen.width))).padStart(2, '0')}ff`
-      this.spotlight.x = this.hero.activeSprite.x
-    }
-
-    onStepPauseIndependent() {
-      // this.moveSun()
-    }
-
     winterCountdown() {
       if (this.winterCountdownTime > 0) {
-        this.textDisplays[0].show('GET READY!');
-        this.textDisplays[1].show(Math.floor(this.winterCountdownTime / this.winterCountdownInterval) || 'GO!');
+        this.textDisplays[0].show('GET READY!')
+        this.textDisplays[1].show(Math.floor(this.winterCountdownTime / this.winterCountdownInterval) || 'GO!')
 
         this.winterCountdownTime -= 1
         return this.winterCountdownTime
@@ -586,12 +577,18 @@
       return false
     }
 
+    onStepPauseIndependent() {
+      // nothing yet
+    }
+
     onStepPauseDependent() {
       const countingDown = this.winterCountdown()
 
       if (countingDown) {
         return
-      } else if (countingDown === 0) {
+      }
+
+      if (countingDown === 0) {
         this.hero.activeSprite.visible = true
         Object.keys(this.objects).forEach((key) => {
           this.objects[key].sprite.visible = true
@@ -600,7 +597,7 @@
 
       this.resetDeferredForDestroy()
       this.enemyTypeDestroyed = false
-      this.world.step(CONSTANTS.TIME_STEP);
+      this.world.step(CONSTANTS.TIME_STEP)
       this.textDisplays.forEach(display => display.hide())
 
       this.evaluateCollisions()
@@ -609,21 +606,9 @@
       this.moveObjects()
       this.destroyDeferred()
 
-      if (this.hero.invincibilityTime) {
-        if (this.hero.invincibilityTime > CONSTANTS.SHAKE.DURATION) {
-          this.shake()
-        }
+      this.hero.onStep()
 
-        this.hero.invincibilityTime -= 1
-      }
-
-      if (this.hero.fishThrowTime > 0) {
-        this.hero.fishThrowTime -= 1
-      } else {
-        this.hero.fishThrowTime = 0
-      }
-
-      if (!this.active) {
+      if (this.over) {
         this.gameOver()
         return
       }
@@ -646,7 +631,7 @@
 
       window.requestAnimationFrame(function() {
         that.onStep()
-      });
+      })
     }
 
     onKeyDown(key) {
@@ -705,15 +690,15 @@
 
       this.keys = {
         down: {},
-      };
+      }
 
       window.addEventListener('keydown', function(e) {
         that.onKeyDown(that.translateKeyCode(e.keyCode))
-      });
+      })
 
       window.addEventListener('keyup', function(e) {
         that.onKeyUp(that.translateKeyCode(e.keyCode))
-      });
+      })
     }
 
     createHero() {
@@ -743,7 +728,7 @@
           that.destroyEntity(that.objects[bodies.find(item => item.type === TYPES.FISH).id])
         },
         [that.hashTypes(TYPES.GULL, TYPES.GROUND)]: function(bodies) {
-          const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id];
+          const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id]
           gull.flyAway()
         },
         [that.hashTypes(TYPES.GROUND, TYPES.SEAL)]: function(bodies) {
@@ -754,12 +739,12 @@
         },
         [that.hashTypes(TYPES.HERO, TYPES.SEAL)]: function(bodies, point, fixtures) {
           const dive = Boolean(fixtures.find(item => item.dive === true))
-          const enemy = that.objects[bodies.find(item => item.type === TYPES.SEAL).id];
+          const enemy = that.objects[bodies.find(item => item.type === TYPES.SEAL).id]
 
           that.handleEnemyHeroCollision(enemy, point, dive)
         },
         [that.hashTypes(TYPES.GULL, TYPES.HERO)]: function(bodies, point) {
-          const enemy = that.objects[bodies.find(item => item.type === TYPES.GULL).id];
+          const enemy = that.objects[bodies.find(item => item.type === TYPES.GULL).id]
           that.handleEnemyHeroCollision(enemy, point)
         },
         [that.hashTypes(TYPES.FISH, TYPES.SEAL)]: function(bodies) {
@@ -782,23 +767,23 @@
           }
         },
         [that.hashTypes(TYPES.MALE, TYPES.OFFSCREEN)]: function(bodies) {
-          const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id];
+          const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id]
           that.destroyEntity(male.abductor)
           that.destroyEntity(male)
         },
         [that.hashTypes(TYPES.SEAL, TYPES.OFFSCREEN)]: function(bodies) {
-          const seal = that.objects[bodies.find(item => item.type === TYPES.SEAL).id];
+          const seal = that.objects[bodies.find(item => item.type === TYPES.SEAL).id]
           that.destroyEntity(seal)
           that.destroyEntity(seal.abducting)
         },
         [that.hashTypes(TYPES.GULL, TYPES.OFFSCREEN)]: function(bodies) {
-          const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id];
+          const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id]
           that.destroyEntity(gull)
           that.destroyEntity(gull.abducting)
         },
         [that.hashTypes(TYPES.MALE, TYPES.GULL)]: function(bodies) {
-          const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id];
-          const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id];
+          const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id]
+          const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id]
 
           if (gull.abducting) {
             if (!male.abductor) {
@@ -809,9 +794,8 @@
           }
         },
         [that.hashTypes(TYPES.MALE, TYPES.SEAL)]: function(bodies) {
-          const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id];
-          const seal = that.objects[bodies.find(item => item.type === TYPES.SEAL).id];
-
+          const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id]
+          const seal = that.objects[bodies.find(item => item.type === TYPES.SEAL).id]
 
           if (seal.abducting) {
             if (!male.abductor) {
@@ -843,7 +827,7 @@
           style: {
             fill: GREEN,
           },
-          parent: this,
+          game: this,
         }),
         new Text({
           x: 0,
@@ -851,7 +835,7 @@
           style: {
             fill: GREEN,
           },
-          parent: this,
+          game: this,
         })
       ]
 
@@ -860,7 +844,7 @@
         prefix: 'SCORE: ',
         x: 30,
         y: 25,
-        parent: this,
+        game: this,
       })
 
       this.pointDisplay.show(String(this.points))
@@ -869,10 +853,10 @@
         prefix: 'WINTER: ',
         x: 30,
         y: 20,
-        parent: this,
+        game: this,
       })
 
-      this.healthBar = new HealthBar(this);
+      this.healthBar = new HealthBar(this)
     }
 
     setupWorld() {
@@ -970,7 +954,7 @@
       this.paused = true
       this.textDisplays[0].show(`GAME OVER: ${this.gameOverReason}`, {
         fill: RED,
-      });
+      })
 
       this.healthBar.hide()
 
@@ -979,7 +963,7 @@
       this.resetButton = new Button({
         x: 0,
         y: -2,
-        parent: this,
+        game: this,
         style: {
           fill: GREEN,
         },
@@ -995,7 +979,7 @@
       this.menuButton = new Button({
         x: CONSTANTS.HEALTH_BAR.X,
         y: CONSTANTS.HEALTH_BAR.Y,
-        parent: this,
+        game: this,
         style: {
           fill: YELLOW,
         }
@@ -1011,7 +995,7 @@
     }
 
     resetBodies() {
-      this.healthBar.graphics.clear();
+      this.healthBar.graphics.clear()
 
       Object.keys(this.objects).forEach((id) => {
         this.destroyEntity(this.objects[id])
@@ -1052,10 +1036,6 @@
       this.pointDisplay.show(String(this.points))
     }
 
-    typeComplete(type) {
-      return this.winterStats[type].destroyed === this.winterStats[type].total
-    }
-
     spawnEnemies() {
       CONSTANTS.ENEMY_TYPES.forEach((type) => {
         if (this.toCreateEnemy(type)) {
@@ -1090,14 +1070,14 @@
     }
 
     createBlockDisplay(graphics, x1, y1, x2, y2, color) {
-      graphics.beginFill(color, 1);
+      graphics.beginFill(color, 1)
       graphics.drawRect(
         mpx(x1),
         mpy(y1),
         mpx(x2) - mpx(x1),
         mpy(y2) - mpy(y1)
       )
-      graphics.endFill();
+      graphics.endFill()
     }
 
     createBlock(graphics, body, box2dOpts, display, x1, y1, x2, y2) {
@@ -1109,8 +1089,8 @@
     }
 
     createBorders() {
-      const graphics = new PIXI.Graphics();
-      this.container.addChild(graphics);
+      const graphics = new PIXI.Graphics()
+      this.container.addChild(graphics)
 
       const offscreenDetectors = this.world.createBody()
       const wall = this.world.createBody()
@@ -1174,14 +1154,14 @@
   }
 
   class HealthBar {
-    constructor(parent) {
-      this.game = parent
-      this.graphics = new PIXI.Graphics();
-      this.game.container.addChild(this.graphics);
+    constructor(game) {
+      this.game = game
+      this.graphics = new PIXI.Graphics()
+      this.game.container.addChild(this.graphics)
     }
 
     hide() {
-      this.game.container.removeChild(this.graphics);
+      this.game.container.removeChild(this.graphics)
     }
 
     update(health) {
@@ -1190,11 +1170,11 @@
       }
 
       if (health) {
-        this.body = this.game.world.createBody(Vec2(CONSTANTS.HEALTH_BAR.X, CONSTANTS.HEALTH_BAR.Y));
+        this.body = this.game.world.createBody(Vec2(CONSTANTS.HEALTH_BAR.X, CONSTANTS.HEALTH_BAR.Y))
 
         this.body.createFixture(planck.Box(CONSTANTS.HEALTH_BAR.MAX_WIDTH * (health / CONSTANTS.HERO.HEALTH.MAX), 0.5), {
           filterGroupIndex: 99,
-        });
+        })
 
         let color
         let bitColor
@@ -1210,7 +1190,7 @@
           bitColor = BIT_RED
         }
 
-        this.graphics.clear();
+        this.graphics.clear()
 
         this.game.createBlockDisplay(
           this.graphics,
@@ -1234,9 +1214,9 @@
       x,
       y,
       style,
-      parent
+      game
     }) {
-      this.parent = parent
+      this.game = game
       this.prefix = prefix
       this.x = x
       this.y = y
@@ -1247,31 +1227,31 @@
     }
 
     show(text, style) {
-      this.parent.container.removeChild(this.text)
+      this.game.container.removeChild(this.text)
 
       this.text = new PIXI.Text(`${this.prefix} ${text}`, {
         ...this.style,
         ...style,
-      });
+      })
 
       this.text.anchor.set(0.5)
       this.text.x = mpx(this.x)
       this.text.y = mpy(this.y)
 
-      this.parent.container.addChild(this.text);
+      this.game.container.addChild(this.text)
     }
 
     hide() {
       if (this.text) {
-        this.parent.container.removeChild(this.text)
+        this.game.container.removeChild(this.text)
         this.text = null
       }
     }
   }
 
   class Friend {
-    constructor(parent) {
-      this.game = parent
+    constructor(game) {
+      this.game = game
       this.id = this.game.createId()
       this.game.objects[this.id] = this
     }
@@ -1283,8 +1263,8 @@
   }
 
   class Male extends Friend {
-    constructor(parent) {
-      super(parent)
+    constructor(game) {
+      super(game)
       this.velocity = CONSTANTS.MALE.SPEED
       this.alive = true
       this.abductor = null
@@ -1357,17 +1337,17 @@
     setupSprite() {
       const animationStartIndex = Math.floor(Math.random() * 2)
       const sprite = getAnimatedSprite('male:neutral:{i}.png', 2)
-      sprite.gotoAndPlay(animationStartIndex);
+      sprite.gotoAndPlay(animationStartIndex)
       sprite.animationSpeed = CONSTANTS.MALE.ANIMATION_SPEED.STANDARD
       sprite.anchor.set(0.5)
 
       const spriteNormals = getAnimatedSprite('male:neutral:normal:{i}.png', 2)
-      spriteNormals.gotoAndPlay(animationStartIndex);
+      spriteNormals.gotoAndPlay(animationStartIndex)
       spriteNormals.animationSpeed = CONSTANTS.MALE.ANIMATION_SPEED.STANDARD
       spriteNormals.anchor.set(0.5)
 
       const spriteShadows = getAnimatedSprite('male:neutral:{i}.png', 2)
-      spriteShadows.gotoAndPlay(animationStartIndex);
+      spriteShadows.gotoAndPlay(animationStartIndex)
       spriteShadows.animationSpeed = CONSTANTS.MALE.ANIMATION_SPEED.STANDARD
       spriteShadows.anchor.set(0.5)
 
@@ -1414,14 +1394,14 @@
     constructor({
       damage,
       health,
-      parent,
+      game,
     }) {
       this.alive = true
       this.damage = damage
       this.health = health
       this.invincibilityTime = 0
 
-      this.game = parent
+      this.game = game
       this.id = this.game.createId()
       this.game.objects[this.id] = this
     }
@@ -1454,11 +1434,11 @@
   }
 
   class Seal extends Foe {
-    constructor(parent, direction) {
+    constructor(game, direction) {
       super({
         damage: CONSTANTS.SEAL.DAMAGE,
         health: CONSTANTS.SEAL.HEALTH,
-        parent,
+        game,
       })
 
       this.direction = direction
@@ -1485,17 +1465,17 @@
     setupSprite() {
       const animationStartIndex = Math.floor(Math.random() * 4)
       const sprite = getAnimatedSprite('seal:running:{i}.png', 4)
-      sprite.gotoAndPlay(animationStartIndex);
+      sprite.gotoAndPlay(animationStartIndex)
       sprite.animationSpeed = CONSTANTS.SEAL.ANIMATION_SPEED.STANDARD
       sprite.anchor.set(0.5)
 
       const spriteNormals = getAnimatedSprite('seal:running:normal:{i}.png', 4)
-      spriteNormals.gotoAndPlay(animationStartIndex);
+      spriteNormals.gotoAndPlay(animationStartIndex)
       spriteNormals.animationSpeed = CONSTANTS.SEAL.ANIMATION_SPEED.STANDARD
       spriteNormals.anchor.set(0.5)
 
       const spriteShadows = getAnimatedSprite('seal:running:{i}.png', 4)
-      spriteShadows.gotoAndPlay(animationStartIndex);
+      spriteShadows.gotoAndPlay(animationStartIndex)
       spriteShadows.animationSpeed = CONSTANTS.SEAL.ANIMATION_SPEED.STANDARD
       spriteShadows.anchor.set(0.5)
 
@@ -1549,7 +1529,7 @@
         this.body,
         male.body,
         Vec2(0, 0)
-      ));
+      ))
     }
 
     jump() {
@@ -1563,11 +1543,11 @@
   }
 
   class Gull extends Foe {
-    constructor(parent, direction) {
+    constructor(game, direction) {
       super({
         damage: CONSTANTS.GULL.DAMAGE,
         health: CONSTANTS.GULL.HEALTH,
-        parent,
+        game,
       })
 
       this.direction = direction
@@ -1594,17 +1574,17 @@
     setupSprite() {
       const animationStartIndex = Math.floor(Math.random() * 2)
       const spriteDiffuse = getAnimatedSprite('gull:flying:{i}.png', 2)
-      spriteDiffuse.gotoAndPlay(animationStartIndex);
+      spriteDiffuse.gotoAndPlay(animationStartIndex)
       spriteDiffuse.animationSpeed = CONSTANTS.GULL.ANIMATION_SPEED.STANDARD
       spriteDiffuse.anchor.set(0.5)
 
       const spriteNormals = getAnimatedSprite('gull:flying:normal:{i}.png', 2)
-      spriteNormals.gotoAndPlay(animationStartIndex);
+      spriteNormals.gotoAndPlay(animationStartIndex)
       spriteNormals.animationSpeed = CONSTANTS.GULL.ANIMATION_SPEED.STANDARD
       spriteNormals.anchor.set(0.5)
 
       const spriteShadows = getAnimatedSprite('gull:flying:{i}.png', 2)
-      spriteShadows.gotoAndPlay(animationStartIndex);
+      spriteShadows.gotoAndPlay(animationStartIndex)
       spriteShadows.animationSpeed = CONSTANTS.GULL.ANIMATION_SPEED.STANDARD
       spriteShadows.anchor.set(0.5)
 
@@ -1659,7 +1639,7 @@
         this.body,
         male.body,
         Vec2(0, 0)
-      ));
+      ))
     }
 
     destroySprites() {
@@ -1693,11 +1673,11 @@
       x,
       y,
       direction,
-      parent,
+      game,
     }) {
       this.alive = true
       this.damage = CONSTANTS.FISH.DAMAGE
-      this.game = parent
+      this.game = game
 
       this.body = this.game.world.createBody({
         position: Vec2(x, y),
@@ -1713,7 +1693,7 @@
 
       this.setupSprite()
 
-      this.body.setAngularVelocity(Math.random() * Math.PI * 10 - (Math.PI * 5));
+      this.body.setAngularVelocity(Math.random() * Math.PI * 10 - (Math.PI * 5))
 
       this.game.assignType(this, TYPES.FISH)
 
@@ -1761,13 +1741,13 @@
       texture = CONSTANTS.HERO.TRAIL.TEXTURE,
       smoothness = 100,
       length = 20,
-      parent,
+      game,
     }) {
       this.texture = texture
-      this.parent = parent
+      this.game = game
       this.smoothness = smoothness
       this.length = length
-      this.points = [];
+      this.points = []
 
       this.history = {
         x: new Array(this.length).fill(mpx(x)),
@@ -1778,47 +1758,50 @@
     }
 
     destroy() {
-      this.parent.container.removeChild(this.rope)
+      this.game.container.removeChild(this.rope)
     }
 
     createRope(x, y) {
-      this.points = [];
+      this.points = []
 
       for (let i = 0; i < this.smoothness; i++) {
-        this.points.push(new PIXI.Point(mpx(x), mpy(y)));
+        this.points.push(new PIXI.Point(mpx(x), mpy(y)))
       }
 
-      this.rope = new PIXI.mesh.Rope(this.texture, this.points);
-      this.rope.blendmode = PIXI.BLEND_MODES.ADD;
-      this.parent.container.addChild(this.rope);
+      this.rope = new PIXI.mesh.Rope(this.texture, this.points)
+      this.rope.blendmode = PIXI.BLEND_MODES.ADD
+      this.game.container.addChild(this.rope)
     }
 
     update(x, y, show) {
       this.rope.alpha = show ? 1 : 0
 
-      this.history.x.unshift(x);
-      this.history.y.unshift(y);
-      this.history.x.pop();
-      this.history.y.pop();
+      this.history.x.unshift(x)
+      this.history.y.unshift(y)
+      this.history.x.pop()
+      this.history.y.pop()
 
       for (let i = 0; i < this.smoothness; i++) {
         const iterator = i / this.smoothness * this.length
         const point = this.points[i]
 
-        point.x = cubicInterpolation(this.history.x, iterator);
-        point.y = cubicInterpolation(this.history.y, iterator);
+        point.x = cubicInterpolation(this.history.x, iterator)
+        point.y = cubicInterpolation(this.history.y, iterator)
       }
     }
   }
 
   class Hero {
-    constructor(parent) {
-      this.game = parent
+    constructor(game) {
+      this.game = game
       this.alive = true
       this.health = CONSTANTS.HERO.HEALTH.MAX
       this.invincibilityTime = 0
       this.fishThrowTime = 0
       this.damage = CONSTANTS.HERO.DAMAGE
+      this.jumps = CONSTANTS.HERO.JUMP.MAX
+      this.speed = CONSTANTS.HERO.SPEED
+
       this.bodyOpts = {
         filterCategoryBits: CATEGORIES.HERO,
         filterMaskBits: MASKS.HERO,
@@ -1832,7 +1815,13 @@
       }
 
       this.setupSprite()
+      this.setupBody()
 
+      this.game.assignType(this, TYPES.HERO)
+      this.game.healthBar.update(this.health)
+    }
+
+    setupBody() {
       this.body = this.game.world.createBody({
         position: Vec2(CONSTANTS.HERO.SPAWN.X, CONSTANTS.HERO.SPAWN.Y),
         type: 'dynamic',
@@ -1840,18 +1829,11 @@
         allowSleep: false
       })
 
-      this.game.assignType(this, TYPES.HERO)
-
       this.body.createFixture(planck.Box(CONSTANTS.HERO.HITBOX.WIDTH, CONSTANTS.HERO.HITBOX.HEIGHT), this.bodyOpts)
 
       this.body.render = {
         stroke: GREEN
       }
-
-      this.jumps = CONSTANTS.HERO.JUMP.MAX
-      this.speed = CONSTANTS.HERO.SPEED
-
-      this.game.healthBar.update(this.health)
     }
 
     getNeutralSprite() {
@@ -1859,17 +1841,17 @@
 
       const animationStartIndex = Math.floor(Math.random() * 2)
       const spriteDiffuse = getAnimatedSprite('hero:neutral:{i}.png', 2)
-      spriteDiffuse.gotoAndPlay(animationStartIndex);
+      spriteDiffuse.gotoAndPlay(animationStartIndex)
       spriteDiffuse.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.NEUTRAL]
       spriteDiffuse.anchor.set(0.5)
 
       const spriteNormals = getAnimatedSprite('hero:neutral:normal:{i}.png', 2)
-      spriteNormals.gotoAndPlay(animationStartIndex);
+      spriteNormals.gotoAndPlay(animationStartIndex)
       spriteNormals.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.NEUTRAL]
       spriteNormals.anchor.set(0.5)
 
       const spriteShadows = getAnimatedSprite('hero:neutral:{i}.png', 2)
-      spriteShadows.gotoAndPlay(animationStartIndex);
+      spriteShadows.gotoAndPlay(animationStartIndex)
       spriteShadows.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.NEUTRAL]
       spriteShadows.anchor.set(0.5)
 
@@ -1884,17 +1866,17 @@
 
       const animationStartIndex = Math.floor(Math.random() * 2)
       const spriteDiffuse = getAnimatedSprite('hero:running:{i}.png', 2)
-      spriteDiffuse.gotoAndPlay(animationStartIndex);
+      spriteDiffuse.gotoAndPlay(animationStartIndex)
       spriteDiffuse.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.RUNNING]
       spriteDiffuse.anchor.set(0.5)
 
       const spriteNormals = getAnimatedSprite('hero:running:normal:{i}.png', 2)
-      spriteNormals.gotoAndPlay(animationStartIndex);
+      spriteNormals.gotoAndPlay(animationStartIndex)
       spriteNormals.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.RUNNING]
       spriteNormals.anchor.set(0.5)
 
       const spriteShadows = getAnimatedSprite('hero:running:{i}.png', 2)
-      spriteShadows.gotoAndPlay(animationStartIndex);
+      spriteShadows.gotoAndPlay(animationStartIndex)
       spriteShadows.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.RUNNING]
       spriteShadows.anchor.set(0.5)
 
@@ -1909,17 +1891,17 @@
 
       const animationStartIndex = Math.floor(Math.random() * 4)
       const spriteDiffuse = getAnimatedSprite('hero:diving:{i}.png', 4)
-      spriteDiffuse.gotoAndPlay(animationStartIndex);
+      spriteDiffuse.gotoAndPlay(animationStartIndex)
       spriteDiffuse.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.DIVING]
       spriteDiffuse.anchor.set(0.5)
 
       const spriteNormals = getAnimatedSprite('hero:diving:normal:{i}.png', 4)
-      spriteNormals.gotoAndPlay(animationStartIndex);
+      spriteNormals.gotoAndPlay(animationStartIndex)
       spriteNormals.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.DIVING]
       spriteNormals.anchor.set(0.5)
 
       const spriteShadows = getAnimatedSprite('hero:diving:{i}.png', 4)
-      spriteShadows.gotoAndPlay(animationStartIndex);
+      spriteShadows.gotoAndPlay(animationStartIndex)
       spriteShadows.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED[states.DIVING]
       spriteShadows.anchor.set(0.5)
 
@@ -1936,7 +1918,7 @@
         texture: CONSTANTS.HERO.TRAIL.TEXTURE,
         smoothness: CONSTANTS.HERO.TRAIL.SMOOTHNESS,
         length: CONSTANTS.HERO.TRAIL.LENGTH,
-        parent: this.game,
+        game: this.game,
       })
 
       const states = CONSTANTS.HERO.MOVEMENT_STATES
@@ -1966,6 +1948,20 @@
       this.trail.destroy()
     }
 
+    onStep() {
+      if (this.invincibilityTime) {
+        if (this.invincibilityTime > (CONSTANTS.HERO.INVINCIBILITY_INTERVAL - CONSTANTS.SHAKE.DURATION)) {
+          this.game.shake()
+        }
+
+        this.invincibilityTime -= 1
+      }
+
+      if (this.fishThrowTime) {
+        this.fishThrowTime -= 1
+      }
+    }
+
     /**
      * @param {Integer} damage - damage dealt
      */
@@ -1989,16 +1985,16 @@
         return
       }
 
+      this.fishThrowTime = CONSTANTS.HERO.THROW_INTERVAL
+
       const pos = this.body.getPosition()
 
       new Fish({
         x: pos.x,
         y: pos.y,
         direction: this.state.direction,
-        parent: this.game,
+        game: this.game,
       })
-
-      this.fishThrowTime = CONSTANTS.HERO.THROW_INTERVAL
     }
 
     dive() {
@@ -2117,7 +2113,6 @@
 
       this.setActiveSprite()
       this.activeSprite.position.set(mpx(pos.x), mpy(pos.y))
-
       this.trail.update(mpx(pos.x), mpy(pos.y), this.state.airborne)
     }
   }
@@ -2138,26 +2133,15 @@
 
   class Menu {
     constructor() {
-      const that = this
       this.container = new PIXI.Container()
       stage.addChild(this.container)
 
-      // resetStage()
+      this.setupBackground()
+      this.setupText()
+    }
 
-      const diffuse = new PIXI.Sprite.fromImage(CONSTANTS.BACKGROUND.DIFFUSE);
-      const normals = new PIXI.Sprite.fromImage(CONSTANTS.BACKGROUND.NORMAL);
-      diffuse.parentGroup = PIXI.lights.diffuseGroup;
-      normals.parentGroup = PIXI.lights.normalGroup;
-
-      const light = new PIXI.lights.PointLight(0xffffff, 200);
-      light.x = 100;
-      light.y = 0;
-
-      this.container.addChild(
-          normals,
-          diffuse,
-          light
-      );
+    setupText() {
+      const that = this
 
       this.title = new Text({
         x: 0,
@@ -2165,13 +2149,13 @@
         style: {
           fill: GREEN,
         },
-        parent: this,
+        game: this,
       })
 
       this.startButton = new Button({
         x: 0,
         y: 5,
-        parent: this,
+        game: this,
       })
 
       this.startButton.show({
@@ -2184,6 +2168,23 @@
       this.title.show('PENGUIN DEFENDER')
     }
 
+    setupBackground() {
+      const diffuse = new PIXI.Sprite.fromImage(CONSTANTS.BACKGROUND.DIFFUSE)
+      const normals = new PIXI.Sprite.fromImage(CONSTANTS.BACKGROUND.NORMAL)
+      diffuse.parentGroup = PIXI.lights.diffuseGroup
+      normals.parentGroup = PIXI.lights.normalGroup
+
+      const light = new PIXI.lights.PointLight(0xffffff, 200)
+      light.x = 100
+      light.y = 0
+
+      this.container.addChild(
+          normals,
+          diffuse,
+          light
+      )
+    }
+
     startGame() {
       stage.removeChild(this.container)
 
@@ -2191,7 +2192,7 @@
 
       window.requestAnimationFrame(function() {
         game.onStep()
-      });
+      })
     }
   }
 
@@ -2211,7 +2212,7 @@
       .add('gull_flying_normal_spritesheet', '/assets/gull/spritesheets/flying.normal.json')
       .load(() => {
         new Menu()
-      });
+      })
   })()
 })()
 
