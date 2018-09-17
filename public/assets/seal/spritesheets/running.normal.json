@@ -1,0 +1,95 @@
+{
+  "frames": {
+    "seal:running:normal:1.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 34
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 34
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 34
+      }
+    },
+    "seal:running:normal:2.png": {
+      "frame": {
+        "x": 64,
+        "y": 0,
+        "w": 64,
+        "h": 34
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 64,
+        "y": 0,
+        "w": 64,
+        "h": 34
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 34
+      }
+    },
+    "seal:running:normal:3.png": {
+      "frame": {
+        "x": 0,
+        "y": 34,
+        "w": 64,
+        "h": 34
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 34,
+        "w": 64,
+        "h": 34
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 34
+      }
+    },
+    "seal:running:normal:4.png": {
+      "frame": {
+        "x": 64,
+        "y": 34,
+        "w": 64,
+        "h": 34
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 64,
+        "y": 34,
+        "w": 64,
+        "h": 34
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 34
+      }
+    }
+  },
+  "meta": {
+    "app": "http://www.penguindefender.com",
+    "version": "1.0",
+    "image": "/assets/seal/spritesheets/running.normal.masked.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 128,
+      "h": 68
+    },
+    "scale": "1"
+  }
+}

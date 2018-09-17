@@ -1,0 +1,95 @@
+{
+  "frames": {
+    "hero:attacking:normal:1.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 100,
+        "h": 51
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 100,
+        "h": 51
+      },
+      "sourceSize": {
+        "w": 100,
+        "h": 51
+      }
+    },
+    "hero:attacking:normal:2.png": {
+      "frame": {
+        "x": 100,
+        "y": 0,
+        "w": 100,
+        "h": 51
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 100,
+        "y": 0,
+        "w": 100,
+        "h": 51
+      },
+      "sourceSize": {
+        "w": 100,
+        "h": 51
+      }
+    },
+    "hero:attacking:normal:3.png": {
+      "frame": {
+        "x": 0,
+        "y": 51,
+        "w": 100,
+        "h": 51
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 51,
+        "w": 100,
+        "h": 51
+      },
+      "sourceSize": {
+        "w": 100,
+        "h": 51
+      }
+    },
+    "hero:attacking:normal:4.png": {
+      "frame": {
+        "x": 100,
+        "y": 51,
+        "w": 100,
+        "h": 51
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 100,
+        "y": 51,
+        "w": 100,
+        "h": 51
+      },
+      "sourceSize": {
+        "w": 100,
+        "h": 51
+      }
+    }
+  },
+  "meta": {
+    "app": "http://www.penguindefender.com",
+    "version": "1.0",
+    "image": "/assets/hero/spritesheets/attacking.normal.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 200,
+      "h": 102
+    },
+    "scale": "1"
+  }
+}

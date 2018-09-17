@@ -3,62 +3,8 @@
  */
 (function main() {
   /**
-   * Cubic interpolation based on https://github.com/osuushi/Smooth.js
-   * @param	k
-   * @return
+   * Constants
    */
-  function clipInput(k, arr) {
-    if (k <= 0) {
-      return arr[0];
-    }
-    if (k >= arr.length - 1) {
-      return arr[arr.length - 1];
-    }
-
-    return arr[k];
-  }
-
-  function getTangent(k, factor, array) {
-    return factor * (clipInput(k + 1, array) - clipInput(k - 1, array)) / 2;
-  }
-
-  function cubicInterpolation(array, t, tangentFactor) {
-    if (tangentFactor == null) tangentFactor = 1;
-
-    const k = Math.floor(t);
-    const m = [getTangent(k, tangentFactor, array), getTangent(k + 1, tangentFactor, array)];
-    const p = [clipInput(k, array), clipInput(k + 1, array)];
-    t -= k;
-    const t2 = t * t;
-    const t3 = t * t2;
-    return (2 * t3 - 3 * t2 + 1) * p[0] + (t3 - 2 * t2 + t) * m[0] + ( -2 * t3 + 3 * t2) * p[1] + (t3 - t2) * m[1];
-  }
-
-  const pscale = 13;
-
-  function getAnimatedSprite(nameTemplate, max) {
-    const textures = [];
-
-    for (let i = 1; i <= max; i++) {
-      textures.push(PIXI.Texture.fromFrame(nameTemplate.replace('{i}', i)));
-    }
-
-    return new PIXI.extras.AnimatedSprite(textures)
-  }
-
-  function mpx(m) {
-    return m * pscale + (window.innerWidth / 2.3);
-  }
-
-  function mpy(m) {
-    return window.innerHeight * 0.5 - (m * pscale);
-  }
-
-  const app = new PIXI.Application(window.innerWidth * 0.9, window.innerHeight * 0.9)
-
-  document.getElementById('content').appendChild(app.view);
-  app.view.style.position = 'absolute';
-  app.view.style.border = '1px solid #222222';
 
   const CATEGORIES = Object.freeze({
     FOE: 0x0001,
@@ -188,7 +134,6 @@
       THROW_X: 20,
       THROW_Y: 50,
       THROW_INTERVAL: 25,
-      TEXTURE: PIXI.Texture.fromImage('assets/fish.png'),
       BOX_WIDTH: 1,
       BOX_HEIGHT: 0.6,
     }),
@@ -224,6 +169,10 @@
       BOX_HEIGHT: 0.6,
       ANIMATION_SPEED_FLYING: 0.1,
     }),
+    SUN: Object.freeze({
+      MIN_X: 100,
+      MAX_X: 400,
+    }),
     GLOBAL: Object.freeze({
       TIME_STEP: 1 / 30,
       INVINCIBILITY_INTERVAL: 30,
@@ -233,7 +182,8 @@
       BORDER_X_LEFT: -40,
       OFFSCREEN_X_RIGHT: 55,
       OFFSCREEN_X_LEFT: -55,
-      BACKGROUND_TEXTURE: PIXI.Texture.fromImage('assets/mountains.png'),
+      BACKGROUND_PATH: 'assets/mountains.png',
+      BACKGROUND_NORMAL_PATH: 'assets/mountains.normal.clouds.light.png',
       WINTER_COUNTDOWN_TIME: 50,
       WINTER_INTERIM_TIME: 1500,
     }),
@@ -241,6 +191,62 @@
       TEXTURE: PIXI.Texture.fromImage('assets/menu.png'),
     }),
   })
+
+  /**
+   * PIXI setup
+   */
+
+  const app = new PIXI.Application({
+    backgroundColor: 0x000000,
+    width: window.innerWidth * 0.9,
+    height: window.innerHeight * 0.9,
+  });
+
+  stage = PIXI.shadows.init(app);
+  PIXI.shadows.filter.ambientLight = 0.3;
+
+  document.getElementById('content').appendChild(app.view);
+  app.view.style.position = 'absolute';
+  app.view.style.border = '1px solid #222222';
+
+
+  /**
+   * Helper functions
+   */
+
+  function assembleBasicSprite(diffuseSprite, normalSprite, shadowSprite) {
+    const container = new PIXI.Container();
+
+    diffuseSprite.parentGroup = PIXI.lights.diffuseGroup;
+    container.addChild(diffuseSprite);
+
+    normalSprite.parentGroup = PIXI.lights.normalGroup;
+    container.addChild(normalSprite);
+
+    if (shadowSprite) {
+      shadowSprite.parentGroup = PIXI.shadows.casterGroup;
+        container.addChild(shadowSprite);
+    }
+
+    return container;
+  }
+
+  function createShadowCastingLight(radius, intensity, color) {
+    const container = new PIXI.Container();
+
+    const pixiLight = new PIXI.lights.PointLight(color, intensity);
+    container.addChild(pixiLight);
+
+    const shadow = new PIXI.shadows.Shadow(radius, 0.2);
+    shadow.pointCount = 5
+    shadow.range = 1000
+    shadow.scatterRange = 4
+    shadow.radialResolution = 600
+    shadow.depthResolution = 1
+    container.addChild(shadow);
+
+    return container;
+}
 
   const Vec2 = planck.Vec2
 
@@ -250,6 +256,68 @@
       : 0
   }
 
+  /**
+   * Cubic interpolation based on https://github.com/osuushi/Smooth.js
+   * @param	k
+   * @return
+   */
+  function clipInput(k, arr) {
+    if (k <= 0) {
+      return arr[0];
+    }
+    if (k >= arr.length - 1) {
+      return arr[arr.length - 1];
+    }
+
+    return arr[k];
+  }
+
+  function getTangent(k, factor, array) {
+    return factor * (clipInput(k + 1, array) - clipInput(k - 1, array)) / 2;
+  }
+
+  function cubicInterpolation(array, t, tangentFactor) {
+    if (tangentFactor == null) tangentFactor = 1;
+
+    const k = Math.floor(t);
+    const m = [getTangent(k, tangentFactor, array), getTangent(k + 1, tangentFactor, array)];
+    const p = [clipInput(k, array), clipInput(k + 1, array)];
+    t -= k;
+    const t2 = t * t;
+    const t3 = t * t2;
+    return (2 * t3 - 3 * t2 + 1) * p[0] + (t3 - 2 * t2 + t) * m[0] + ( -2 * t3 + 3 * t2) * p[1] + (t3 - t2) * m[1];
+  }
+
+  const pscale = 13;
+
+  /**
+   * Build sprite from spritesheet data
+   */
+  function getAnimatedSprite(nameTemplate, max) {
+    const textures = [];
+
+    for (let i = 1; i <= max; i++) {
+      textures.push(PIXI.Texture.fromFrame(nameTemplate.replace('{i}', i)));
+    }
+
+    return new PIXI.extras.AnimatedSprite(textures)
+  }
+
+  /**
+   * Scaling for render
+   */
+
+  function mpx(m) {
+    return m * pscale + (window.innerWidth / 2.3);
+  }
+
+  function mpy(m) {
+    return window.innerHeight * 0.5 - (m * pscale);
+  }
+
+  /**
+   * Game
+   */
   class Game {
     constructor() {
       this.reset()
@@ -274,11 +342,48 @@
 
     setupContainer() {
       if (this.container) {
-        app.stage.removeChild(this.container)
+        stage.removeChild(this.container)
       }
 
-      this.container = new PIXI.Container();
-      app.stage.addChild(this.container);
+      this.container = new PIXI.Container()
+      stage.addChild(this.container)
+
+      // resetStage()
+
+      // move into single background object
+      const backgroundDiffuse = PIXI.Sprite.fromImage(SETTINGS.GLOBAL.BACKGROUND_PATH, true);
+      backgroundDiffuse.width = app.screen.width;
+      backgroundDiffuse.height = app.screen.height;
+      backgroundDiffuse.zOrder = -3
+
+      const backgroundNormals = PIXI.Sprite.fromImage(SETTINGS.GLOBAL.BACKGROUND_NORMAL_PATH);
+      backgroundNormals.width = app.screen.width;
+      backgroundNormals.height = app.screen.height;
+      backgroundNormals.zOrder = -3
+
+      const background = assembleBasicSprite(backgroundDiffuse, backgroundNormals)
+
+      this.ambientLight = new PIXI.lights.AmbientLight(null, 10)
+      this.directionalLight = new PIXI.lights.DirectionalLight(null, 10, new PIXI.Point(300, 300));
+
+      this.shadowCastingLight = createShadowCastingLight(1000, 20, 0x1111cc);
+      this.shadowCastingLight.position.set(0, 0);
+
+      this.container.addChild(
+        background,
+        this.ambientLight,
+        this.directionalLight,
+        this.shadowCastingLight,
+      );
+
+      // app.stage.addChild(
+      //     // put all layers for deferred rendering of normals
+      //     new PIXI.display.Layer(PIXI.lights.diffuseGroup),
+      //     new PIXI.display.Layer(PIXI.lights.normalGroup),
+      //     new PIXI.display.Layer(PIXI.lights.lightGroup),
+      //     // Add the lights and images
+      //     this.container
+      // );
     }
 
     startWinterCountdown() {
@@ -409,8 +514,13 @@
       }
     }
 
+    moveSun() {
+      this.spotlight.color = `0x${String(Math.floor(50 - this.spotlight.x * (50 / app.screen.width))).padStart(2, '0')}${String(Math.floor(this.spotlight.x * (100 / app.screen.width))).padStart(2, '0')}ff`
+      this.spotlight.x = this.hero.activeSprite.x
+    }
+
     onStepPauseIndependent() {
-      // nothing yet
+      // this.moveSun()
     }
 
     winterCountdown() {
@@ -694,10 +804,6 @@
         })
       ]
 
-      this.background = new PIXI.Sprite(SETTINGS.GLOBAL.BACKGROUND_TEXTURE)
-      this.background.zOrder = -3
-      this.container.addChild(this.background)
-
       // must be AFTER background
       this.pointDisplay = new Text({
         prefix: 'SCORE: ',
@@ -847,7 +953,7 @@
       this.menuButton.show({
         text: 'MENU',
         fn: () => {
-          app.stage.removeChild(that.container)
+          stage.removeChild(that.container)
           new Menu()
         }
       })
@@ -1196,19 +1302,24 @@
     }
 
     setupSprite() {
-      const textures = [];
+      const animationStartIndex = Math.floor(Math.random() * 2)
+      const sprite = getAnimatedSprite('male:neutral:{i}.png', 2)
+      sprite.gotoAndPlay(animationStartIndex);
+      sprite.animationSpeed = SETTINGS.MALE.ANIMATION_SPEED_STANDARD
+      sprite.anchor.set(0.5)
 
-      for (let i = 1; i <= 2; i++) {
-        textures.push(PIXI.Texture.fromFrame(`male:neutral:${i}.png`));
-      }
+      const spriteNormals = getAnimatedSprite('male:neutral:normal:{i}.png', 2)
+      spriteNormals.gotoAndPlay(animationStartIndex);
+      spriteNormals.animationSpeed = SETTINGS.MALE.ANIMATION_SPEED_STANDARD
+      spriteNormals.anchor.set(0.5)
 
-      this.sprite = new PIXI.extras.AnimatedSprite(textures);
+      const spriteShadows = getAnimatedSprite('male:neutral:{i}.png', 2)
+      spriteShadows.gotoAndPlay(animationStartIndex);
+      spriteShadows.animationSpeed = SETTINGS.MALE.ANIMATION_SPEED_STANDARD
+      spriteShadows.anchor.set(0.5)
 
-      this.sprite.anchor.set(0.5)
+      this.sprite = assembleBasicSprite(sprite, spriteNormals, spriteShadows)
       this.sprite.visible = false
-      this.sprite.play();
-      this.sprite.animationSpeed = SETTINGS.MALE.ANIMATION_SPEED_STANDARD
-
       this.game.container.addChild(this.sprite)
     }
 
@@ -1283,6 +1394,9 @@
     render() {
       const pos = this.body.getPosition()
       this.sprite.position.set(mpx(pos.x), mpy(pos.y))
+      if (this.spriteNormals) {
+        this.spriteNormals.position.set(mpx(pos.x), mpy(pos.y))
+      }
     }
   }
 
@@ -1312,21 +1426,27 @@
 
     destroySprites() {
       this.game.container.removeChild(this.sprite)
+      this.game.container.removeChild(this.spriteNormals)
     }
 
     setupSprite() {
-      const textures = [];
+      const animationStartIndex = Math.floor(Math.random() * 4)
+      const sprite = getAnimatedSprite('seal:running:{i}.png', 4)
+      sprite.gotoAndPlay(animationStartIndex);
+      sprite.animationSpeed = SETTINGS.SEAL.ANIMATION_SPEED_STANDARD
+      sprite.anchor.set(0.5)
 
-      for (let i = 1; i <= 4; i++) {
-        textures.push(PIXI.Texture.fromFrame(`seal:running:${i}.png`));
-      }
+      const spriteNormals = getAnimatedSprite('seal:running:normal:{i}.png', 4)
+      spriteNormals.gotoAndPlay(animationStartIndex);
+      spriteNormals.animationSpeed = SETTINGS.SEAL.ANIMATION_SPEED_STANDARD
+      spriteNormals.anchor.set(0.5)
 
-      this.sprite = new PIXI.extras.AnimatedSprite(textures);
+      const spriteShadows = getAnimatedSprite('seal:running:{i}.png', 4)
+      spriteShadows.gotoAndPlay(animationStartIndex);
+      spriteShadows.animationSpeed = SETTINGS.SEAL.ANIMATION_SPEED_STANDARD
+      spriteShadows.anchor.set(0.5)
 
-      this.sprite.anchor.set(0.5)
-      this.sprite.gotoAndPlay(Math.floor(Math.random() * 4));
-      this.sprite.animationSpeed = SETTINGS.SEAL.ANIMATION_SPEED_STANDARD
-
+      this.sprite = assembleBasicSprite(sprite, spriteNormals, spriteShadows)
       this.game.container.addChild(this.sprite)
     }
 
@@ -1419,20 +1539,24 @@
     }
 
     setupSprite() {
-      const textures = [];
+      const animationStartIndex = Math.floor(Math.random() * 2)
+      const spriteDiffuse = getAnimatedSprite('gull:flying:{i}.png', 2)
+      spriteDiffuse.gotoAndPlay(animationStartIndex);
+      spriteDiffuse.animationSpeed = SETTINGS.GULL.ANIMATION_SPEED_FLYING
+      spriteDiffuse.anchor.set(0.5)
 
-      for (let i = 1; i <= 2; i++) {
-        textures.push(PIXI.Texture.fromFrame(`gull:flying:${i}.png`));
-      }
+      const spriteNormals = getAnimatedSprite('gull:flying:normal:{i}.png', 2)
+      spriteNormals.gotoAndPlay(animationStartIndex);
+      spriteNormals.animationSpeed = SETTINGS.GULL.ANIMATION_SPEED_FLYING
+      spriteNormals.anchor.set(0.5)
 
-      this.sprite = new PIXI.extras.AnimatedSprite(textures);
+      const spriteShadows = getAnimatedSprite('gull:flying:{i}.png', 2)
+      spriteShadows.gotoAndPlay(animationStartIndex);
+      spriteShadows.animationSpeed = SETTINGS.GULL.ANIMATION_SPEED_FLYING
+      spriteShadows.anchor.set(0.5)
 
-      this.sprite.anchor.set(0.5)
-      this.sprite.gotoAndPlay(Math.floor(Math.random() * 2));
-
+      this.sprite = assembleBasicSprite(spriteDiffuse, spriteNormals, spriteShadows)
       this.sprite.scale.x = this.direction
-      this.sprite.animationSpeed = SETTINGS.GULL.ANIMATION_SPEED_FLYING
-
       this.game.container.addChild(this.sprite)
     }
 
@@ -1531,9 +1655,7 @@
         SETTINGS.FISH.THROW_Y
       ))
 
-      this.sprite = new PIXI.Sprite(SETTINGS.FISH.TEXTURE)
-      this.sprite.anchor.set(0.5);
-      this.game.container.addChild(this.sprite)
+      this.setupSprite()
 
       this.body.setAngularVelocity(Math.random() * Math.PI * 10 - (Math.PI * 5));
 
@@ -1549,6 +1671,20 @@
       this.id = this.game.createId()
       this.game.objects[this.id] = this
       this.body.id = this.id
+    }
+
+    setupSprite() {
+      const spriteDiffuse = new PIXI.Sprite(PIXI.Texture.fromImage('assets/fish.png'))
+      spriteDiffuse.anchor.set(0.5)
+
+      const spriteNormals = new PIXI.Sprite(PIXI.Texture.fromImage('assets/fish.normal.png'))
+      spriteNormals.anchor.set(0.5)
+
+      const spriteShadows = new PIXI.Sprite(PIXI.Texture.fromImage('assets/fish.png'))
+      spriteShadows.anchor.set(0.5)
+
+      this.sprite = assembleBasicSprite(spriteDiffuse, spriteNormals, spriteShadows)
+      this.game.container.addChild(this.sprite)
     }
 
     destroySprites() {
@@ -1663,6 +1799,81 @@
       this.game.healthBar.update(this.health)
     }
 
+    getNeutralSprite() {
+      const states = SETTINGS.HERO.MOVEMENT_STATES
+
+      const animationStartIndex = Math.floor(Math.random() * 2)
+      const spriteDiffuse = getAnimatedSprite('hero:neutral:{i}.png', 2)
+      spriteDiffuse.gotoAndPlay(animationStartIndex);
+      spriteDiffuse.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.NEUTRAL]
+      spriteDiffuse.anchor.set(0.5)
+
+      const spriteNormals = getAnimatedSprite('hero:neutral:normal:{i}.png', 2)
+      spriteNormals.gotoAndPlay(animationStartIndex);
+      spriteNormals.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.NEUTRAL]
+      spriteNormals.anchor.set(0.5)
+
+      const spriteShadows = getAnimatedSprite('hero:neutral:{i}.png', 2)
+      spriteShadows.gotoAndPlay(animationStartIndex);
+      spriteShadows.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.NEUTRAL]
+      spriteShadows.anchor.set(0.5)
+
+      const sprite = assembleBasicSprite(spriteDiffuse, spriteNormals, spriteShadows)
+      this.game.container.addChild(sprite)
+      sprite.visible = false
+      return sprite
+    }
+
+    getRunningSprite() {
+      const states = SETTINGS.HERO.MOVEMENT_STATES
+
+      const animationStartIndex = Math.floor(Math.random() * 2)
+      const spriteDiffuse = getAnimatedSprite('hero:running:{i}.png', 2)
+      spriteDiffuse.gotoAndPlay(animationStartIndex);
+      spriteDiffuse.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.RUNNING]
+      spriteDiffuse.anchor.set(0.5)
+
+      const spriteNormals = getAnimatedSprite('hero:running:normal:{i}.png', 2)
+      spriteNormals.gotoAndPlay(animationStartIndex);
+      spriteNormals.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.RUNNING]
+      spriteNormals.anchor.set(0.5)
+
+      const spriteShadows = getAnimatedSprite('hero:running:{i}.png', 2)
+      spriteShadows.gotoAndPlay(animationStartIndex);
+      spriteShadows.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.RUNNING]
+      spriteShadows.anchor.set(0.5)
+
+      const sprite = assembleBasicSprite(spriteDiffuse, spriteNormals, spriteShadows)
+      this.game.container.addChild(sprite)
+      sprite.visible = false
+      return sprite
+    }
+
+    getAttackingSprite() {
+      const states = SETTINGS.HERO.MOVEMENT_STATES
+
+      const animationStartIndex = Math.floor(Math.random() * 4)
+      const spriteDiffuse = getAnimatedSprite('hero:attacking:{i}.png', 4)
+      spriteDiffuse.gotoAndPlay(animationStartIndex);
+      spriteDiffuse.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.ATTACKING]
+      spriteDiffuse.anchor.set(0.5)
+
+      const spriteNormals = getAnimatedSprite('hero:attacking:normal:{i}.png', 4)
+      spriteNormals.gotoAndPlay(animationStartIndex);
+      spriteNormals.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.ATTACKING]
+      spriteNormals.anchor.set(0.5)
+
+      const spriteShadows = getAnimatedSprite('hero:attacking:{i}.png', 4)
+      spriteShadows.gotoAndPlay(animationStartIndex);
+      spriteShadows.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.ATTACKING]
+      spriteShadows.anchor.set(0.5)
+
+      const sprite = assembleBasicSprite(spriteDiffuse, spriteNormals, spriteShadows)
+      this.game.container.addChild(sprite)
+      sprite.visible = false
+      return sprite
+    }
+
     setupSprite() {
       this.trail = new Trail({
         x: SETTINGS.HERO.START_X,
@@ -1676,9 +1887,9 @@
       const states = SETTINGS.HERO.MOVEMENT_STATES
 
       this.sprites = {
-        [states.ATTACKING]: getAnimatedSprite('hero:attacking:{i}.png', 4),
-        [states.NEUTRAL]: getAnimatedSprite('hero:neutral:{i}.png', 2),
-        [states.RUNNING]: getAnimatedSprite('hero:running:{i}.png', 2),
+        [states.ATTACKING]: this.getAttackingSprite(),
+        [states.NEUTRAL]: this.getNeutralSprite(),
+        [states.RUNNING]: this.getRunningSprite(),
       }
 
       this.stateMappings = {
@@ -1689,18 +1900,7 @@
         [states.RUNNING]: this.sprites[states.RUNNING],
       }
 
-      this.sprites.NEUTRAL.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.NEUTRAL]
-      this.sprites.RUNNING.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.RUNNING]
-      this.sprites.ATTACKING.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.ATTACKING]
-
       this.setActiveSprite(false)
-
-      Object.keys(this.sprites).forEach((key) => {
-        this.sprites[key].anchor.set(0.5)
-        this.sprites[key].visible = false
-        this.sprites[key].animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[key]
-        this.game.container.addChild(this.sprites[key])
-      })
     }
 
     destroySprites() {
@@ -1843,20 +2043,22 @@
       const sprite = this.stateMappings[this.state.action]
 
       if (sprite === this.activeSprite) {
-        this.activeSprite.scale.x = this.state.direction
+        this.activeSprite.scale.x = this.stateMappings[this.state.action] === this.stateMappings.RUNNING
+          ? this.state.direction
+          : 1
         return
       }
 
       if (this.activeSprite) {
         this.activeSprite.visible = false
-        this.activeSprite.stop()
         sprite.animationSpeed = this.activeSprite.animationSpeed
       }
 
       this.activeSprite = sprite
       this.activeSprite.visible = visible
-      this.activeSprite.scale.x = this.state.direction
-      this.activeSprite.play()
+      this.activeSprite.scale.x = this.stateMappings[this.state.action] === this.stateMappings.RUNNING
+        ? this.state.direction
+        : 1
     }
 
     render() {
@@ -1886,13 +2088,25 @@
   class Menu {
     constructor() {
       const that = this
-      this.container = new PIXI.Container();
-      app.stage.addChild(this.container);
+      this.container = new PIXI.Container()
+      stage.addChild(this.container)
 
-      this.background = new PIXI.Sprite(SETTINGS.MENU.TEXTURE)
-      this.background.zOrder = -3
+      // resetStage()
 
-      this.container.addChild(this.background)
+      const diffuse = PIXI.Sprite.fromImage('assets/mountains.png');
+      const normals = PIXI.Sprite.fromImage('assets/mountains.normal.clouds.light.png');
+      diffuse.parentGroup = PIXI.lights.diffuseGroup;
+      normals.parentGroup = PIXI.lights.normalGroup;
+
+      const light = new PIXI.lights.PointLight(0xffffff, 200);
+      light.x = 100;
+      light.y = 0;
+
+      this.container.addChild(
+          normals,
+          diffuse,
+          light
+      );
 
       this.title = new Text({
         x: 0,
@@ -1920,7 +2134,7 @@
     }
 
     startGame() {
-      app.stage.removeChild(this.container)
+      stage.removeChild(this.container)
 
       const game = new Game()
 
@@ -1933,11 +2147,17 @@
   (function setupGame() {
     PIXI.loader
       .add('hero_neutral_spritesheet', '/assets/hero/spritesheets/neutral.json')
+      .add('hero_neutral_normal_spritesheet', '/assets/hero/spritesheets/neutral.normal.json')
       .add('hero_running_spritesheet', '/assets/hero/spritesheets/running.json')
+      .add('hero_running_normal_spritesheet', '/assets/hero/spritesheets/running.normal.json')
       .add('hero_attacking_spritesheet', '/assets/hero/spritesheets/attacking.json')
+      .add('hero_attacking_normal_spritesheet', '/assets/hero/spritesheets/attacking.normal.json')
       .add('male_neutral_spritesheet', '/assets/male/spritesheets/neutral.json')
+      .add('male_neutral_normal_spritesheet', '/assets/male/spritesheets/neutral.normal.json')
       .add('seal_running_spritesheet', '/assets/seal/spritesheets/running.json')
+      .add('seal_running_normal_spritesheet', '/assets/seal/spritesheets/running.normal.json')
       .add('gull_flying_spritesheet', '/assets/gull/spritesheets/flying.json')
+      .add('gull_flying_normal_spritesheet', '/assets/gull/spritesheets/flying.normal.json')
       .load(() => {
         new Menu()
       });
