@@ -1,5 +1,4 @@
 ### QUEUE
-- LOGIC.15
 - LOGIC.16
 - AUDIO.1
 - AUDIO.2
@@ -118,7 +117,8 @@ LOGIC.15
 - [x] clean up Game methods
 
 LOGIC.16
-- [ ] get rid of Menu, incorporate into Game
+- [x] get rid of Menu, incorporate into Game
+- [x] bug fix: fish appears at origin when created
 - [ ] settings: shadows on/off
 - [ ] settings: music on/off
 - [ ] settings: sound effects on/off

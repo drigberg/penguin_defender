@@ -372,7 +372,49 @@
    */
   class Game {
     constructor() {
+      const that = this
+
       this.reset()
+      this.showMainMenu()
+
+      window.requestAnimationFrame(function() {
+        that.onStep()
+      })
+    }
+
+    destroyMainMenu() {
+      if (this.menu) {
+        stage.removeChild(this.menu)
+      }
+    }
+
+    showMainMenu() {
+      const that = this
+
+      this.menu = new PIXI.Container()
+      stage.addChild(this.menu)
+
+      new Text({
+        x: 0,
+        y: 10,
+        style: {
+          fill: GREEN,
+        },
+        container: this.menu,
+        show: 'PENGUIN DEFENDER'
+      })
+
+      new Button({
+        x: 0,
+        y: 5,
+        container: this.menu,
+        show: {
+          fn: () => {
+            that.startWinter()
+          },
+          text: 'PLAY',
+        }
+      })
     }
 
     resetStats() {
@@ -388,11 +430,9 @@
       this.resetStats()
       this.setupContainer()
       this.setupWorld()
-      this.setupDisplay()
       this.createBorders()
       this.setupCollisionHandlers()
       this.setupInteractivity()
-      this.startWinter()
     }
 
     createBackground() {
@@ -542,6 +582,8 @@
     }
 
     startWinter() {
+      this.destroyMainMenu()
+      this.setupDisplay()
       this.resetBodies()
 
       this.over = false
@@ -827,7 +869,7 @@
           style: {
             fill: GREEN,
           },
-          game: this,
+          container: this.container,
         }),
         new Text({
           x: 0,
@@ -835,7 +877,7 @@
           style: {
             fill: GREEN,
           },
-          game: this,
+          container: this.container,
         })
       ]
 
@@ -844,16 +886,15 @@
         prefix: 'SCORE: ',
         x: 30,
         y: 25,
-        game: this,
+        container: this.container,
+        show: String(this.points)
       })
-
-      this.pointDisplay.show(String(this.points))
 
       this.winterDisplay = new Text({
         prefix: 'WINTER: ',
         x: 30,
         y: 20,
-        game: this,
+        container: this.container,
       })
 
       this.healthBar = new HealthBar(this)
@@ -963,7 +1004,7 @@
       this.resetButton = new Button({
         x: 0,
         y: -2,
-        game: this,
+        container: this.container,
         style: {
           fill: GREEN,
         },
@@ -973,13 +1014,14 @@
         text: 'PLAY AGAIN',
         fn: () => {
           that.reset()
+          that.startWinter()
         }
       })
 
       this.menuButton = new Button({
         x: CONSTANTS.HEALTH_BAR.X,
         y: CONSTANTS.HEALTH_BAR.Y,
-        game: this,
+        container: this.container,
         style: {
           fill: YELLOW,
         }
@@ -1214,9 +1256,10 @@
       x,
       y,
       style,
-      game
+      container,
+      show,
     }) {
-      this.game = game
+      this.container = container
       this.prefix = prefix
       this.x = x
       this.y = y
@@ -1224,10 +1267,18 @@
         ...BASE_TEXT_STYLE,
         ...style,
       }
+
+      if (show) {
+        if (show instanceof Array) {
+          this.show(...show)
+        } else {
+          this.show(show)
+        }
+      }
     }
 
     show(text, style) {
-      this.game.container.removeChild(this.text)
+      this.container.removeChild(this.text)
 
       this.text = new PIXI.Text(`${this.prefix} ${text}`, {
         ...this.style,
@@ -1238,12 +1289,12 @@
       this.text.x = mpx(this.x)
       this.text.y = mpy(this.y)
 
-      this.game.container.addChild(this.text)
+      this.container.addChild(this.text)
     }
 
     hide() {
       if (this.text) {
-        this.game.container.removeChild(this.text)
+        this.container.removeChild(this.text)
         this.text = null
       }
     }
@@ -1679,6 +1730,17 @@
       this.damage = CONSTANTS.FISH.DAMAGE
       this.game = game
 
+      this.setupBody(x, y, direction)
+      this.setupSprite()
+
+      this.game.assignType(this, TYPES.FISH)
+
+      this.id = this.game.createId()
+      this.body.id = this.id
+      this.game.objects[this.id] = this
+    }
+
+    setupBody(x, y, direction) {
       this.body = this.game.world.createBody({
         position: Vec2(x, y),
         type: 'dynamic',
@@ -1686,27 +1748,18 @@
         allowSleep: false
       })
 
+      this.body.createFixture(planck.Box(CONSTANTS.FISH.HITBOX.WIDTH, CONSTANTS.FISH.HITBOX.HEIGHT), {
+        filterCategoryBits: CATEGORIES.HERO,
+        filterMaskBits: MASKS.HERO,
+        filterGroupIndex: GROUPS.HERO,
+      })
+
       this.body.setLinearVelocity(Vec2(
         CONSTANTS.FISH.LAUNCH_VELOCITY.X * direction,
         CONSTANTS.FISH.LAUNCH_VELOCITY.Y
       ))
 
-      this.setupSprite()
-
       this.body.setAngularVelocity(Math.random() * Math.PI * 10 - (Math.PI * 5))
-
-      this.game.assignType(this, TYPES.FISH)
-
-      const boxOpts = {
-        filterCategoryBits: CATEGORIES.HERO,
-        filterMaskBits: MASKS.HERO,
-        filterGroupIndex: GROUPS.HERO,
-      }
-
-      this.body.createFixture(planck.Box(CONSTANTS.FISH.HITBOX.WIDTH, CONSTANTS.FISH.HITBOX.HEIGHT), boxOpts)
-      this.id = this.game.createId()
-      this.game.objects[this.id] = this
-      this.body.id = this.id
     }
 
     setupSprite() {
@@ -1721,6 +1774,7 @@
 
       this.sprite = assembleBasicSprite(spriteDiffuse, spriteNormals, spriteShadows)
       this.game.container.addChild(this.sprite)
+      this.sprite.visible = false
     }
 
     destroySprites() {
@@ -1731,6 +1785,7 @@
       const pos = this.body.getPosition()
       this.sprite.position.set(mpx(pos.x), mpy(pos.y))
       this.sprite.rotation = this.body.getAngle()
+      this.sprite.visible = true
     }
   }
 
@@ -2119,7 +2174,16 @@
 
   class Button extends Text {
     constructor(opts) {
-      super(opts)
+      const {
+        show,
+        ...textOpts
+      } = opts
+
+      super(textOpts)
+
+      if (show) {
+        this.show(show)
+      }
     }
 
     show({ text, fn }) {
@@ -2131,70 +2195,6 @@
     }
   }
 
-  class Menu {
-    constructor() {
-      this.container = new PIXI.Container()
-      stage.addChild(this.container)
-
-      this.setupBackground()
-      this.setupText()
-    }
-
-    setupText() {
-      const that = this
-
-      this.title = new Text({
-        x: 0,
-        y: 10,
-        style: {
-          fill: GREEN,
-        },
-        game: this,
-      })
-
-      this.startButton = new Button({
-        x: 0,
-        y: 5,
-        game: this,
-      })
-
-      this.startButton.show({
-        fn: () => {
-          that.startGame()
-        },
-        text: 'PLAY',
-      })
-
-      this.title.show('PENGUIN DEFENDER')
-    }
-
-    setupBackground() {
-      const diffuse = new PIXI.Sprite.fromImage(CONSTANTS.BACKGROUND.DIFFUSE)
-      const normals = new PIXI.Sprite.fromImage(CONSTANTS.BACKGROUND.NORMAL)
-      diffuse.parentGroup = PIXI.lights.diffuseGroup
-      normals.parentGroup = PIXI.lights.normalGroup
-
-      const light = new PIXI.lights.PointLight(0xffffff, 200)
-      light.x = 100
-      light.y = 0
-
-      this.container.addChild(
-          normals,
-          diffuse,
-          light
-      )
-    }
-
-    startGame() {
-      stage.removeChild(this.container)
-
-      const game = new Game()
-
-      window.requestAnimationFrame(function() {
-        game.onStep()
-      })
-    }
-  }
 
   (function setupGame() {
     PIXI.loader
@@ -2211,7 +2211,7 @@
       .add('gull_flying_spritesheet', '/assets/gull/spritesheets/flying.json')
       .add('gull_flying_normal_spritesheet', '/assets/gull/spritesheets/flying.normal.json')
       .load(() => {
-        new Menu()
+        new Game()
       })
   })()
 })()
