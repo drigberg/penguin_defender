@@ -1,6 +1,6 @@
 {
   "frames": {
-    "hero:attacking:1.png": {
+    "hero:diving:normal:1.png": {
       "frame": {
         "x": 0,
         "y": 0,
@@ -20,7 +20,7 @@
         "h": 51
       }
     },
-    "hero:attacking:2.png": {
+    "hero:diving:normal:2.png": {
       "frame": {
         "x": 100,
         "y": 0,
@@ -40,7 +40,7 @@
         "h": 51
       }
     },
-    "hero:attacking:3.png": {
+    "hero:diving:normal:3.png": {
       "frame": {
         "x": 0,
         "y": 51,
@@ -60,7 +60,7 @@
         "h": 51
       }
     },
-    "hero:attacking:4.png": {
+    "hero:diving:normal:4.png": {
       "frame": {
         "x": 100,
         "y": 51,
@@ -84,7 +84,7 @@
   "meta": {
     "app": "http://www.penguindefender.com",
     "version": "1.0",
-    "image": "/assets/hero/spritesheets/attacking.png",
+    "image": "/assets/hero/spritesheets/diving.normal.png",
     "format": "RGBA8888",
     "size": {
       "w": 200,

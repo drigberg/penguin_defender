@@ -98,7 +98,7 @@
         MIN_VELOCITY: 5,
       }),
       ANIMATION_SPEED: Object.freeze({
-        ATTACKING: 0.18,
+        DIVING: 0.18,
         NEUTRAL: 0.03,
         RUNNING: 0.06,
         JUMPING: 0.24,
@@ -107,7 +107,7 @@
         RUNNING: 'RUNNING',
         GLIDING: 'GLIDING',
         NEUTRAL: 'NEUTRAL',
-        ATTACKING: 'ATTACKING',
+        DIVING: 'DIVING',
         JUMPING: 'JUMPING',
       }),
       JUMP: 35,
@@ -119,8 +119,8 @@
       GLIDE_IMPULSE: 2,
       BOX_WIDTH: 1.5,
       BOX_HEIGHT: 2.0,
-      STOMP_BOX_WIDTH: 8.0,
-      STOMP_BOX_HEIGHT: 0.5,
+      DIVE_BOX_WIDTH: 8.0,
+      DIVE_BOX_HEIGHT: 0.5,
       START_X: 0.0,
       START_Y: 5.0,
     }),
@@ -623,7 +623,7 @@
           this.hero.throwFish()
           break
         case 'F':
-          this.hero.stomp()
+          this.hero.dive()
           break
         default:
           // nothing
@@ -634,7 +634,7 @@
 
     onKeyUp(key) {
       this.keys.down[key] = false
-      if (!this.keys.down.RIGHT && !this.keys.down.LEFT && this.hero.state.action !== SETTINGS.HERO.MOVEMENT_STATES.ATTACKING) {
+      if (!this.keys.down.RIGHT && !this.keys.down.LEFT && this.hero.state.action !== SETTINGS.HERO.MOVEMENT_STATES.DIVING) {
         this.hero.state.action = SETTINGS.HERO.MOVEMENT_STATES.NEUTRAL
       }
     }
@@ -702,10 +702,10 @@
           that.objects[bodies.find(item => item.type === TYPES.MALE).id].jumps = SETTINGS.MALE.MAX_JUMPS
         },
         [that.hashTypes(TYPES.HERO, TYPES.SEAL)]: function(bodies, point, fixtures) {
-          const stomp = Boolean(fixtures.find(item => item.stomp === true))
+          const dive = Boolean(fixtures.find(item => item.dive === true))
           const enemy = that.objects[bodies.find(item => item.type === TYPES.SEAL).id];
 
-          that.handleEnemyHeroCollision(enemy, point, stomp)
+          that.handleEnemyHeroCollision(enemy, point, dive)
         },
         [that.hashTypes(TYPES.GULL, TYPES.HERO)]: function(bodies, point) {
           const enemy = that.objects[bodies.find(item => item.type === TYPES.GULL).id];
@@ -856,8 +856,8 @@
       })
     }
 
-    handleEnemyHeroCollision(enemy, point, stomp) {
-      if (stomp || Math.abs(point.normal.y) === 1) {
+    handleEnemyHeroCollision(enemy, point, dive) {
+      if (dive || Math.abs(point.normal.y) === 1) {
         enemy.takeDamage(this.hero.damage)
         this.hero.jumps = SETTINGS.HERO.MAX_JUMPS
       } else {
@@ -1849,23 +1849,23 @@
       return sprite
     }
 
-    getAttackingSprite() {
+    getDivingSprite() {
       const states = SETTINGS.HERO.MOVEMENT_STATES
 
       const animationStartIndex = Math.floor(Math.random() * 4)
-      const spriteDiffuse = getAnimatedSprite('hero:attacking:{i}.png', 4)
+      const spriteDiffuse = getAnimatedSprite('hero:diving:{i}.png', 4)
       spriteDiffuse.gotoAndPlay(animationStartIndex);
-      spriteDiffuse.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.ATTACKING]
+      spriteDiffuse.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.DIVING]
       spriteDiffuse.anchor.set(0.5)
 
-      const spriteNormals = getAnimatedSprite('hero:attacking:normal:{i}.png', 4)
+      const spriteNormals = getAnimatedSprite('hero:diving:normal:{i}.png', 4)
       spriteNormals.gotoAndPlay(animationStartIndex);
-      spriteNormals.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.ATTACKING]
+      spriteNormals.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.DIVING]
       spriteNormals.anchor.set(0.5)
 
-      const spriteShadows = getAnimatedSprite('hero:attacking:{i}.png', 4)
+      const spriteShadows = getAnimatedSprite('hero:diving:{i}.png', 4)
       spriteShadows.gotoAndPlay(animationStartIndex);
-      spriteShadows.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.ATTACKING]
+      spriteShadows.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.DIVING]
       spriteShadows.anchor.set(0.5)
 
       const sprite = assembleBasicSprite(spriteDiffuse, spriteNormals, spriteShadows)
@@ -1887,13 +1887,13 @@
       const states = SETTINGS.HERO.MOVEMENT_STATES
 
       this.sprites = {
-        [states.ATTACKING]: this.getAttackingSprite(),
+        [states.DIVING]: this.getDivingSprite(),
         [states.NEUTRAL]: this.getNeutralSprite(),
         [states.RUNNING]: this.getRunningSprite(),
       }
 
       this.stateMappings = {
-        [states.ATTACKING]: this.sprites[states.ATTACKING],
+        [states.DIVING]: this.sprites[states.DIVING],
         [states.GLIDING]: this.sprites[states.NEUTRAL],
         [states.JUMPING]: this.sprites[states.JUMPING],
         [states.NEUTRAL]: this.sprites[states.NEUTRAL],
@@ -1946,12 +1946,12 @@
       this.fishThrowTime = SETTINGS.FISH.THROW_INTERVAL
     }
 
-    stomp() {
-      if (this.stompFixture) {
+    dive() {
+      if (this.diveFixture) {
         return
       }
 
-      this.state.action = SETTINGS.HERO.MOVEMENT_STATES.ATTACKING
+      this.state.action = SETTINGS.HERO.MOVEMENT_STATES.DIVING
 
       this.body.setLinearVelocity(Vec2(
         this.body.getLinearVelocity().x,
@@ -1959,11 +1959,11 @@
       )
 
       const top = SETTINGS.HERO.BOX_HEIGHT * -1
-      const left = SETTINGS.HERO.STOMP_BOX_WIDTH * -0.5
-      const right = SETTINGS.HERO.STOMP_BOX_WIDTH * 0.5
-      const height = SETTINGS.HERO.STOMP_BOX_HEIGHT
+      const left = SETTINGS.HERO.DIVE_BOX_WIDTH * -0.5
+      const right = SETTINGS.HERO.DIVE_BOX_WIDTH * 0.5
+      const height = SETTINGS.HERO.DIVE_BOX_HEIGHT
 
-      this.stompFixture = this.body.createFixture(
+      this.diveFixture = this.body.createFixture(
         planck.Polygon([
           Vec2(left, top),
           Vec2(right, top),
@@ -1973,7 +1973,7 @@
         this.bodyOpts
       )
 
-      this.stompFixture.stomp = true
+      this.diveFixture.dive = true
     }
 
     glide() {
@@ -1991,7 +1991,7 @@
         return
       }
 
-      if (this.state.action === SETTINGS.HERO.MOVEMENT_STATES.ATTACKING) {
+      if (this.state.action === SETTINGS.HERO.MOVEMENT_STATES.DIVING) {
         this.state.action = SETTINGS.HERO.MOVEMENT_STATES.NEUTRAL
       }
 
@@ -1999,8 +1999,8 @@
       this.activeSprite.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED.RUNNING
       this.jumps = SETTINGS.HERO.MAX_JUMPS
 
-      if (this.stompFixture) {
-        this.game.deferDestroyFixture(this, 'stompFixture')
+      if (this.diveFixture) {
+        this.game.deferDestroyFixture(this, 'diveFixture')
       }
     }
 
@@ -2009,7 +2009,7 @@
      */
     move(direction) {
       this.state.direction = direction
-      if (this.state.action !== SETTINGS.HERO.MOVEMENT_STATES.ATTACKING) {
+      if (this.state.action !== SETTINGS.HERO.MOVEMENT_STATES.DIVING) {
         this.state.action = SETTINGS.HERO.MOVEMENT_STATES.RUNNING
       }
 
@@ -2150,8 +2150,8 @@
       .add('hero_neutral_normal_spritesheet', '/assets/hero/spritesheets/neutral.normal.json')
       .add('hero_running_spritesheet', '/assets/hero/spritesheets/running.json')
       .add('hero_running_normal_spritesheet', '/assets/hero/spritesheets/running.normal.json')
-      .add('hero_attacking_spritesheet', '/assets/hero/spritesheets/attacking.json')
-      .add('hero_attacking_normal_spritesheet', '/assets/hero/spritesheets/attacking.normal.json')
+      .add('hero_diving_spritesheet', '/assets/hero/spritesheets/diving.json')
+      .add('hero_diving_normal_spritesheet', '/assets/hero/spritesheets/diving.normal.json')
       .add('male_neutral_spritesheet', '/assets/male/spritesheets/neutral.json')
       .add('male_neutral_normal_spritesheet', '/assets/male/spritesheets/neutral.normal.json')
       .add('seal_running_spritesheet', '/assets/seal/spritesheets/running.json')

@@ -112,7 +112,7 @@ GAMEPLAY.14
 - [x] bug fix: double-stomp
 
 GAMEPLAY.15
-- [ ] rename "stomp/attack" to "dive/diving"
+- [x] rename "stomp/attack" to "dive/diving"
 - [ ] clean up Game methods
 - [ ] clean up settings
 - [ ] separate all pixi and planck methods
