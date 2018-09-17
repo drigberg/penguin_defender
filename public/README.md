@@ -1,3 +1,8 @@
+### QUEUE
+- GAMEPLAY.15
+- GAMEPLAY.16
+- AUDIO.1
+- AUDIO.2
 
 ### Gameplay Todos
 GAMEPLAY.1
@@ -111,20 +116,31 @@ GAMEPLAY.15
 - [ ] clean up Game methods
 - [ ] clean up settings
 - [ ] separate all pixi and planck methods
+
+GAMEPLAY.16
+- [ ] get rid of Menu, incorporate into Game
+- [ ] settings: shadows on/off
+- [ ] settings: music on/off
+- [ ] settings: sound effects on/off
+- [ ] settings: song selection
+
+GAMEPLAY.17
+- [ ] bounce off of enemies
+- [ ] bug fix: "from top" calculation
+- [ ] new enemy (bank: wolves, caribou, walrus, Putin-on-horse, lumberjack)
+
+GAMEPLAY.18
 - [ ] make testbed only differ by testbed and hidden pixi, not commented
 - [ ] refine movement
 
-GAMEPLAY.16
+GAMEPLAY.19
 - [ ] gulls fall when killed, are destroyed offscreen
 - [ ] seals fall when killed, are destroyed offscreen
 - [ ] fish fall after collisions, are destroyed offscreen
 - [ ] standardize colors (alert, points, success, etc)
 - [ ] post-wave movement
 
-GAMEPLAY.17
-- [ ] Putin-on-a-Horse
-- [ ] wolves
-- [ ] caribou
+
 
 ### UI Todos
 UI.1
@@ -170,19 +186,19 @@ UI.6
 - [x] hero splash damage animation
 - [x] animation: basic gull
 
-
 UI.7
 - [x] basic lighting
 - [x] shadows
 - [x] sprite normals: seal
 - [x] sprite normals: male
 - [x] sprite normals: gull
-- [ ] sprite normals: fish
-- [ ] sprite normals: hero
+- [x] sprite normals: hero neutral
+- [x] sprite normals: hero attacking
+- [x] sprite normals: hero running
+- [x] sprite normals: fish
 
 UI.8
-- [ ] get rid of Menu, incorporate into Game
-- [ ] extra sun rises between winters, sets during countdown
+- [ ] sun rises and brightens between winters, sets during countdown
 - [ ] snowstorm in background
 - [ ] snowstorm stops with winter's end
 
@@ -191,8 +207,26 @@ UI.9
 - [ ] switch to better animation library (smoothie?)
 
 UI.10
+- [ ] enemy 3 assets (wolf?)
+- [ ] enemy 4 assets (walrus?)
+
+UI.11
+- [ ] controls screen
+
+UI.12
+- [ ] enhance hero assets
+- [ ] enhance male assets
+- [ ] enhance fish assets
+- [ ] enhance seal assets
+- [ ] enhance gull assets
+- [ ] enhance background assets
+- [ ] enhance text displays
+
+UI.12
 - [ ] opening scene
 - [ ] post-wave animation (female textures, cheering)
+- [ ] refine lighting
+- [ ] clouds?
 
 ### Audio Todos
 AUDIO.1
@@ -209,11 +243,13 @@ AUDIO.2
 - [ ] basic game over sound
 
 AUDIO.3
-- [ ] basic gameplay music
+- [ ] basic gameplay music (bank: Penguin Lake, original)
 - [ ] basic gameover music
 - [ ] basic menu music
 
 AUDIO.4
+- [ ] song 2
+- [ ] song 3
 - [ ] high-quality jump sound
 - [ ] high-quality glide sound
 - [ ] high-quality stomp sound

@@ -134,7 +134,6 @@
       THROW_X: 20,
       THROW_Y: 50,
       THROW_INTERVAL: 25,
-      TEXTURE: PIXI.Texture.fromImage('assets/fish.png'),
       BOX_WIDTH: 1,
       BOX_HEIGHT: 0.6,
     }),
@@ -364,14 +363,15 @@
 
       const background = assembleBasicSprite(backgroundDiffuse, backgroundNormals)
 
-      this.container.addChild(new PIXI.lights.AmbientLight(null, 1));
-      this.directionalLight = new PIXI.lights.DirectionalLight(0xff5555, 0.9, new PIXI.Point(200, 200));
+      this.ambientLight = new PIXI.lights.AmbientLight(null, 10)
+      this.directionalLight = new PIXI.lights.DirectionalLight(null, 10, new PIXI.Point(300, 300));
 
-      this.shadowCastingLight = createShadowCastingLight(1000, 100, 0xffffff);
+      this.shadowCastingLight = createShadowCastingLight(1000, 20, 0x1111cc);
       this.shadowCastingLight.position.set(0, 0);
 
       this.container.addChild(
         background,
+        this.ambientLight,
         this.directionalLight,
         this.shadowCastingLight,
       );
@@ -1479,8 +1479,6 @@
         ? -1
         : 1
 
-      // this.spriteNormals.scale.x = this.sprite.scale.x
-
       this.body.setLinearVelocity(Vec2(
         velocity,
         this.body.getLinearVelocity().y
@@ -1542,10 +1540,10 @@
 
     setupSprite() {
       const animationStartIndex = Math.floor(Math.random() * 2)
-      const sprite = getAnimatedSprite('gull:flying:{i}.png', 2)
-      sprite.gotoAndPlay(animationStartIndex);
-      sprite.animationSpeed = SETTINGS.GULL.ANIMATION_SPEED_FLYING
-      sprite.anchor.set(0.5)
+      const spriteDiffuse = getAnimatedSprite('gull:flying:{i}.png', 2)
+      spriteDiffuse.gotoAndPlay(animationStartIndex);
+      spriteDiffuse.animationSpeed = SETTINGS.GULL.ANIMATION_SPEED_FLYING
+      spriteDiffuse.anchor.set(0.5)
 
       const spriteNormals = getAnimatedSprite('gull:flying:normal:{i}.png', 2)
       spriteNormals.gotoAndPlay(animationStartIndex);
@@ -1557,7 +1555,7 @@
       spriteShadows.animationSpeed = SETTINGS.GULL.ANIMATION_SPEED_FLYING
       spriteShadows.anchor.set(0.5)
 
-      this.sprite = assembleBasicSprite(sprite, spriteNormals, spriteShadows)
+      this.sprite = assembleBasicSprite(spriteDiffuse, spriteNormals, spriteShadows)
       this.sprite.scale.x = this.direction
       this.game.container.addChild(this.sprite)
     }
@@ -1657,9 +1655,7 @@
         SETTINGS.FISH.THROW_Y
       ))
 
-      this.sprite = new PIXI.Sprite(SETTINGS.FISH.TEXTURE)
-      this.sprite.anchor.set(0.5);
-      this.game.container.addChild(this.sprite)
+      this.setupSprite()
 
       this.body.setAngularVelocity(Math.random() * Math.PI * 10 - (Math.PI * 5));
 
@@ -1675,6 +1671,20 @@
       this.id = this.game.createId()
       this.game.objects[this.id] = this
       this.body.id = this.id
+    }
+
+    setupSprite() {
+      const spriteDiffuse = new PIXI.Sprite(PIXI.Texture.fromImage('assets/fish.png'))
+      spriteDiffuse.anchor.set(0.5)
+
+      const spriteNormals = new PIXI.Sprite(PIXI.Texture.fromImage('assets/fish.normal.png'))
+      spriteNormals.anchor.set(0.5)
+
+      const spriteShadows = new PIXI.Sprite(PIXI.Texture.fromImage('assets/fish.png'))
+      spriteShadows.anchor.set(0.5)
+
+      this.sprite = assembleBasicSprite(spriteDiffuse, spriteNormals, spriteShadows)
+      this.game.container.addChild(this.sprite)
     }
 
     destroySprites() {
@@ -1789,6 +1799,81 @@
       this.game.healthBar.update(this.health)
     }
 
+    getNeutralSprite() {
+      const states = SETTINGS.HERO.MOVEMENT_STATES
+
+      const animationStartIndex = Math.floor(Math.random() * 2)
+      const spriteDiffuse = getAnimatedSprite('hero:neutral:{i}.png', 2)
+      spriteDiffuse.gotoAndPlay(animationStartIndex);
+      spriteDiffuse.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.NEUTRAL]
+      spriteDiffuse.anchor.set(0.5)
+
+      const spriteNormals = getAnimatedSprite('hero:neutral:normal:{i}.png', 2)
+      spriteNormals.gotoAndPlay(animationStartIndex);
+      spriteNormals.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.NEUTRAL]
+      spriteNormals.anchor.set(0.5)
+
+      const spriteShadows = getAnimatedSprite('hero:neutral:{i}.png', 2)
+      spriteShadows.gotoAndPlay(animationStartIndex);
+      spriteShadows.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.NEUTRAL]
+      spriteShadows.anchor.set(0.5)
+
+      const sprite = assembleBasicSprite(spriteDiffuse, spriteNormals, spriteShadows)
+      this.game.container.addChild(sprite)
+      sprite.visible = false
+      return sprite
+    }
+
+    getRunningSprite() {
+      const states = SETTINGS.HERO.MOVEMENT_STATES
+
+      const animationStartIndex = Math.floor(Math.random() * 2)
+      const spriteDiffuse = getAnimatedSprite('hero:running:{i}.png', 2)
+      spriteDiffuse.gotoAndPlay(animationStartIndex);
+      spriteDiffuse.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.RUNNING]
+      spriteDiffuse.anchor.set(0.5)
+
+      const spriteNormals = getAnimatedSprite('hero:running:normal:{i}.png', 2)
+      spriteNormals.gotoAndPlay(animationStartIndex);
+      spriteNormals.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.RUNNING]
+      spriteNormals.anchor.set(0.5)
+
+      const spriteShadows = getAnimatedSprite('hero:running:{i}.png', 2)
+      spriteShadows.gotoAndPlay(animationStartIndex);
+      spriteShadows.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.RUNNING]
+      spriteShadows.anchor.set(0.5)
+
+      const sprite = assembleBasicSprite(spriteDiffuse, spriteNormals, spriteShadows)
+      this.game.container.addChild(sprite)
+      sprite.visible = false
+      return sprite
+    }
+
+    getAttackingSprite() {
+      const states = SETTINGS.HERO.MOVEMENT_STATES
+
+      const animationStartIndex = Math.floor(Math.random() * 4)
+      const spriteDiffuse = getAnimatedSprite('hero:attacking:{i}.png', 4)
+      spriteDiffuse.gotoAndPlay(animationStartIndex);
+      spriteDiffuse.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.ATTACKING]
+      spriteDiffuse.anchor.set(0.5)
+
+      const spriteNormals = getAnimatedSprite('hero:attacking:normal:{i}.png', 4)
+      spriteNormals.gotoAndPlay(animationStartIndex);
+      spriteNormals.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.ATTACKING]
+      spriteNormals.anchor.set(0.5)
+
+      const spriteShadows = getAnimatedSprite('hero:attacking:{i}.png', 4)
+      spriteShadows.gotoAndPlay(animationStartIndex);
+      spriteShadows.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.ATTACKING]
+      spriteShadows.anchor.set(0.5)
+
+      const sprite = assembleBasicSprite(spriteDiffuse, spriteNormals, spriteShadows)
+      this.game.container.addChild(sprite)
+      sprite.visible = false
+      return sprite
+    }
+
     setupSprite() {
       this.trail = new Trail({
         x: SETTINGS.HERO.START_X,
@@ -1802,9 +1887,9 @@
       const states = SETTINGS.HERO.MOVEMENT_STATES
 
       this.sprites = {
-        [states.ATTACKING]: getAnimatedSprite('hero:attacking:{i}.png', 4),
-        [states.NEUTRAL]: getAnimatedSprite('hero:neutral:{i}.png', 2),
-        [states.RUNNING]: getAnimatedSprite('hero:running:{i}.png', 2),
+        [states.ATTACKING]: this.getAttackingSprite(),
+        [states.NEUTRAL]: this.getNeutralSprite(),
+        [states.RUNNING]: this.getRunningSprite(),
       }
 
       this.stateMappings = {
@@ -1815,18 +1900,7 @@
         [states.RUNNING]: this.sprites[states.RUNNING],
       }
 
-      this.sprites.NEUTRAL.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.NEUTRAL]
-      this.sprites.RUNNING.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.RUNNING]
-      this.sprites.ATTACKING.animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[states.ATTACKING]
-
       this.setActiveSprite(false)
-
-      Object.keys(this.sprites).forEach((key) => {
-        this.sprites[key].anchor.set(0.5)
-        this.sprites[key].visible = false
-        this.sprites[key].animationSpeed = SETTINGS.HERO.ANIMATION_SPEED[key]
-        this.game.container.addChild(this.sprites[key])
-      })
     }
 
     destroySprites() {
@@ -1969,20 +2043,22 @@
       const sprite = this.stateMappings[this.state.action]
 
       if (sprite === this.activeSprite) {
-        this.activeSprite.scale.x = this.state.direction
+        this.activeSprite.scale.x = this.stateMappings[this.state.action] === this.stateMappings.RUNNING
+          ? this.state.direction
+          : 1
         return
       }
 
       if (this.activeSprite) {
         this.activeSprite.visible = false
-        this.activeSprite.stop()
         sprite.animationSpeed = this.activeSprite.animationSpeed
       }
 
       this.activeSprite = sprite
       this.activeSprite.visible = visible
-      this.activeSprite.scale.x = this.state.direction
-      this.activeSprite.play()
+      this.activeSprite.scale.x = this.stateMappings[this.state.action] === this.stateMappings.RUNNING
+        ? this.state.direction
+        : 1
     }
 
     render() {
@@ -2071,8 +2147,11 @@
   (function setupGame() {
     PIXI.loader
       .add('hero_neutral_spritesheet', '/assets/hero/spritesheets/neutral.json')
+      .add('hero_neutral_normal_spritesheet', '/assets/hero/spritesheets/neutral.normal.json')
       .add('hero_running_spritesheet', '/assets/hero/spritesheets/running.json')
+      .add('hero_running_normal_spritesheet', '/assets/hero/spritesheets/running.normal.json')
       .add('hero_attacking_spritesheet', '/assets/hero/spritesheets/attacking.json')
+      .add('hero_attacking_normal_spritesheet', '/assets/hero/spritesheets/attacking.normal.json')
       .add('male_neutral_spritesheet', '/assets/male/spritesheets/neutral.json')
       .add('male_neutral_normal_spritesheet', '/assets/male/spritesheets/neutral.normal.json')
       .add('seal_running_spritesheet', '/assets/seal/spritesheets/running.json')
