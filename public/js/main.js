@@ -135,6 +135,7 @@
           WIDTH: 8.0,
           HEIGHT: 0.5,
         }),
+        SOUND_OVERFLOW: 200,
       }),
       SPAWN: Object.freeze({
         X: 0.0,
@@ -369,14 +370,59 @@
     return window.innerHeight * 0.5 - (m * pscale)
   }
 
+  class SoundManager {
+    constructor() {
+      this.sounds = {}
+    }
+
+    play(key, {
+      loop = false,
+    } = {}) {
+      if (this.sounds[key]) {
+        this.sounds[key].stop()
+      } else {
+        this.sounds[key] = Sound.createInstance(key)
+      }
+
+      if (loop) {
+        const that = this
+        this.sounds[key].on("complete", function loop() {
+          that.sounds[key].play()
+        });
+      }
+
+      this.sounds[key].play()
+    }
+
+    stop(key) {
+      if (this.sounds[key]) {
+        this.sounds[key].stop()
+      }
+    }
+
+    pause(key) {
+      if (this.sounds[key]) {
+        this.sounds[key].paused = true
+      }
+    }
+
+    continue(key) {
+      if (this.sounds[key]) {
+        this.sounds[key].paused = false
+      }
+    }
+  }
+
   /**
    * Game
    */
   class Game {
     constructor() {
       const that = this
-
-      Sound.play('theme')
+      this.soundManager = new SoundManager()
+      this.soundManager.play('theme', {
+        loop: true,
+      })
 
       this.reset()
       this.showMainMenu()
@@ -680,6 +726,26 @@
       })
     }
 
+    togglePause() {
+      if (this.winterCountdownTime) {
+        return
+      }
+
+      this.paused = !this.paused
+
+      if (this.paused) {
+        this.soundManager.play('pause')
+        this.soundManager.pause('theme')
+        this.textDisplays[0].show('PAUSED', {
+          fill: BLUE,
+        })
+        return
+      }
+
+      this.soundManager.continue('theme')
+      this.textDisplays[0].hide()
+    }
+
     onKeyDown(key) {
       if (this.keys.down[key]) {
         return
@@ -687,16 +753,7 @@
 
       switch (key) {
         case 'P':
-          this.paused = !this.paused
-
-          if (!this.winterCountdownTime && this.paused) {
-            this.textDisplays[0].show('PAUSED', {
-              fill: BLUE,
-            })
-          } else if (!this.winterCountdownTime && !this.paused) {
-            this.textDisplays[0].hide()
-          }
-
+          this.togglePause()
           break
         case 'UP':
           this.hero.jump()
@@ -1387,6 +1444,8 @@
     }
 
     onAbduction() {
+      this.game.soundManager.play('abduction')
+
       this.abductor = this
       this.sprite.animationSpeed = CONSTANTS.MALE.ANIMATION_SPEED.STRESSED
 
@@ -1479,7 +1538,7 @@
       this.invincibilityTime = CONSTANTS.HERO.INVINCIBILITY_INTERVAL
 
       if (this.health <= 0) {
-        Sound.play('kill')
+        this.game.soundManager.play('kill')
         this.game.world.destroyBody(this.body)
         this.game.addPoints(this.points)
         this.game.destroyEntity(this)
@@ -2036,7 +2095,7 @@
         return
       }
 
-      Sound.play('damage')
+      this.game.soundManager.play('damage')
       this.health -= damage
       this.invincibilityTime = CONSTANTS.HERO.INVINCIBILITY_INTERVAL
 
@@ -2052,7 +2111,7 @@
         return
       }
 
-      Sound.play('throw')
+      this.game.soundManager.play('pause')
 
       this.fishThrowTime = CONSTANTS.HERO.THROW_INTERVAL
 
@@ -2070,6 +2129,8 @@
       if (this.diveFixture) {
         return
       }
+
+      this.game.soundManager.play('dive')
 
       this.state.action = CONSTANTS.HERO.MOVEMENT_STATES.DIVING
 
@@ -2144,7 +2205,7 @@
         return
       }
 
-      Sound.play('jump')
+      this.game.soundManager.play('jump')
       this.activeSprite.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED.JUMPING
       this.state.airborne = true
 
@@ -2218,6 +2279,9 @@
       'kill': '/assets/audio/kill.mp3',
       'theme': '/assets/audio/theme.mp3',
       'throw': '/assets/audio/throw.mp3',
+      'abduction': '/assets/audio/abduction.mp3',
+      'pause': '/assets/audio/pause.mp3',
+      'dive': '/assets/audio/dive.mp3',
     }
 
     let graphicsLoaded = false

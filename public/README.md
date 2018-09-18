@@ -249,16 +249,17 @@ AUDIO.1
 - [x] basic fish-throw sound
 
 AUDIO.2
-- [ ] basic stomp sound
-- [ ] basic male death sound
-- [ ] basic abduction sound
-- [ ] basic pause sound
+- [x] basic abduction sound
+- [x] basic dive sound
+- [x] basic pause sound
 
 AUDIO.3
-- [ ] current theme loops indefinitely
-- [ ] theme pauses when game is paused
+- [x] SoundManager class
+- [x] current theme loops indefinitely
+- [x] theme pauses when game is paused
 
 AUDIO.4
+- [ ] basic male death sound
 - [ ] basic victory sound
 - [ ] basic gameover music
 - [ ] basic menu music
@@ -268,7 +269,7 @@ AUDIO.5
 - [ ] glid music
 - [ ] HQ jump sound
 - [ ] HQ glide sound
-- [ ] HQ stomp sound
+- [ ] HQ dive sound
 - [ ] HQ damage sound
 
 AUDIO.6
