@@ -131,18 +131,21 @@ LOGIC.18
 - [ ] blink while invincible
 - [ ] bounce off of enemies
 - [ ] bug fix: "from top" calculation
-- [ ] new enemy (bank: wolves, caribou, walrus, Putin-on-horse, lumberjack)
 
 LOGIC.19
 - [ ] eslint
-- [ ] make testbed only differ by testbed and hidden pixi, not commented
-- [ ] refine movement
+- [ ] gulls drop eggs
+- [ ] new enemy (bank: wolves, caribou, walrus, Putin-on-horse, lumberjack)
 
 LOGIC.20
+- [ ] make testbed only differ by testbed and hidden pixi, not commented
+- [ ] refine movement
+- [ ] standardize colors (alert, points, success, etc)
+
+LOGIC.21
 - [ ] gulls fall when killed, are destroyed offscreen
 - [ ] seals fall when killed, are destroyed offscreen
 - [ ] fish fall after collisions, are destroyed offscreen
-- [ ] standardize colors (alert, points, success, etc)
 - [ ] post-wave movement
 
 LOGIC.21
@@ -206,25 +209,30 @@ UI.7
 - [x] sprite normals: fish
 
 UI.8
+- [ ] retro text
+- [ ] retro introduction with Mars-ish theme
+- [ ] skip-intro button
+
+UI.9
 - [ ] sun rises and brightens between winters, sets during countdown
 - [ ] snowstorm in background
 - [ ] snowstorm stops with winter's end
 
-UI.9
+UI.10
 - [ ] responsive screen
 - [ ] switch to better animation library (smoothie?)
 
-UI.10
+UI.11
 - [ ] enemy 3 assets (wolf?)
 - [ ] enemy 4 assets (walrus?)
 
-UI.11
+UI.12
 - [ ] more congrulation text options
 - [ ] controls screen
 - [ ] high score table
 - [ ] high score table input
 
-UI.12
+UI.13
 - [ ] enhance hero assets
 - [ ] enhance male assets
 - [ ] enhance fish assets
@@ -233,7 +241,7 @@ UI.12
 - [ ] enhance background assets
 - [ ] enhance text displays
 
-UI.12
+UI.14
 - [ ] opening scene
 - [ ] post-wave animation (female textures, cheering)
 - [ ] refine lighting
