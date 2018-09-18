@@ -1,5 +1,4 @@
 ### QUEUE
-- AUDIO.1
 - AUDIO.2
 
 ### Gameplay Todos
@@ -242,39 +241,45 @@ UI.12
 
 ### Audio Todos
 AUDIO.1
-- [ ] basic jump sound
-- [ ] basic glide sound
-- [ ] basic stomp sound
-- [ ] basic damage sound
+- [x] set up SoundJS
+- [x] basic jump sound
+- [x] Penguin Defender theme
+- [x] basic damage sound
+- [x] basic enemy death sound
+- [x] basic fish-throw sound
 
 AUDIO.2
-- [ ] basic abduction sound
+- [ ] basic stomp sound
 - [ ] basic male death sound
-- [ ] basic seal death sound
-- [ ] basic gull death sound
-- [ ] basic game over sound
+- [ ] basic abduction sound
+- [ ] basic pause sound
 
 AUDIO.3
-- [ ] basic gameplay music (bank: Penguin Lake, original)
+- [ ] current theme loops indefinitely
+- [ ] theme pauses when game is paused
+
+AUDIO.4
+- [ ] basic victory sound
 - [ ] basic gameover music
 - [ ] basic menu music
 
-AUDIO.4
-- [ ] song 2
-- [ ] song 3
-- [ ] high-quality jump sound
-- [ ] high-quality glide sound
-- [ ] high-quality stomp sound
-- [ ] high-quality damage sound
-
 AUDIO.5
-- [ ] high-quality abduction sound
-- [ ] high-quality male death sound
-- [ ] high-quality seal death sound
-- [ ] high-quality gull death sound
-- [ ] high-quality game over sound
+- [ ] song 2
+- [ ] glid music
+- [ ] HQ jump sound
+- [ ] HQ glide sound
+- [ ] HQ stomp sound
+- [ ] HQ damage sound
 
 AUDIO.6
-- [ ] high-quality gameplay music
-- [ ] high-quality gameover music
-- [ ] high-quality menu music
+- [ ] HQ abduction sound
+- [ ] HQ male death sound
+- [ ] HQ seal death sound
+- [ ] HQ gull death sound
+- [ ] HQ game over sound
+
+AUDIO.7
+- [ ] song 3
+- [ ] HQ gameplay music
+- [ ] HQ gameover music
+- [ ] HQ menu music

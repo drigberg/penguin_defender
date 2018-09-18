@@ -2,6 +2,8 @@
  * Basic surival game created using pixi.js and planck.js
  */
 (function main() {
+  const Sound = createjs.Sound
+
   /**
    * Constants
    */
@@ -374,6 +376,8 @@
     constructor() {
       const that = this
 
+      Sound.play('theme')
+
       this.reset()
       this.showMainMenu()
 
@@ -418,7 +422,7 @@
     }
 
     resetStats() {
-      this.winter = 6
+      this.winter = 0
       this.paused = true
       this.idPointer = 1
       this.objects = {}
@@ -583,7 +587,7 @@
 
     startWinter() {
       this.destroyMainMenu()
-      this.setupDisplay()
+      this.resetDisplay()
       this.resetBodies()
 
       this.over = false
@@ -735,11 +739,15 @@
       }
 
       window.addEventListener('keydown', function(e) {
-        that.onKeyDown(that.translateKeyCode(e.keyCode))
+        if (that.winter) {
+          that.onKeyDown(that.translateKeyCode(e.keyCode))
+        }
       })
 
       window.addEventListener('keyup', function(e) {
-        that.onKeyUp(that.translateKeyCode(e.keyCode))
+        if (that.winter) {
+          that.onKeyUp(that.translateKeyCode(e.keyCode))
+        }
       })
     }
 
@@ -861,25 +869,27 @@
       }
     }
 
-    setupDisplay() {
-      this.textDisplays = [
-        new Text({
-          x: 0,
-          y: 10,
-          style: {
-            fill: GREEN,
-          },
-          container: this.container,
-        }),
-        new Text({
-          x: 0,
-          y: 4,
-          style: {
-            fill: GREEN,
-          },
-          container: this.container,
-        })
-      ]
+    resetDisplay() {
+      if (!this.textDisplays) {
+        this.textDisplays = [
+          new Text({
+            x: 0,
+            y: 10,
+            style: {
+              fill: GREEN,
+            },
+            container: this.container,
+          }),
+          new Text({
+            x: 0,
+            y: 4,
+            style: {
+              fill: GREEN,
+            },
+            container: this.container,
+          })
+        ]
+      }
 
       // must be AFTER background
       this.pointDisplay = new Text({
@@ -1469,6 +1479,7 @@
       this.invincibilityTime = CONSTANTS.HERO.INVINCIBILITY_INTERVAL
 
       if (this.health <= 0) {
+        Sound.play('kill')
         this.game.world.destroyBody(this.body)
         this.game.addPoints(this.points)
         this.game.destroyEntity(this)
@@ -2025,6 +2036,7 @@
         return
       }
 
+      Sound.play('damage')
       this.health -= damage
       this.invincibilityTime = CONSTANTS.HERO.INVINCIBILITY_INTERVAL
 
@@ -2039,6 +2051,8 @@
       if (this.fishThrowTime) {
         return
       }
+
+      Sound.play('throw')
 
       this.fishThrowTime = CONSTANTS.HERO.THROW_INTERVAL
 
@@ -2130,6 +2144,7 @@
         return
       }
 
+      Sound.play('jump')
       this.activeSprite.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED.JUMPING
       this.state.airborne = true
 
@@ -2197,6 +2212,40 @@
 
 
   (function setupGame() {
+    const sounds = {
+      'jump': '/assets/audio/jump.mp3',
+      'damage': '/assets/audio/damage.mp3',
+      'kill': '/assets/audio/kill.mp3',
+      'theme': '/assets/audio/theme.mp3',
+      'throw': '/assets/audio/throw.mp3',
+    }
+
+    let graphicsLoaded = false
+    let soundsLoaded = false
+    let soundfilesLoaded = 0
+    let soundfilesToLoad = Object.keys(sounds).length
+
+    Object.keys(sounds).forEach((key) => {
+      Sound.registerSound(sounds[key], key);
+    })
+
+    function startIfReady() {
+      if (!graphicsLoaded || !soundsLoaded) {
+        return
+      }
+
+      new Game()
+    }
+
+    Sound.on("fileload", () => {
+      soundfilesLoaded += 1
+      if (soundfilesLoaded === soundfilesToLoad) {
+        soundsLoaded = true
+      }
+
+      startIfReady()
+    });
+
     PIXI.loader
       .add('hero_neutral_spritesheet', '/assets/hero/spritesheets/neutral.json')
       .add('hero_neutral_normal_spritesheet', '/assets/hero/spritesheets/neutral.normal.json')
@@ -2211,7 +2260,8 @@
       .add('gull_flying_spritesheet', '/assets/gull/spritesheets/flying.json')
       .add('gull_flying_normal_spritesheet', '/assets/gull/spritesheets/flying.normal.json')
       .load(() => {
-        new Game()
+        graphicsLoaded = true
+        startIfReady()
       })
   })()
 })()
