@@ -232,7 +232,11 @@ UI.8
 - [x] use constant view size
 
 UI.9
-- [ ] introduction (retrofitted games presents --> brief story with white text --> main menu)
+- [x] introduction (retrofitted games presents --> brief story with white text --> main menu)
+- [x] introduction text fades in and out
+- [x] text can wrap
+- [x] bug fix: display disappears on play-again
+- [ ] bug fix: double-speed each time you return to menu and play again
 - [ ] skip-intro button
 - [ ] retro font
 

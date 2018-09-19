@@ -42,7 +42,36 @@
     GULL: 'GULL',
   })
 
+  const SLIDESHOW = Object.freeze({
+    STATES: Object.freeze({
+      FADING_IN: 'FADING_IN',
+      SUSTAINING: 'SUSTAINING',
+      FADING_OUT: 'FADING_OUT',
+      WAITING: 'WAITING',
+    }),
+    TIMELINE: Object.freeze([
+      'FADING_IN',
+      'SUSTAINING',
+      'FADING_OUT',
+      'WAITING',
+    ])
+  })
+
   const CONSTANTS = Object.freeze({
+    INTRO: Object.freeze({
+      TIME_INTERVALS: Object.freeze({
+        [SLIDESHOW.STATES.FADING_IN]: 80,
+        [SLIDESHOW.STATES.SUSTAINING]: 1,
+        [SLIDESHOW.STATES.FADING_OUT]: 80,
+        [SLIDESHOW.STATES.WAITING]: 40,
+      }),
+      SLIDES: Object.freeze([
+        'Every winter, male Emperor Penguins huddle\n together at the South Pole for warmth,\n while the females fish out to sea.',
+        'Times have changed. Emboldened by rising\n temperatures, fierce predators have moved\n further south.',
+        'Your colony holds to tradition and refuses\n to find a new nesting ground. You alone\n stand between them and utter annihilation.',
+        'Defend your penguin brothers\n until the females return.'
+      ]),
+    }),
     SCREEN: Object.freeze({
       WIDTH: 1152,
       HEIGHT: 630,
@@ -58,6 +87,7 @@
       }),
     }),
     COLORS: Object.freeze({
+      WHITE: '#eeeeee',
       RED: '#ee1111',
       BLUE: '#5555ee',
       YELLOW: '#aaaa22',
@@ -426,28 +456,151 @@
   }
 
   /**
-   * Game
+   * Slideshow
    */
-  class Game {
-    constructor() {
-      const that = this
-      this.soundManager = new SoundManager()
-      this.soundManager.play('theme', {
-        loop: true,
-      })
 
-      this.reset()
-      this.showMainMenu()
+  class Slideshow {
+    constructor({
+      slides,
+      intervals,
+      onComplete,
+    }) {
+      const that = this
+      this.container = new PIXI.Container()
+      this.onCompleteCallback = onComplete
+
+      this.slides = slides
+      this.intervals = intervals
+
+      this.currentSlideIndex = -1
+      this.state = SLIDESHOW.STATES.WAITING
+      this.timer = 1
+
+      stage.addChild(this.container)
+
+      this.text = new Text({
+        x: -40,
+        y: 10,
+        style: {
+          fill: CONSTANTS.COLORS.WHITE,
+          fontSize: 36,
+        },
+        container: this.container,
+        centered: false,
+      })
 
       window.requestAnimationFrame(function() {
         that.onStep()
       })
     }
 
+    fadeIn() {
+      this.text.text.alpha += 1 / this.intervals[SLIDESHOW.STATES.FADING_IN]
+    }
+
+    fadeOut() {
+      this.text.text.alpha -= 1 / this.intervals[SLIDESHOW.STATES.FADING_IN]
+    }
+
+    nextState() {
+      let nextIndex = SLIDESHOW.TIMELINE.indexOf(this.state) + 1
+      if (nextIndex === SLIDESHOW.TIMELINE.length) {
+        nextIndex = 0
+      }
+
+      this.state = SLIDESHOW.TIMELINE[nextIndex]
+      this.timer = this.intervals[this.state]
+
+
+      if (this.state === SLIDESHOW.STATES.FADING_IN) {
+        this.currentSlideIndex += 1
+        if (this.currentSlideIndex === this.slides.length) {
+          this.onComplete()
+          return
+        }
+
+        this.text.show(this.slides[this.currentSlideIndex])
+        this.text.text.alpha = 0
+      }
+    }
+
+    onStep() {
+      const that = this
+
+      this.timer -= 1
+
+      if (!this.timer) {
+        this.nextState()
+      }
+
+      switch (this.state) {
+        case SLIDESHOW.STATES.FADING_IN:
+          this.fadeIn()
+          break
+        case SLIDESHOW.STATES.FADING_OUT:
+          this.fadeOut()
+          break
+        case SLIDESHOW.STATES.SUSTAINING:
+        case SLIDESHOW.STATES.WAITING:
+          break
+      }
+
+      window.requestAnimationFrame(function() {
+        that.onStep()
+      })
+    }
+
+    onComplete() {
+      stage.removeChild(this.container)
+      this.onCompleteCallback()
+    }
+  }
+
+  /**
+   * Game
+   */
+  class Game {
+    constructor() {
+      this.soundManager = new SoundManager()
+      this.soundManager.play('theme', {
+        loop: true,
+      })
+
+      this.setupInteractivity()
+      this.setupCollisionHandlers()
+      this.playIntro()
+      this.setupWorld()
+    }
+
+    playIntro() {
+      const that = this
+      new Slideshow({
+        slides: [''],
+        intervals: CONSTANTS.INTRO.TIME_INTERVALS,
+        onComplete: () => that.onIntroComplete()
+      })
+    }
+
+    onIntroComplete() {
+      this.reset()
+      this.showMainMenu()
+    }
+
     destroyMainMenu() {
       if (this.menu) {
         stage.removeChild(this.menu)
       }
+    }
+
+    start() {
+      this.destroyMainMenu()
+
+      const that = this
+      window.requestAnimationFrame(function() {
+        that.onStepGameplay()
+      })
+
+      this.startWinter()
     }
 
     showMainMenu() {
@@ -472,7 +625,7 @@
         container: this.menu,
         show: {
           fn: () => {
-            that.startWinter()
+            that.start()
           },
           text: 'PLAY',
         }
@@ -487,15 +640,13 @@
       this.points = 0
       this.over = false
       this.inGame = false
+      this.gameDisplaysCreated = false
     }
 
     reset() {
       this.resetStats()
       this.setupContainer()
-      this.setupWorld()
       this.createBorders()
-      this.setupCollisionHandlers()
-      this.setupInteractivity()
     }
 
     createBackground() {
@@ -656,7 +807,6 @@
     }
 
     startWinter() {
-      this.destroyMainMenu()
       this.resetDisplay()
       this.resetBodies()
 
@@ -694,11 +844,11 @@
       return false
     }
 
-    onStepPauseIndependent() {
+    onStepGameplayPauseIndependent() {
       // nothing yet
     }
 
-    onStepPauseDependent() {
+    onStepGameplayPauseDependent() {
       const countingDown = this.winterCountdown()
 
       if (countingDown) {
@@ -737,17 +887,17 @@
       this.renderObjects()
     }
 
-    onStep() {
+    onStepGameplay() {
       const that = this
 
-      this.onStepPauseIndependent()
+      this.onStepGameplayPauseIndependent()
 
       if (!this.paused) {
-        this.onStepPauseDependent()
+        this.onStepGameplayPauseDependent()
       }
 
       window.requestAnimationFrame(function() {
-        that.onStep()
+        that.onStepGameplay()
       })
     }
 
@@ -1153,7 +1303,8 @@
         text: 'MENU',
         fn: () => {
           stage.removeChild(that.container)
-          new Menu()
+          that.reset()
+          that.showMainMenu()
         }
       })
     }
