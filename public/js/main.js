@@ -31,36 +31,6 @@
     OFFSCREEN: CATEGORIES.FOE | CATEGORIES.FRIEND,
   })
 
-  const RED = '#ee1111'
-  const BLUE = '#5555ee'
-  const YELLOW = '#aaaa22'
-  const GREEN = '#22aa22'
-
-  const BIT_RED = 0xEE5555
-  const BIT_BLUE = 0x5555EE
-  const BIT_YELLOW = 0xAAAA22
-  const BIT_GREEN = 0x22AA22
-
-  const BASE_TEXT_STYLE = new PIXI.TextStyle({
-    fontFamily: 'Courier New',
-    fontSize: 72,
-    strokeThickness: 0,
-    fontWeight: 'bold',
-    fill: BLUE,
-  })
-
-  const KEY_CODE_MAP = {
-    39: 'RIGHT',
-    37: 'LEFT',
-    38: 'UP',
-    40: 'DOWN',
-    32: 'SPACE',
-    13: 'RETURN',
-  }
-
-  const LEFT = -1
-  const RIGHT = 1
-
   const TYPES = Object.freeze({
     GROUND: 'GROUND',
     WALL: 'WALL',
@@ -73,9 +43,43 @@
   })
 
   const CONSTANTS = Object.freeze({
+    SCREEN: Object.freeze({
+      WIDTH: 1152,
+      HEIGHT: 630,
+    }),
+    DISPLAYS: Object.freeze({
+      POINTS: Object.freeze({
+        X: 10,
+        Y: 25,
+      }),
+      WINTER: Object.freeze({
+        X: 10,
+        Y: 21.8,
+      }),
+    }),
+    COLORS: Object.freeze({
+      RED: '#ee1111',
+      BLUE: '#5555ee',
+      YELLOW: '#aaaa22',
+      GREEN: '#22aa22',
+      BIT_RED: 0xEE5555,
+      BIT_BLUE: 0x5555EE,
+      BIT_YELLOW: 0xAAAA22,
+      BIT_GREEN: 0x22AA22,
+    }),
+    KEY_CODES: Object.freeze({
+      32: 'SPACE',
+      13: 'RETURN',
+    }),
+    LEFT: -1,
+    RIGHT: 1,
+    POINT_BONUSES: Object.freeze({
+      PER_MALE_REMAINING: 100,
+      PERFECT_MALE_DEFENSE: 500,
+    }),
     ENEMY_TYPES: Object.freeze([
       TYPES.SEAL,
-      TYPES.GULL
+      TYPES.GULL,
     ]),
     MALE: Object.freeze({
       SPAWN: Object.freeze({
@@ -151,7 +155,7 @@
     }),
     HEALTH_BAR: Object.freeze({
       X: -40,
-      Y: 26,
+      Y: 22,
       MAX_WIDTH: 10,
     }),
     FISH: Object.freeze({
@@ -246,14 +250,22 @@
     GRAVITY: -60,
   })
 
+  const BASE_TEXT_STYLE = new PIXI.TextStyle({
+    fontFamily: 'Courier New',
+    fontSize: 72,
+    strokeThickness: 0,
+    fontWeight: 'bold',
+    fill: CONSTANTS.COLORS.BLUE,
+  })
+
   /**
    * PIXI setup
    */
 
   const app = new PIXI.Application({
     backgroundColor: 0x000000,
-    width: window.innerWidth * 0.9,
-    height: window.innerHeight * 0.9,
+    width: CONSTANTS.SCREEN.WIDTH,
+    height: CONSTANTS.SCREEN.HEIGHT,
   })
 
   stage = PIXI.shadows.init(app)
@@ -363,11 +375,11 @@
    */
 
   function mpx(m) {
-    return m * pscale + (window.innerWidth / 2.3)
+    return m * pscale + (CONSTANTS.SCREEN.WIDTH * 0.482)
   }
 
   function mpy(m) {
-    return window.innerHeight * 0.5 - (m * pscale)
+    return CONSTANTS.SCREEN.HEIGHT * (5 / 9) - (m * pscale)
   }
 
   class SoundManager {
@@ -448,7 +460,7 @@
         x: 0,
         y: 10,
         style: {
-          fill: GREEN,
+          fill: CONSTANTS.COLORS.GREEN,
         },
         container: this.menu,
         show: 'PENGUIN DEFENDER'
@@ -474,6 +486,7 @@
       this.objects = {}
       this.points = 0
       this.over = false
+      this.inGame = false
     }
 
     reset() {
@@ -539,6 +552,13 @@
       this.textDisplays[1].show('NOICE')
       this.paused = true
       this.over = true
+
+      const { [TYPES.MALE]: maleStats } = this.getWinterStats()
+
+      this.points += (maleStats.total - maleStats.destroyed) * CONSTANTS.POINT_BONUSES.PER_MALE_REMAINING
+      if (!maleStats.destroyed) {
+        this.points += CONSTANTS.POINT_BONUSES.PERFECT_MALE_DEFENSE
+      }
 
       setTimeout(() => that.startWinter(), CONSTANTS.WINTER.INTERIM)
     }
@@ -631,6 +651,10 @@
       this.gameOverReason = 'YOU DIED'
     }
 
+    formatWinter(num) {
+      return String(num).padStart(3, '0')
+    }
+
     startWinter() {
       this.destroyMainMenu()
       this.resetDisplay()
@@ -638,10 +662,11 @@
 
       this.over = false
       this.paused = false
+      this.inGame = true
 
       this.winter += 1
       this.winterStats = this.getWinterStats()
-      this.winterDisplay.show(this.winter)
+      this.winterDisplay.show(this.formatWinter(this.winter))
 
       this.setupMales()
       this.createHero()
@@ -737,7 +762,7 @@
         this.soundManager.play('pause')
         this.soundManager.pause('theme')
         this.textDisplays[0].show('PAUSED', {
-          fill: BLUE,
+          fill: CONSTANTS.COLORS.BLUE,
         })
         return
       }
@@ -751,29 +776,51 @@
         return
       }
 
+      this.keys.down[key] = true
+
       switch (key) {
         case 'P':
+          if (!this.winter) {
+            return
+          }
+
           this.togglePause()
           break
-        case 'UP':
+        case 'W':
+          if (this.paused || !this.inGame) {
+            return
+          }
+
           this.hero.jump()
           break
-        case 'SPACE':
-          this.hero.throwFish()
-          break
-        case 'F':
+        case 'S':
+          if (this.paused || !this.inGame) {
+            return
+          }
+
           this.hero.dive()
+          break
+        case 'SPACE':
+          if (this.paused || !this.inGame) {
+            return
+          }
+
+
+          this.hero.throwFish()
           break
         default:
           // nothing
       }
-
-      this.keys.down[key] = true
     }
 
     onKeyUp(key) {
       this.keys.down[key] = false
-      if (!this.keys.down.RIGHT && !this.keys.down.LEFT && this.hero.state.action !== CONSTANTS.HERO.MOVEMENT_STATES.DIVING) {
+
+      if (this.paused || !this.inGame) {
+        return
+      }
+
+      if (!this.keys.down.A && !this.keys.down.D && this.hero.state.action !== CONSTANTS.HERO.MOVEMENT_STATES.DIVING) {
         this.hero.state.action = CONSTANTS.HERO.MOVEMENT_STATES.NEUTRAL
       }
     }
@@ -785,7 +832,7 @@
         return char
       }
 
-      return KEY_CODE_MAP[code]
+      return CONSTANTS.KEY_CODES[code]
     }
 
     setupInteractivity() {
@@ -796,15 +843,11 @@
       }
 
       window.addEventListener('keydown', function(e) {
-        if (that.winter) {
-          that.onKeyDown(that.translateKeyCode(e.keyCode))
-        }
+        that.onKeyDown(that.translateKeyCode(e.keyCode))
       })
 
       window.addEventListener('keyup', function(e) {
-        if (that.winter) {
-          that.onKeyUp(that.translateKeyCode(e.keyCode))
-        }
+        that.onKeyUp(that.translateKeyCode(e.keyCode))
       })
     }
 
@@ -927,44 +970,55 @@
     }
 
     resetDisplay() {
-      if (!this.textDisplays) {
-        this.textDisplays = [
-          new Text({
-            x: 0,
-            y: 10,
-            style: {
-              fill: GREEN,
-            },
-            container: this.container,
-          }),
-          new Text({
-            x: 0,
-            y: 4,
-            style: {
-              fill: GREEN,
-            },
-            container: this.container,
-          })
-        ]
+      if (this.gameDisplaysCreated) {
+        return
       }
+
+      this.textDisplays = [
+        new Text({
+          x: 0,
+          y: 10,
+          style: {
+            fill: CONSTANTS.COLORS.GREEN,
+          },
+          container: this.container,
+        }),
+        new Text({
+          x: 0,
+          y: 4,
+          style: {
+            fill: CONSTANTS.COLORS.GREEN,
+          },
+          container: this.container,
+        })
+      ]
 
       // must be AFTER background
       this.pointDisplay = new Text({
-        prefix: 'SCORE: ',
-        x: 30,
-        y: 25,
+        style: {
+          fontSize: 48,
+        },
+        prefix: 'SCORE:',
+        x: CONSTANTS.DISPLAYS.POINTS.X,
+        y: CONSTANTS.DISPLAYS.POINTS.Y,
         container: this.container,
-        show: String(this.points)
+        show: this.formatPoints(this.points),
+        centered: false
       })
 
       this.winterDisplay = new Text({
-        prefix: 'WINTER: ',
-        x: 30,
-        y: 20,
+        style: {
+          fontSize: 48,
+        },
+        prefix: 'WINTER:    ',
+        x: CONSTANTS.DISPLAYS.WINTER.X,
+        y: CONSTANTS.DISPLAYS.WINTER.Y,
         container: this.container,
+        centered: false
       })
 
       this.healthBar = new HealthBar(this)
+      this.gameDisplaysCreated = true
     }
 
     setupWorld() {
@@ -1042,8 +1096,8 @@
     createEnemy(type) {
       this.winterStats[type].created +=1
       const direction = Math.random() < 0.5
-        ? LEFT
-        : RIGHT
+        ? CONSTANTS.LEFT
+        : CONSTANTS.RIGHT
 
       switch (type) {
         case TYPES.SEAL:
@@ -1060,8 +1114,9 @@
     gameOver() {
       const that = this
       this.paused = true
+      this.inGame = false
       this.textDisplays[0].show(`GAME OVER: ${this.gameOverReason}`, {
-        fill: RED,
+        fill: CONSTANTS.COLORS.RED,
       })
 
       this.healthBar.hide()
@@ -1073,7 +1128,7 @@
         y: -2,
         container: this.container,
         style: {
-          fill: GREEN,
+          fill: CONSTANTS.COLORS.GREEN,
         },
       })
 
@@ -1090,7 +1145,7 @@
         y: CONSTANTS.HEALTH_BAR.Y,
         container: this.container,
         style: {
-          fill: YELLOW,
+          fill: CONSTANTS.COLORS.YELLOW,
         }
       })
 
@@ -1118,7 +1173,7 @@
     }
 
     getWinterStats() {
-      const seals = enforcePositive(this.winter * 2 + 10)
+      const seals = 2
       const gulls = enforcePositive(this.winter * 3 - 10)
 
       return {
@@ -1140,9 +1195,13 @@
       }
     }
 
+    formatPoints(num) {
+      return String(num).padStart(8, '0')
+    }
+
     addPoints(num) {
       this.points += num
-      this.pointDisplay.show(String(this.points))
+      this.pointDisplay.show(this.formatPoints(this.points))
     }
 
     spawnEnemies() {
@@ -1167,14 +1226,10 @@
     }
 
     evaluateActiveKeys() {
-      if (this.keys.down.G) {
-        this.hero.glide()
-      }
-
-      if (this.keys.down.RIGHT) {
-        this.hero.move(RIGHT)
-      } else if (this.keys.down.LEFT) {
-        this.hero.move(LEFT)
+      if (this.keys.down.D) {
+        this.hero.move(CONSTANTS.RIGHT)
+      } else if (this.keys.down.A) {
+        this.hero.move(CONSTANTS.LEFT)
       }
     }
 
@@ -1191,7 +1246,7 @@
 
     createBlock(graphics, body, box2dOpts, display, x1, y1, x2, y2) {
       if (display) {
-        this.createBlockDisplay(graphics, x1, y1, x2, y2, BIT_BLUE)
+        this.createBlockDisplay(graphics, x1, y1, x2, y2, CONSTANTS.COLORS.BIT_BLUE)
       }
 
       body.createFixture(planck.Edge(Vec2(x1, y1), Vec2(x2, y2)), box2dOpts)
@@ -1289,14 +1344,14 @@
         let bitColor
 
         if (health > CONSTANTS.HERO.HEALTH.MAX * 0.67) {
-          color = GREEN
-          bitColor = BIT_GREEN
+          color = CONSTANTS.COLORS.GREEN
+          bitColor = CONSTANTS.COLORS.BIT_GREEN
         } else if (health > CONSTANTS.HERO.HEALTH.MAX * 0.33) {
-          color = YELLOW
-          bitColor = BIT_YELLOW
+          color = CONSTANTS.COLORS.YELLOW
+          bitColor = CONSTANTS.COLORS.BIT_YELLOW
         } else {
-          color = RED
-          bitColor = BIT_RED
+          color = CONSTANTS.COLORS.RED
+          bitColor = CONSTANTS.COLORS.BIT_RED
         }
 
         this.graphics.clear()
@@ -1325,7 +1380,9 @@
       style,
       container,
       show,
+      centered = true,
     }) {
+      this.centered = centered
       this.container = container
       this.prefix = prefix
       this.x = x
@@ -1352,7 +1409,10 @@
         ...style,
       })
 
-      this.text.anchor.set(0.5)
+      if (this.centered) {
+        this.text.anchor.set(0.5)
+      }
+
       this.text.x = mpx(this.x)
       this.text.y = mpy(this.y)
 
@@ -1410,7 +1470,7 @@
       })
 
       this.body.render = {
-        stroke: GREEN
+        stroke: CONSTANTS.COLORS.GREEN
       }
 
       this.game.assignType(this, TYPES.MALE)
@@ -1566,7 +1626,7 @@
       this.points = CONSTANTS.SEAL.POINTS
       this.abducting = false
 
-      this.velocity = direction === RIGHT
+      this.velocity = direction === CONSTANTS.RIGHT
         ? CONSTANTS.SEAL.SPEED
         : CONSTANTS.SEAL.SPEED * -1
 
@@ -1605,7 +1665,7 @@
     }
 
     setupBody() {
-      const x = this.direction === LEFT
+      const x = this.direction === CONSTANTS.LEFT
       ? CONSTANTS.SEAL.SPAWN.X
       : CONSTANTS.SEAL.SPAWN.X * -1
 
@@ -1679,7 +1739,7 @@
       this.flapPower = CONSTANTS.GULL.FLAP.STANDARD.POWER
       this.flapInterval = CONSTANTS.GULL.FLAP.STANDARD.INTERVAL
 
-      if (direction === LEFT) {
+      if (direction === CONSTANTS.LEFT) {
         this.velocity *= -1
       }
 
@@ -1715,7 +1775,7 @@
     }
 
     setupBody() {
-      const x = this.direction === LEFT
+      const x = this.direction === CONSTANTS.LEFT
         ? CONSTANTS.GULL.SPAWN.X
         : CONSTANTS.GULL.SPAWN.X * -1
 
@@ -1734,7 +1794,7 @@
       })
 
       this.body.render = {
-        stroke: BLUE
+        stroke: CONSTANTS.COLORS.BLUE
       }
     }
 
@@ -1936,7 +1996,7 @@
       this.state = {
         airborne: true,
         action: 'NEUTRAL',
-        direction: RIGHT,
+        direction: CONSTANTS.RIGHT,
       }
 
       this.setupSprite()
@@ -1957,7 +2017,7 @@
       this.body.createFixture(planck.Box(CONSTANTS.HERO.HITBOX.WIDTH, CONSTANTS.HERO.HITBOX.HEIGHT), this.bodyOpts)
 
       this.body.render = {
-        stroke: GREEN
+        stroke: CONSTANTS.COLORS.GREEN
       }
     }
 
@@ -2186,7 +2246,7 @@
     }
 
     /**
-     * @param {Integer} direction - LEFT or RIGHT
+     * @param {Integer} direction - CONSTANTS.LEFT or CONSTANTS.RIGHT
      */
     move(direction) {
       this.state.direction = direction

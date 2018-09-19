@@ -117,6 +117,12 @@ LOGIC.15
 LOGIC.16
 - [x] get rid of Menu, incorporate into Game
 - [x] bug fix: fish appears at origin when created
+- [x] bug fix: key presses while paused
+- [x] dive: down button
+- [x] switch to ASWD
+- [ ] points for males who survive each winter
+- [ ] bonus if no males abductd at end of winter
+- [ ] bonus for full health at end of winter
 
 LOGIC.17
 - [ ] settings: shadows on/off
@@ -131,6 +137,7 @@ LOGIC.18
 - [ ] blink while invincible
 - [ ] bounce off of enemies
 - [ ] bug fix: "from top" calculation
+- [ ] bug fix: health bar collisions
 
 LOGIC.19
 - [ ] eslint
@@ -149,9 +156,19 @@ LOGIC.21
 - [ ] post-wave movement
 
 LOGIC.21
-- [ ] orca summons
+- [ ] orca summons: ENTER key
 - [ ] hero.lives
 - [ ] males don't regenerate back to max each winter
+
+LOGIC.22
+- [ ] ELDER THING boss every {x} levels
+- [ ] red lighting during boss levels
+- [ ] boss throw shoggoth to collect males and bring them back to it
+- [ ] boss attack: tentacle spear thrust
+- [ ] boss attack: laser blast?
+
+LOGIC.23
+- [ ] revise keybindings, make sure they make sense
 
 ### UI Todos
 UI.1
@@ -209,30 +226,59 @@ UI.7
 - [x] sprite normals: fish
 
 UI.8
-- [ ] retro text
-- [ ] retro introduction with Mars-ish theme
-- [ ] skip-intro button
+- [x] fixed-length points
+- [x] fixed-length winter count (triple digits)
+- [x] add `centered` argument for text
+- [x] use constant view size
 
 UI.9
-- [ ] sun rises and brightens between winters, sets during countdown
-- [ ] snowstorm in background
-- [ ] snowstorm stops with winter's end
+- [ ] introduction (retrofitted games presents --> brief story with white text --> main menu)
+- [ ] skip-intro button
+- [ ] retro font
 
 UI.10
+- [ ] select options with arrow keys -- no mouse clicks!
+- [ ] enter or space selects option, left & right toggle/shift
+- [ ] title screen has options for START, SETTINGS, and CONTROLS
+- [ ] settings screen
+- [ ] controls screen
+
+UI.11
+- [ ] display lives remaining
+- [ ] settings/controls have BACK button, with function provided as argument
+- [ ] settings/controls available from pause menu (CONTINUE/SETTINGS/CONTROLS)
+- [ ] EXIT is available as option when paused
+- [ ] EXIT has an "are you sure" check with default "no"
+
+UI.12
+- [ ] song selection screen before game starts
+- [ ] bonus points text effect: blinking colors, sweep up, or both
+- [ ] more congrulation text options
+
+UI.13
+- [ ] high score table
+- [ ] high score table input
+- [ ] scores are stored in postgres
+- [ ] scores are fetched with socket.io
+- [ ] BACK button goes to main menu
+
+UI.14
 - [ ] responsive screen
 - [ ] switch to better animation library (smoothie?)
 
-UI.11
+UI.15
 - [ ] enemy 3 assets (wolf?)
 - [ ] enemy 4 assets (walrus?)
 
-UI.12
-- [ ] more congrulation text options
-- [ ] controls screen
-- [ ] high score table
-- [ ] high score table input
+UI.16
+- [ ] Elder Thing assets
 
-UI.13
+UI.17
+- [ ] snowstorm in background
+- [ ] snowstorm stops with winter's end
+- [ ] snowstorm configurable in settings
+
+UI.18
 - [ ] enhance hero assets
 - [ ] enhance male assets
 - [ ] enhance fish assets
@@ -241,25 +287,22 @@ UI.13
 - [ ] enhance background assets
 - [ ] enhance text displays
 
-UI.14
-- [ ] opening scene
-- [ ] post-wave animation (female textures, cheering)
+UI.19
 - [ ] refine lighting
-- [ ] clouds?
 
 ### Audio Todos
 AUDIO.1
 - [x] set up SoundJS
-- [x] basic jump sound
+- [x] draft jump sound
 - [x] Penguin Defender theme
-- [x] basic damage sound
-- [x] basic enemy death sound
-- [x] basic fish-throw sound
+- [x] draft damage sound
+- [x] draft enemy death sound
+- [x] draft fish-throw sound
 
 AUDIO.2
-- [x] basic abduction sound
-- [x] basic dive sound
-- [x] basic pause sound
+- [x] draft abduction sound
+- [x] draft dive sound
+- [x] draft pause sound
 
 AUDIO.3
 - [x] SoundManager class
@@ -267,10 +310,11 @@ AUDIO.3
 - [x] theme pauses when game is paused
 
 AUDIO.4
-- [ ] basic male death sound
-- [ ] basic victory sound
-- [ ] basic gameover music
-- [ ] basic menu music
+- [ ] draft male death sound
+- [ ] draft victory sound
+- [ ] draft gameover music
+- [ ] draft menu music
+- [ ] draft intro music (Mars-inspired?)
 
 AUDIO.5
 - [ ] song 2
