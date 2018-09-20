@@ -1,3 +1,4 @@
+"use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
@@ -31,13 +32,17 @@ var __rest = (this && this.__rest) || function (s, e) {
             t[p[i]] = s[p[i]];
     return t;
 };
+exports.__esModule = true;
+var planck = require("./planckv0.1.45.min.js");
+var createjs = require("createjs-module");
+var PIXI = require("./pixi.min.js");
+require("./pixi-layers.js");
+require("./pixi-lights.js");
+require("./pixi-shadows.js");
 /**
  * Basic surival game created using pixi.js and planck.js
  */
 (function main() {
-    var PIXI = window.PIXI;
-    var planck = window.planck;
-    var createjs = window.createjs;
     var Sound = createjs.Sound;
     /**
      * Constants
@@ -1622,7 +1627,6 @@ var __rest = (this && this.__rest) || function (s, e) {
                 fixedRotation: true,
                 allowSleep: false
             });
-            console.log("BODY:", this.body);
             this.body.createFixture(planck.Box(CONSTANTS.HERO.HITBOX.WIDTH, CONSTANTS.HERO.HITBOX.HEIGHT), this.bodyOpts);
             this.body.render = {
                 stroke: GREEN
@@ -1888,12 +1892,8 @@ var __rest = (this && this.__rest) || function (s, e) {
             Sound.registerSound(sounds[key], key);
         });
         function startIfReady() {
-            console.log("Ready?", {
-                graphicsLoaded: graphicsLoaded,
-                soundsLoaded: soundsLoaded
-            });
             if (!graphicsLoaded || !soundsLoaded) {
-                return;
+                // return
             }
             new Game();
         }

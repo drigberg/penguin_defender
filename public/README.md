@@ -119,6 +119,19 @@ LOGIC.16
 - [x] bug fix: fish appears at origin when created
 
 LOGIC.17
+- [x] compile with typescript
+- [ ] bug fix: "cannot import when module is none"
+- [ ] bundle createjs
+- [ ] bundle planck
+- [ ] bundle pixi modules
+- [ ] CONSTANTS interface
+- [ ] planck typings
+- [ ] pixi-layers typings
+- [ ] replace `any`: collisions
+- [ ] replace `any`: constructor arguments
+- [ ] replace `any`: remaining
+
+LOGIC.17
 - [ ] settings: shadows on/off
 - [ ] settings: music on/off
 - [ ] settings: sound effects on/off

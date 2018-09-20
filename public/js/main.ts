@@ -1,10 +1,14 @@
+import * as planck from './planckv0.1.45.min.js'
+import * as createjs from 'createjs-module'
+import * as PIXI from './pixi.min.js'
+import './pixi-layers.js'
+import './pixi-lights.js'
+import './pixi-shadows.js'
+
 /**
  * Basic surival game created using pixi.js and planck.js
  */
 (function main() {
-  const PIXI: any = (window as any).PIXI
-  const planck: any = (window as any).planck
-  const createjs: any = (window as any).createjs
   const Sound = createjs.Sound
 
   /**
@@ -374,7 +378,7 @@
   }
 
   class SoundManager {
-    sounds: any
+    sounds: { [index: string]: any }
 
     constructor() {
       this.sounds = {}
@@ -445,7 +449,11 @@
     winterDisplay: Text
     pointDisplay: Text
     hero: Hero
-    keys: any
+    keys: {
+      down: {
+        [index: string]: boolean
+      }
+    }
     collisions: any[]
     collisionHandlers: any
     resetButton: Button
@@ -862,31 +870,31 @@
         [that.hashTypes(TYPES.GROUND, TYPES.HERO)]: function() {
           that.hero.land()
         },
-        [that.hashTypes(TYPES.FISH, TYPES.GROUND)]: function(bodies: any) {
+        [that.hashTypes(TYPES.FISH, TYPES.GROUND)]: function(bodies: any[]) {
           that.destroyEntity(that.objects[bodies.find(item => item.type === TYPES.FISH).id])
         },
-        [that.hashTypes(TYPES.GULL, TYPES.GROUND)]: function(bodies: any) {
+        [that.hashTypes(TYPES.GULL, TYPES.GROUND)]: function(bodies: any[]) {
           const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id]
           gull.flyAway()
         },
-        [that.hashTypes(TYPES.GROUND, TYPES.SEAL)]: function(bodies: any) {
+        [that.hashTypes(TYPES.GROUND, TYPES.SEAL)]: function(bodies: any[]) {
           that.objects[bodies.find(item => item.type === TYPES.SEAL).id].jumps = CONSTANTS.SEAL.JUMP.MAX
         },
-        [that.hashTypes(TYPES.GROUND, TYPES.MALE)]: function(bodies: any) {
+        [that.hashTypes(TYPES.GROUND, TYPES.MALE)]: function(bodies: any[]) {
           that.objects[bodies.find(item => item.type === TYPES.MALE).id].jumps = CONSTANTS.MALE.JUMP.MAX
         },
-        [that.hashTypes(TYPES.HERO, TYPES.SEAL)]: function(bodies: any, point: any, fixtures: any) {
+        [that.hashTypes(TYPES.HERO, TYPES.SEAL)]: function(bodies: any[], point: any[], fixtures: any[]) {
           const dive = Boolean(fixtures.find(item => item.dive === true))
           const enemy = that.objects[bodies.find(item => item.type === TYPES.SEAL).id]
 
           that.handleEnemyHeroCollision(enemy, point, dive)
         },
-        [that.hashTypes(TYPES.GULL, TYPES.HERO)]: function(bodies: any, point: any, fixtures: any) {
+        [that.hashTypes(TYPES.GULL, TYPES.HERO)]: function(bodies: any[], point: any[], fixtures: any[]) {
           const dive = Boolean(fixtures.find(item => item.dive === true))
           const enemy = that.objects[bodies.find(item => item.type === TYPES.GULL).id]
           that.handleEnemyHeroCollision(enemy, point, dive)
         },
-        [that.hashTypes(TYPES.FISH, TYPES.SEAL)]: function(bodies: any) {
+        [that.hashTypes(TYPES.FISH, TYPES.SEAL)]: function(bodies: any[]) {
           that.handleEnemyFishCollision(
             that.objects[bodies.find(item => item.type === TYPES.SEAL).id],
             that.objects[bodies.find(item => item.type === TYPES.FISH).id],
@@ -898,29 +906,29 @@
             that.objects[bodies.find(item => item.type === TYPES.FISH).id],
           )
         },
-        [that.hashTypes(TYPES.MALE, TYPES.MALE)]: function(bodies: any) {
+        [that.hashTypes(TYPES.MALE, TYPES.MALE)]: function(bodies: any[]) {
           if (Math.random() < 0.1) {
             that.objects[bodies[0].id].jump()
           } else if (Math.random() < 0.1) {
             that.objects[bodies[1].id].jump()
           }
         },
-        [that.hashTypes(TYPES.MALE, TYPES.OFFSCREEN)]: function(bodies: any) {
+        [that.hashTypes(TYPES.MALE, TYPES.OFFSCREEN)]: function(bodies: any[]) {
           const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id]
           that.destroyEntity(male.abductor)
           that.destroyEntity(male)
         },
-        [that.hashTypes(TYPES.SEAL, TYPES.OFFSCREEN)]: function(bodies: any) {
+        [that.hashTypes(TYPES.SEAL, TYPES.OFFSCREEN)]: function(bodies: any[]) {
           const seal = that.objects[bodies.find(item => item.type === TYPES.SEAL).id]
           that.destroyEntity(seal)
           that.destroyEntity(seal.abducting)
         },
-        [that.hashTypes(TYPES.GULL, TYPES.OFFSCREEN)]: function(bodies: any) {
+        [that.hashTypes(TYPES.GULL, TYPES.OFFSCREEN)]: function(bodies: any[]) {
           const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id]
           that.destroyEntity(gull)
           that.destroyEntity(gull.abducting)
         },
-        [that.hashTypes(TYPES.MALE, TYPES.GULL)]: function(bodies: any) {
+        [that.hashTypes(TYPES.MALE, TYPES.GULL)]: function(bodies: any[]) {
           const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id]
           const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id]
 
@@ -932,7 +940,7 @@
             gull.abduct(male)
           }
         },
-        [that.hashTypes(TYPES.MALE, TYPES.SEAL)]: function(bodies: any) {
+        [that.hashTypes(TYPES.MALE, TYPES.SEAL)]: function(bodies: any[]) {
           const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id]
           const seal = that.objects[bodies.find(item => item.type === TYPES.SEAL).id]
 
@@ -2056,8 +2064,6 @@
         allowSleep: false
       })
 
-      console.log("BODY:", this.body)
-
       this.body.createFixture(planck.Box(CONSTANTS.HERO.HITBOX.WIDTH, CONSTANTS.HERO.HITBOX.HEIGHT), this.bodyOpts)
 
       this.body.render = {
@@ -2401,13 +2407,8 @@
     })
 
     function startIfReady() {
-      console.log("Ready?", {
-        graphicsLoaded,
-        soundsLoaded,
-      })
-
       if (!graphicsLoaded || !soundsLoaded) {
-        return
+        // return
       }
 
       new Game()
