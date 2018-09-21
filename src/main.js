@@ -34,8 +34,8 @@ var __rest = (this && this.__rest) || function (s, e) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require("./createjs.js");
-var planck = require("./planckv0.1.45.min.js");
-var PIXI = require("./pixi.min.js");
+var PIXI = require('./pixi.min.js');
+var planck = require('./planckv0.1.45');
 require("./pixi-layers.js");
 require("./pixi-lights.js");
 require("./pixi-shadows.js");

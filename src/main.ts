@@ -1,6 +1,7 @@
 import './createjs.js'
-import * as planck from './planckv0.1.45.min.js'
-import * as PIXI from './pixi.min.js'
+declare function require(path: string) : any;
+const PIXI = require('./pixi.min.js')
+const planck = require('./planckv0.1.45')
 import './pixi-layers.js'
 import './pixi-lights.js'
 import './pixi-shadows.js'
@@ -281,9 +282,9 @@ import {
    */
 
   function assembleBasicSprite(
-    diffuseSprite: ShadowEnabledSprite,
-    normalSprite: ShadowEnabledSprite,
-    shadowSprite: ShadowEnabledSprite
+    diffuseSprite: ShadowEnabledSprite | PIXI.Sprite,
+    normalSprite: ShadowEnabledSprite | PIXI.Sprite,
+    shadowSprite: ShadowEnabledSprite | PIXI.Sprite
   ) {
     const container = new PIXI.Container()
 

@@ -26713,8 +26713,8 @@ var __rest = (this && this.__rest) || function (s, e) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require("./createjs.js");
-var planck = require("./planckv0.1.45.min.js");
-var PIXI = require("./pixi.min.js");
+var PIXI = require('./pixi.min.js');
+var planck = require('./planckv0.1.45');
 require("./pixi-layers.js");
 require("./pixi-lights.js");
 require("./pixi-shadows.js");
@@ -28640,7 +28640,7 @@ require("./pixi-shadows.js");
     })();
 })();
 
-},{"./createjs.js":1,"./pixi-layers.js":3,"./pixi-lights.js":4,"./pixi-shadows.js":5,"./pixi.min.js":6,"./planckv0.1.45.min.js":7}],3:[function(require,module,exports){
+},{"./createjs.js":1,"./pixi-layers.js":3,"./pixi-lights.js":4,"./pixi-shadows.js":5,"./pixi.min.js":6,"./planckv0.1.45":7}],3:[function(require,module,exports){
 var pixi_display;
 (function (pixi_display) {
     Object.assign(PIXI.Container.prototype, {

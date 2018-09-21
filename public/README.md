@@ -128,19 +128,22 @@ LOGIC.17
 - [x] collision type checks
 - [x] fix tsconfig setup
 - [x] bug fix: no sound
+- [x] pixi-layers typings
+- [x] dev:start command
+
+LOGIC.18
 - [ ] planck typings
-- [ ] pixi-layers typings
 - [ ] replace `any`: collisions
 - [ ] replace `any`: constructor arguments
 - [ ] replace `any`: remaining
 
-LOGIC.17
+LOGIC.19
 - [ ] settings: shadows on/off
 - [ ] settings: music on/off
 - [ ] settings: sound effects on/off
 - [ ] settings: song selection
 
-LOGIC.18
+LOGIC.20
 - [ ] light class: implement fade method
 - [ ] lights fade to black upon death
 - [ ] lights fade in when created
@@ -148,17 +151,17 @@ LOGIC.18
 - [ ] bounce off of enemies
 - [ ] bug fix: "from top" calculation
 
-LOGIC.19
+LOGIC.21
 - [ ] eslint
 - [ ] gulls drop eggs
 - [ ] new enemy (bank: wolves, caribou, walrus, Putin-on-horse, lumberjack)
 
-LOGIC.20
+LOGIC.22
 - [ ] make testbed only differ by testbed and hidden pixi, not commented
 - [ ] refine movement
 - [ ] standardize colors (alert, points, success, etc)
 
-LOGIC.21
+LOGIC.23
 - [ ] gulls fall when killed, are destroyed offscreen
 - [ ] seals fall when killed, are destroyed offscreen
 - [ ] fish fall after collisions, are destroyed offscreen
