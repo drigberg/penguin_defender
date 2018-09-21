@@ -1,4 +1,4 @@
-import * as createjs from 'createjs-module'
+import './createjs.js'
 import * as planck from './planckv0.1.45.min.js'
 import * as PIXI from './pixi.min.js'
 import './pixi-layers.js'
@@ -2459,7 +2459,7 @@ import {
 
     function startIfReady() {
       if (!graphicsLoaded || !soundsLoaded) {
-        // return
+        return
       }
 
       new Game()

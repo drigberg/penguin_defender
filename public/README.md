@@ -127,7 +127,7 @@ LOGIC.17
 - [x] CONSTANTS interface
 - [x] collision type checks
 - [x] fix tsconfig setup
-- [ ] bug fix: no sound
+- [x] bug fix: no sound
 - [ ] planck typings
 - [ ] pixi-layers typings
 - [ ] replace `any`: collisions
