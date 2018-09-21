@@ -133,18 +133,27 @@ LOGIC.17
 
 LOGIC.18
 - [x] minify bundle
+- [x] get rid of Menu, incorporate into Game
+- [x] bug fix: fish appears at origin when created
+- [x] bug fix: key presses while paused
+- [x] get rid of glide()
+- [x] switch to ASWD
+- [x] bug fix: double event listeners
+- [x] bug fix: extra animation frame requests on restart
+
+LOGIC.19
 - [ ] planck typings
 - [ ] replace `any`: collisions
 - [ ] replace `any`: constructor arguments
 - [ ] replace `any`: remaining
 
-LOGIC.19
+LOGIC.20
 - [ ] settings: shadows on/off
 - [ ] settings: music on/off
 - [ ] settings: sound effects on/off
 - [ ] settings: song selection
 
-LOGIC.20
+LOGIC.21
 - [ ] light class: implement fade method
 - [ ] lights fade to black upon death
 - [ ] lights fade in when created
@@ -152,23 +161,23 @@ LOGIC.20
 - [ ] bounce off of enemies
 - [ ] bug fix: "from top" calculation
 
-LOGIC.21
+LOGIC.22
 - [ ] eslint
 - [ ] gulls drop eggs
 - [ ] new enemy (bank: wolves, caribou, walrus, Putin-on-horse, lumberjack)
 
-LOGIC.22
+LOGIC.23
 - [ ] make testbed only differ by testbed and hidden pixi, not commented
 - [ ] refine movement
 - [ ] standardize colors (alert, points, success, etc)
 
-LOGIC.23
+LOGIC.24
 - [ ] gulls fall when killed, are destroyed offscreen
 - [ ] seals fall when killed, are destroyed offscreen
 - [ ] fish fall after collisions, are destroyed offscreen
 - [ ] post-wave movement
 
-LOGIC.21
+LOGIC.25
 - [ ] orca summons
 - [ ] hero.lives
 - [ ] males don't regenerate back to max each winter

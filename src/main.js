@@ -45,7 +45,6 @@ require("./pixi-shadows.js");
 (function main() {
     var _a;
     var Sound = createjs.Sound;
-    console.log(Sound);
     /**
      * Constants
      */
@@ -458,6 +457,7 @@ require("./pixi-shadows.js");
         function Slideshow(_a) {
             var slides = _a.slides, intervals = _a.intervals, onComplete = _a.onComplete;
             var that = this;
+            this.complete = false;
             this.container = new PIXI.Container();
             this.onCompleteCallback = onComplete;
             this.slides = slides;
@@ -481,11 +481,9 @@ require("./pixi-shadows.js");
             });
         }
         Slideshow.prototype.fadeIn = function () {
-            console.log("FADE IN!", this.text.text.alpha);
             this.text.text.alpha += 1 / this.intervals[SLIDESHOW.STATES.FADING_IN];
         };
         Slideshow.prototype.fadeOut = function () {
-            console.log("FADE OUT!", this.text.text.alpha);
             this.text.text.alpha -= 1 / this.intervals[SLIDESHOW.STATES.FADING_IN];
         };
         Slideshow.prototype.nextState = function () {
@@ -522,11 +520,15 @@ require("./pixi-shadows.js");
                 case SLIDESHOW.STATES.WAITING:
                     break;
             }
+            if (that.complete) {
+                return;
+            }
             window.requestAnimationFrame(function () {
                 that.onStep();
             });
         };
         Slideshow.prototype.onComplete = function () {
+            this.complete = true;
             stage.removeChild(this.container);
             this.onCompleteCallback();
         };
@@ -799,6 +801,9 @@ require("./pixi-shadows.js");
             this.onStepPauseIndependent();
             if (!this.paused) {
                 this.onStepPauseDependent();
+            }
+            if (!that.inGame) {
+                return;
             }
             window.requestAnimationFrame(function () {
                 that.onStep();
@@ -1168,8 +1173,9 @@ require("./pixi-shadows.js");
             this.resetButton.show({
                 text: 'PLAY AGAIN',
                 fn: function () {
+                    stage.removeChild(that.container);
                     that.reset();
-                    that.startWinter();
+                    that.start();
                 }
             });
             this.menuButton = new Button({
@@ -1184,6 +1190,8 @@ require("./pixi-shadows.js");
                 text: 'MENU',
                 fn: function () {
                     stage.removeChild(that.container);
+                    that.reset();
+                    that.showMainMenu();
                 }
             });
         };

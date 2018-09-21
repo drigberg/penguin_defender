@@ -16,7 +16,6 @@ import {
  */
 (function main() {
   const Sound = createjs.Sound
-  console.log(Sound)
 
   /**
    * Constants
@@ -484,6 +483,7 @@ import {
     onCompleteCallback: Function
     text: Text
     intervals: { [index: string]: number }
+    complete: boolean
 
     constructor({
       slides,
@@ -491,6 +491,7 @@ import {
       onComplete,
     }: any) {
       const that = this
+      this.complete = false
       this.container = new PIXI.Container()
       this.onCompleteCallback = onComplete
 
@@ -520,12 +521,10 @@ import {
     }
 
     fadeIn() {
-      console.log("FADE IN!", this.text.text.alpha)
       this.text.text.alpha += 1 / this.intervals[SLIDESHOW.STATES.FADING_IN]
     }
 
     fadeOut() {
-      console.log("FADE OUT!", this.text.text.alpha)
       this.text.text.alpha -= 1 / this.intervals[SLIDESHOW.STATES.FADING_IN]
     }
 
@@ -572,12 +571,17 @@ import {
           break
       }
 
+      if (that.complete) {
+        return
+      }
+
       window.requestAnimationFrame(function() {
         that.onStep()
       })
     }
 
     onComplete() {
+      this.complete = true
       stage.removeChild(this.container)
       this.onCompleteCallback()
     }
@@ -949,6 +953,10 @@ import {
 
       if (!this.paused) {
         this.onStepPauseDependent()
+      }
+
+      if (!that.inGame) {
+        return
       }
 
       window.requestAnimationFrame(function() {
@@ -1379,8 +1387,9 @@ import {
       this.resetButton.show({
         text: 'PLAY AGAIN',
         fn: () => {
+          stage.removeChild(that.container)
           that.reset()
-          that.startWinter()
+          that.start()
         }
       })
 
@@ -1397,6 +1406,8 @@ import {
         text: 'MENU',
         fn: () => {
           stage.removeChild(that.container)
+          that.reset()
+          that.showMainMenu()
         }
       })
     }
