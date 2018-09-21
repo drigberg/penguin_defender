@@ -1,3 +1,6 @@
+#Browserify
+bundle.js.tmp*
+
 #OSX
 .DS_Store
 
