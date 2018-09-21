@@ -1,5 +1,30 @@
-export interface Constants {
+export interface ISlideshow {
+  readonly STATES: {
+    [index: string]: string
+    readonly FADING_IN: string,
+    readonly SUSTAINING: string,
+    readonly FADING_OUT: string,
+    readonly WAITING: string,
+  },
+  readonly TIMELINE: string[]
+}
+
+export interface IConstants {
   [index: string]: any,
+  readonly INTRO: {
+    [index: string]: any
+    readonly TIME_INTERVALS: {
+      [index: string]: number
+    },
+    SLIDES: string[],
+  },
+  SCREEN: {
+    [index: string]: number,
+    WIDTH: number,
+    HEIGHT: number,
+  },
+  readonly LEFT: number
+  readonly RIGHT: number
   readonly ENEMY_TYPES: string[],
   readonly MALE: {
     readonly SPAWN: {
@@ -46,7 +71,6 @@ export interface Constants {
     readonly MOVEMENT_STATES: {
       [index: string]: string
       readonly RUNNING: string,
-      readonly GLIDING: string,
       readonly NEUTRAL: string,
       readonly DIVING: string,
       readonly JUMPING: string,
@@ -78,10 +102,6 @@ export interface Constants {
       [index: string]: number
       readonly X: number,
       readonly Y: number,
-    },
-    readonly GLIDE: {
-      [index: string]: number
-      readonly IMPULSE: number,
     },
     readonly INVINCIBILITY_INTERVAL: number,
     readonly DAMAGE: number,

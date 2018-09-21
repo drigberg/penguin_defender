@@ -26722,6 +26722,7 @@ require("./pixi-shadows.js");
  * Basic surival game created using pixi.js and planck.js
  */
 (function main() {
+    var _a;
     var Sound = createjs.Sound;
     console.log(Sound);
     /**
@@ -26747,31 +26748,6 @@ require("./pixi-shadows.js");
         WALLS: CATEGORIES.HERO,
         OFFSCREEN: CATEGORIES.FOE | CATEGORIES.FRIEND,
     });
-    var RED = '#ee1111';
-    var BLUE = '#5555ee';
-    var YELLOW = '#aaaa22';
-    var GREEN = '#22aa22';
-    var BIT_RED = 0xEE5555;
-    var BIT_BLUE = 0x5555EE;
-    var BIT_YELLOW = 0xAAAA22;
-    var BIT_GREEN = 0x22AA22;
-    var BASE_TEXT_STYLE = new PIXI.TextStyle({
-        fontFamily: 'Courier New',
-        fontSize: 72,
-        strokeThickness: 0,
-        fontWeight: 'bold',
-        fill: BLUE,
-    });
-    var KEY_CODE_MAP = {
-        39: 'RIGHT',
-        37: 'LEFT',
-        38: 'UP',
-        40: 'DOWN',
-        32: 'SPACE',
-        13: 'RETURN',
-    };
-    var LEFT = -1;
-    var RIGHT = 1;
     var TYPES = Object.freeze({
         GROUND: 'GROUND',
         WALL: 'WALL',
@@ -26782,10 +26758,73 @@ require("./pixi-shadows.js");
         SEAL: 'SEAL',
         GULL: 'GULL',
     });
+    var SLIDESHOW = {
+        STATES: {
+            FADING_IN: 'FADING_IN',
+            SUSTAINING: 'SUSTAINING',
+            FADING_OUT: 'FADING_OUT',
+            WAITING: 'WAITING',
+        },
+        TIMELINE: [
+            'FADING_IN',
+            'SUSTAINING',
+            'FADING_OUT',
+            'WAITING',
+        ]
+    };
     var CONSTANTS = {
+        INTRO: {
+            TIME_INTERVALS: (_a = {},
+                _a[SLIDESHOW.STATES.FADING_IN] = 80,
+                _a[SLIDESHOW.STATES.SUSTAINING] = 240,
+                _a[SLIDESHOW.STATES.FADING_OUT] = 80,
+                _a[SLIDESHOW.STATES.WAITING] = 40,
+                _a),
+            SLIDES: [
+                'Every winter, male Emperor Penguins huddle\n together at the South Pole for warmth,\n while the females fish out to sea.',
+                'Times have changed. Emboldened by rising\n temperatures, fierce predators have moved\n further south.',
+                'Your colony holds to tradition and refuses\n to find a new nesting ground. You alone\n stand between them and utter annihilation.',
+                'Defend your penguin brothers\n until the females return.'
+            ],
+        },
+        SCREEN: {
+            WIDTH: 1152,
+            HEIGHT: 630,
+        },
+        DISPLAYS: {
+            POINTS: {
+                X: 10,
+                Y: 25,
+            },
+            WINTER: {
+                X: 10,
+                Y: 21.8,
+            },
+        },
+        COLORS: {
+            WHITE: '#eeeeee',
+            RED: '#ee1111',
+            BLUE: '#5555ee',
+            YELLOW: '#aaaa22',
+            GREEN: '#22aa22',
+            BIT_RED: 0xEE5555,
+            BIT_BLUE: 0x5555EE,
+            BIT_YELLOW: 0xAAAA22,
+            BIT_GREEN: 0x22AA22,
+        },
+        KEY_CODES: {
+            32: 'SPACE',
+            13: 'RETURN',
+        },
+        LEFT: -1,
+        RIGHT: 1,
+        POINT_BONUSES: {
+            PER_MALE_REMAINING: 100,
+            PERFECT_MALE_DEFENSE: 500,
+        },
         ENEMY_TYPES: [
             TYPES.SEAL,
-            TYPES.GULL
+            TYPES.GULL,
         ],
         MALE: {
             SPAWN: {
@@ -26824,7 +26863,6 @@ require("./pixi-shadows.js");
             },
             MOVEMENT_STATES: {
                 RUNNING: 'RUNNING',
-                GLIDING: 'GLIDING',
                 NEUTRAL: 'NEUTRAL',
                 DIVING: 'DIVING',
                 JUMPING: 'JUMPING',
@@ -26851,9 +26889,6 @@ require("./pixi-shadows.js");
                 X: 0.0,
                 Y: 5.0,
             },
-            GLIDE: {
-                IMPULSE: 2,
-            },
             INVINCIBILITY_INTERVAL: 30,
             DAMAGE: 1,
             SPEED: 15,
@@ -26861,7 +26896,7 @@ require("./pixi-shadows.js");
         },
         HEALTH_BAR: {
             X: -40,
-            Y: 26,
+            Y: 22,
             MAX_WIDTH: 10,
         },
         FISH: {
@@ -26955,13 +26990,20 @@ require("./pixi-shadows.js");
         TIME_STEP: 1 / 30,
         GRAVITY: -60,
     };
+    var BASE_TEXT_STYLE = new PIXI.TextStyle({
+        fontFamily: 'Courier New',
+        fontSize: 72,
+        strokeThickness: 0,
+        fontWeight: 'bold',
+        fill: CONSTANTS.COLORS.BLUE,
+    });
     /**
      * PIXI setup
      */
     var app = new PIXI.Application({
         backgroundColor: 0x000000,
-        width: window.innerWidth * 0.9,
-        height: window.innerHeight * 0.9,
+        width: CONSTANTS.SCREEN.WIDTH,
+        height: CONSTANTS.SCREEN.HEIGHT,
     });
     var stage = PIXI.shadows.init(app);
     PIXI.shadows.filter.ambientLight = 0.3;
@@ -27046,10 +27088,10 @@ require("./pixi-shadows.js");
      * Scaling for render
      */
     function mpx(m) {
-        return m * pscale + (window.innerWidth / 2.3);
+        return m * pscale + (CONSTANTS.SCREEN.WIDTH * 0.482);
     }
     function mpy(m) {
-        return window.innerHeight * 0.5 - (m * pscale);
+        return CONSTANTS.SCREEN.HEIGHT * (5 / 9) - (m * pscale);
     }
     var SoundManager = /** @class */ (function () {
         function SoundManager() {
@@ -27089,25 +27131,124 @@ require("./pixi-shadows.js");
         return SoundManager;
     }());
     /**
-     * Game
-     */
-    var Game = /** @class */ (function () {
-        function Game() {
+   * Slideshow
+   */
+    var Slideshow = /** @class */ (function () {
+        function Slideshow(_a) {
+            var slides = _a.slides, intervals = _a.intervals, onComplete = _a.onComplete;
             var that = this;
-            this.soundManager = new SoundManager();
-            this.soundManager.play('theme', {
-                loop: true,
+            this.container = new PIXI.Container();
+            this.onCompleteCallback = onComplete;
+            this.slides = slides;
+            this.intervals = intervals;
+            this.currentSlideIndex = -1;
+            this.state = SLIDESHOW.STATES.WAITING;
+            this.timer = 1;
+            stage.addChild(this.container);
+            this.text = new Text({
+                x: -40,
+                y: 10,
+                style: {
+                    fill: CONSTANTS.COLORS.WHITE,
+                    fontSize: 36,
+                },
+                container: this.container,
+                centered: false,
             });
-            this.reset();
-            this.showMainMenu();
             window.requestAnimationFrame(function () {
                 that.onStep();
             });
         }
+        Slideshow.prototype.fadeIn = function () {
+            console.log("FADE IN!", this.text.text.alpha);
+            this.text.text.alpha += 1 / this.intervals[SLIDESHOW.STATES.FADING_IN];
+        };
+        Slideshow.prototype.fadeOut = function () {
+            console.log("FADE OUT!", this.text.text.alpha);
+            this.text.text.alpha -= 1 / this.intervals[SLIDESHOW.STATES.FADING_IN];
+        };
+        Slideshow.prototype.nextState = function () {
+            var nextIndex = SLIDESHOW.TIMELINE.indexOf(this.state) + 1;
+            if (nextIndex === SLIDESHOW.TIMELINE.length) {
+                nextIndex = 0;
+            }
+            this.state = SLIDESHOW.TIMELINE[nextIndex];
+            this.timer = this.intervals[this.state];
+            if (this.state === SLIDESHOW.STATES.FADING_IN) {
+                this.currentSlideIndex += 1;
+                if (this.currentSlideIndex === this.slides.length) {
+                    this.onComplete();
+                    return;
+                }
+                this.text.show(this.slides[this.currentSlideIndex], null);
+                this.text.text.alpha = 0;
+            }
+        };
+        Slideshow.prototype.onStep = function () {
+            var that = this;
+            this.timer -= this.timer;
+            if (!this.timer) {
+                this.nextState();
+            }
+            switch (this.state) {
+                case SLIDESHOW.STATES.FADING_IN:
+                    this.fadeIn();
+                    break;
+                case SLIDESHOW.STATES.FADING_OUT:
+                    this.fadeOut();
+                    break;
+                case SLIDESHOW.STATES.SUSTAINING:
+                case SLIDESHOW.STATES.WAITING:
+                    break;
+            }
+            window.requestAnimationFrame(function () {
+                that.onStep();
+            });
+        };
+        Slideshow.prototype.onComplete = function () {
+            stage.removeChild(this.container);
+            this.onCompleteCallback();
+        };
+        return Slideshow;
+    }());
+    /**
+     * Game
+     */
+    var Game = /** @class */ (function () {
+        function Game() {
+            this.soundManager = new SoundManager();
+            this.soundManager.play('theme', {
+                loop: true,
+            });
+            this.setupInteractivity();
+            this.setupCollisionHandlers();
+            this.playIntro();
+            this.setupWorld();
+        }
+        Game.prototype.playIntro = function () {
+            var that = this;
+            new Slideshow({
+                slides: CONSTANTS.INTRO.SLIDES,
+                intervals: CONSTANTS.INTRO.TIME_INTERVALS,
+                onComplete: function () { return that.onIntroComplete(); }
+            });
+        };
+        Game.prototype.onIntroComplete = function () {
+            this.reset();
+            this.showMainMenu();
+        };
         Game.prototype.destroyMainMenu = function () {
             if (this.menu) {
                 stage.removeChild(this.menu);
             }
+        };
+        Game.prototype.start = function () {
+            this.destroyMainMenu();
+            var that = this;
+            window.requestAnimationFrame(function () {
+                that.onStep();
+            });
+            this.startWinter();
         };
         Game.prototype.showMainMenu = function () {
             var that = this;
@@ -27117,7 +27258,7 @@ require("./pixi-shadows.js");
                 x: 0,
                 y: 10,
                 style: {
-                    fill: GREEN,
+                    fill: CONSTANTS.COLORS.GREEN,
                 },
                 container: this.menu,
                 show: 'PENGUIN DEFENDER'
@@ -27128,7 +27269,7 @@ require("./pixi-shadows.js");
                 container: this.menu,
                 show: {
                     fn: function () {
-                        that.startWinter();
+                        that.start();
                     },
                     text: 'PLAY',
                 }
@@ -27141,14 +27282,13 @@ require("./pixi-shadows.js");
             this.objects = {};
             this.points = 0;
             this.over = false;
+            this.inGame = false;
+            this.gameDisplaysCreated = false;
         };
         Game.prototype.reset = function () {
             this.resetStats();
             this.setupContainer();
-            this.setupWorld();
             this.createBorders();
-            this.setupCollisionHandlers();
-            this.setupInteractivity();
         };
         Game.prototype.createBackground = function () {
             var diffuse = new PIXI.Sprite.fromImage(CONSTANTS.BACKGROUND.DIFFUSE, true);
@@ -27266,15 +27406,19 @@ require("./pixi-shadows.js");
             this.over = true;
             this.gameOverReason = 'YOU DIED';
         };
+        Game.prototype.formatWinter = function (num) {
+            return String(num).padStart(3, '0');
+        };
         Game.prototype.startWinter = function () {
             this.destroyMainMenu();
             this.resetDisplay();
             this.resetBodies();
             this.over = false;
             this.paused = false;
+            this.inGame = true;
             this.winter += 1;
             this.winterStats = this.getWinterStats();
-            this.winterDisplay.show(String(this.winter), null);
+            this.winterDisplay.show(this.formatWinter(this.winter), null);
             this.setupMales();
             this.createHero();
             this.startWinterCountdown();
@@ -27348,7 +27492,7 @@ require("./pixi-shadows.js");
                 this.soundManager.play('pause');
                 this.soundManager.pause('theme');
                 this.textDisplays[0].show('PAUSED', {
-                    fill: BLUE,
+                    fill: CONSTANTS.COLORS.BLUE,
                 });
                 return;
             }
@@ -27359,27 +27503,39 @@ require("./pixi-shadows.js");
             if (this.keys.down[key]) {
                 return;
             }
+            this.keys.down[key] = true;
             switch (key) {
                 case 'P':
                     this.togglePause();
                     break;
-                case 'UP':
+                case 'W':
+                    if (this.paused || !this.inGame) {
+                        return;
+                    }
                     this.hero.jump();
                     break;
                 case 'SPACE':
+                    if (this.paused || !this.inGame) {
+                        return;
+                    }
                     this.hero.throwFish();
                     break;
-                case 'F':
+                case 'S':
+                    if (this.paused || !this.inGame) {
+                        return;
+                    }
                     this.hero.dive();
                     break;
                 default:
                 // nothing
             }
-            this.keys.down[key] = true;
         };
         Game.prototype.onKeyUp = function (key) {
             this.keys.down[key] = false;
-            if (!this.keys.down.RIGHT && !this.keys.down.LEFT && this.hero.state.action !== CONSTANTS.HERO.MOVEMENT_STATES.DIVING) {
+            if (this.paused || !this.inGame) {
+                return;
+            }
+            if (!this.keys.down.D && !this.keys.down.A && this.hero.state.action !== CONSTANTS.HERO.MOVEMENT_STATES.DIVING) {
                 this.hero.state.action = CONSTANTS.HERO.MOVEMENT_STATES.NEUTRAL;
             }
         };
@@ -27388,7 +27544,7 @@ require("./pixi-shadows.js");
             if (/\w/.test(char)) {
                 return char;
             }
-            return KEY_CODE_MAP[code];
+            return CONSTANTS.KEY_CODES[code];
         };
         Game.prototype.setupInteractivity = function () {
             var that = this;
@@ -27396,14 +27552,10 @@ require("./pixi-shadows.js");
                 down: {},
             };
             window.addEventListener('keydown', function (e) {
-                if (that.winter) {
-                    that.onKeyDown(that.translateKeyCode(e.keyCode));
-                }
+                that.onKeyDown(that.translateKeyCode(e.keyCode));
             });
             window.addEventListener('keyup', function (e) {
-                if (that.winter) {
-                    that.onKeyUp(that.translateKeyCode(e.keyCode));
-                }
+                that.onKeyUp(that.translateKeyCode(e.keyCode));
             });
         };
         Game.prototype.createHero = function () {
@@ -27546,42 +27698,59 @@ require("./pixi-shadows.js");
                 new Male(this);
             }
         };
+        Game.prototype.formatPoints = function (num) {
+            return String(num).padStart(8, '0');
+        };
+        Game.prototype.addPoints = function (num) {
+            this.points += num;
+            this.pointDisplay.show(this.formatPoints(this.points), null);
+        };
         Game.prototype.resetDisplay = function () {
-            if (!this.textDisplays) {
-                this.textDisplays = [
-                    new Text({
-                        x: 0,
-                        y: 10,
-                        style: {
-                            fill: GREEN,
-                        },
-                        container: this.container,
-                    }),
-                    new Text({
-                        x: 0,
-                        y: 4,
-                        style: {
-                            fill: GREEN,
-                        },
-                        container: this.container,
-                    })
-                ];
+            if (this.gameDisplaysCreated) {
+                return;
             }
+            this.textDisplays = [
+                new Text({
+                    x: 0,
+                    y: 10,
+                    style: {
+                        fill: CONSTANTS.COLORS.GREEN,
+                    },
+                    container: this.container,
+                }),
+                new Text({
+                    x: 0,
+                    y: 4,
+                    style: {
+                        fill: CONSTANTS.COLORS.GREEN,
+                    },
+                    container: this.container,
+                })
+            ];
             // must be AFTER background
             this.pointDisplay = new Text({
-                prefix: 'SCORE: ',
-                x: 30,
-                y: 25,
+                style: {
+                    fontSize: 48,
+                },
+                prefix: 'SCORE:',
+                x: CONSTANTS.DISPLAYS.POINTS.X,
+                y: CONSTANTS.DISPLAYS.POINTS.Y,
                 container: this.container,
-                show: String(this.points)
+                show: this.formatPoints(this.points),
+                centered: false
             });
             this.winterDisplay = new Text({
-                prefix: 'WINTER: ',
-                x: 30,
-                y: 20,
+                style: {
+                    fontSize: 48,
+                },
+                prefix: 'WINTER:    ',
+                x: CONSTANTS.DISPLAYS.WINTER.X,
+                y: CONSTANTS.DISPLAYS.WINTER.Y,
                 container: this.container,
+                centered: false
             });
             this.healthBar = new HealthBar(this);
+            this.gameDisplaysCreated = true;
         };
         Game.prototype.setupWorld = function () {
             var that = this;
@@ -27645,8 +27814,8 @@ require("./pixi-shadows.js");
         Game.prototype.createEnemy = function (type) {
             this.winterStats[type].created += 1;
             var direction = Math.random() < 0.5
-                ? LEFT
-                : RIGHT;
+                ? CONSTANTS.LEFT
+                : CONSTANTS.RIGHT;
             switch (type) {
                 case TYPES.SEAL:
                     new Seal(this, direction);
@@ -27661,8 +27830,9 @@ require("./pixi-shadows.js");
         Game.prototype.gameOver = function () {
             var that = this;
             this.paused = true;
+            this.inGame = false;
             this.textDisplays[0].show("GAME OVER: " + this.gameOverReason, {
-                fill: RED,
+                fill: CONSTANTS.COLORS.RED,
             });
             this.healthBar.hide();
             this.resetBodies();
@@ -27671,7 +27841,7 @@ require("./pixi-shadows.js");
                 y: -2,
                 container: this.container,
                 style: {
-                    fill: GREEN,
+                    fill: CONSTANTS.COLORS.GREEN,
                 },
             });
             this.resetButton.show({
@@ -27686,7 +27856,7 @@ require("./pixi-shadows.js");
                 y: CONSTANTS.HEALTH_BAR.Y,
                 container: this.container,
                 style: {
-                    fill: YELLOW,
+                    fill: CONSTANTS.COLORS.YELLOW,
                 }
             });
             this.menuButton.show({
@@ -27729,10 +27899,6 @@ require("./pixi-shadows.js");
                 },
                 _a;
         };
-        Game.prototype.addPoints = function (num) {
-            this.points += num;
-            this.pointDisplay.show(String(this.points), null);
-        };
         Game.prototype.spawnEnemies = function () {
             var _this = this;
             CONSTANTS.ENEMY_TYPES.forEach(function (type) {
@@ -27754,14 +27920,11 @@ require("./pixi-shadows.js");
             });
         };
         Game.prototype.evaluateActiveKeys = function () {
-            if (this.keys.down.G) {
-                this.hero.glide();
+            if (this.keys.down.D) {
+                this.hero.move(CONSTANTS.RIGHT);
             }
-            if (this.keys.down.RIGHT) {
-                this.hero.move(RIGHT);
-            }
-            else if (this.keys.down.LEFT) {
-                this.hero.move(LEFT);
+            else if (this.keys.down.A) {
+                this.hero.move(CONSTANTS.LEFT);
             }
         };
         Game.prototype.createBlockDisplay = function (graphics, x1, y1, x2, y2, color) {
@@ -27771,7 +27934,7 @@ require("./pixi-shadows.js");
         };
         Game.prototype.createBlock = function (graphics, body, box2dOpts, display, x1, y1, x2, y2) {
             if (display) {
-                this.createBlockDisplay(graphics, x1, y1, x2, y2, BIT_BLUE);
+                this.createBlockDisplay(graphics, x1, y1, x2, y2, CONSTANTS.COLORS.BIT_BLUE);
             }
             body.createFixture(planck.Edge(Vec2(x1, y1), Vec2(x2, y2)), box2dOpts);
         };
@@ -27849,16 +28012,16 @@ require("./pixi-shadows.js");
                 var color = void 0;
                 var bitColor = void 0;
                 if (health > CONSTANTS.HERO.HEALTH.MAX * 0.67) {
-                    color = GREEN;
-                    bitColor = BIT_GREEN;
+                    color = CONSTANTS.COLORS.GREEN;
+                    bitColor = CONSTANTS.COLORS.BIT_GREEN;
                 }
                 else if (health > CONSTANTS.HERO.HEALTH.MAX * 0.33) {
-                    color = YELLOW;
-                    bitColor = BIT_YELLOW;
+                    color = CONSTANTS.COLORS.YELLOW;
+                    bitColor = CONSTANTS.COLORS.BIT_YELLOW;
                 }
                 else {
-                    color = RED;
-                    bitColor = BIT_RED;
+                    color = CONSTANTS.COLORS.RED;
+                    bitColor = CONSTANTS.COLORS.BIT_RED;
                 }
                 this.graphics.clear();
                 this.game.createBlockDisplay(this.graphics, CONSTANTS.HEALTH_BAR.X, CONSTANTS.HEALTH_BAR.Y, CONSTANTS.HEALTH_BAR.X + (CONSTANTS.HEALTH_BAR.MAX_WIDTH * (health / CONSTANTS.HERO.HEALTH.MAX)), CONSTANTS.HEALTH_BAR.Y + 2, bitColor);
@@ -27871,7 +28034,8 @@ require("./pixi-shadows.js");
     }());
     var Text = /** @class */ (function () {
         function Text(_a) {
-            var _b = _a.prefix, prefix = _b === void 0 ? '' : _b, x = _a.x, y = _a.y, style = _a.style, container = _a.container, show = _a.show;
+            var _b = _a.prefix, prefix = _b === void 0 ? '' : _b, x = _a.x, y = _a.y, style = _a.style, container = _a.container, show = _a.show, _c = _a.centered, centered = _c === void 0 ? true : _c;
+            this.centered = centered;
             this.container = container;
             this.prefix = prefix;
             this.x = x;
@@ -27889,7 +28053,9 @@ require("./pixi-shadows.js");
         Text.prototype.show = function (text, style) {
             this.container.removeChild(this.text);
             this.text = new PIXI.Text(this.prefix + " " + text, __assign({}, this.style, style));
-            this.text.anchor.set(0.5);
+            if (this.centered) {
+                this.text.anchor.set(0.5);
+            }
             this.text.x = mpx(this.x);
             this.text.y = mpy(this.y);
             this.container.addChild(this.text);
@@ -27937,7 +28103,7 @@ require("./pixi-shadows.js");
             });
             _this.body.createFixture(planck.Box(CONSTANTS.MALE.HITBOX.WIDTH, CONSTANTS.MALE.HITBOX.HEIGHT), __assign({}, _this.filterData));
             _this.body.render = {
-                stroke: GREEN
+                stroke: CONSTANTS.COLORS.GREEN
             };
             _this.game.assignType(_this, TYPES.MALE);
             _this.body.id = _this.id;
@@ -28054,7 +28220,7 @@ require("./pixi-shadows.js");
             _this.direction = direction;
             _this.points = CONSTANTS.SEAL.POINTS;
             _this.abducting = null;
-            _this.velocity = direction === RIGHT
+            _this.velocity = direction === CONSTANTS.RIGHT
                 ? CONSTANTS.SEAL.SPEED
                 : CONSTANTS.SEAL.SPEED * -1;
             _this.setupBody();
@@ -28084,7 +28250,7 @@ require("./pixi-shadows.js");
             this.game.container.addChild(this.sprite);
         };
         Seal.prototype.setupBody = function () {
-            var x = this.direction === LEFT
+            var x = this.direction === CONSTANTS.LEFT
                 ? CONSTANTS.SEAL.SPAWN.X
                 : CONSTANTS.SEAL.SPAWN.X * -1;
             this.body = this.game.world.createBody({
@@ -28136,7 +28302,7 @@ require("./pixi-shadows.js");
             _this.abducting = null;
             _this.flapPower = CONSTANTS.GULL.FLAP.STANDARD.POWER;
             _this.flapInterval = CONSTANTS.GULL.FLAP.STANDARD.INTERVAL;
-            if (direction === LEFT) {
+            if (direction === CONSTANTS.LEFT) {
                 _this.velocity *= -1;
             }
             _this.setupBody();
@@ -28165,7 +28331,7 @@ require("./pixi-shadows.js");
             this.game.container.addChild(this.sprite);
         };
         Gull.prototype.setupBody = function () {
-            var x = this.direction === LEFT
+            var x = this.direction === CONSTANTS.LEFT
                 ? CONSTANTS.GULL.SPAWN.X
                 : CONSTANTS.GULL.SPAWN.X * -1;
             this.body = this.game.world.createBody({
@@ -28181,7 +28347,7 @@ require("./pixi-shadows.js");
                 filterGroupIndex: GROUPS.FOE,
             });
             this.body.render = {
-                stroke: BLUE
+                stroke: CONSTANTS.COLORS.BLUE
             };
         };
         Gull.prototype.flyAway = function () {
@@ -28329,7 +28495,7 @@ require("./pixi-shadows.js");
             this.state = {
                 airborne: true,
                 action: 'NEUTRAL',
-                direction: RIGHT,
+                direction: CONSTANTS.RIGHT,
             };
             this.setupSprite();
             this.setupBody();
@@ -28345,7 +28511,7 @@ require("./pixi-shadows.js");
             });
             this.body.createFixture(planck.Box(CONSTANTS.HERO.HITBOX.WIDTH, CONSTANTS.HERO.HITBOX.HEIGHT), this.bodyOpts);
             this.body.render = {
-                stroke: GREEN
+                stroke: CONSTANTS.COLORS.GREEN
             };
         };
         Hero.prototype.getNeutralSprite = function () {
@@ -28426,7 +28592,6 @@ require("./pixi-shadows.js");
                 _a);
             this.stateMappings = (_b = {},
                 _b[states.DIVING] = this.sprites[states.DIVING],
-                _b[states.GLIDING] = this.sprites[states.NEUTRAL],
                 _b[states.JUMPING] = this.sprites[states.JUMPING],
                 _b[states.NEUTRAL] = this.sprites[states.NEUTRAL],
                 _b[states.RUNNING] = this.sprites[states.RUNNING],
@@ -28498,13 +28663,6 @@ require("./pixi-shadows.js");
                 Vec2(left, top - height),
             ]), this.bodyOpts);
             this.diveFixture.dive = true;
-        };
-        Hero.prototype.glide = function () {
-            this.state.action = CONSTANTS.HERO.MOVEMENT_STATES.GLIDING;
-            this.jumps = 0;
-            var f = this.body.getWorldVector(Vec2(0.0, CONSTANTS.HERO.GLIDE.IMPULSE));
-            var p = this.body.getWorldPoint(Vec2(0.0, 0.0));
-            this.body.applyLinearImpulse(f, p, true);
         };
         Hero.prototype.land = function () {
             var vel = this.body.getLinearVelocity();

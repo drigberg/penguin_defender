@@ -6,7 +6,7 @@
     "noImplicitAny": true,
     "lib":[
       "dom",
-      "es7"
+      "es2017"
     ]
   },
   "compileOnSave": false,
