@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
-    "compile": "tsc ./public/js/main.ts",
-    "bundle": "browserify ./public/js/main.js -o ./public/js/bundle.js",
+    "compile": "tsc",
+    "bundle": "browserify ./src/main.js -o ./public/js/bundle.js",
     "build": "npm run compile && npm run bundle"
   },
   "repository": {

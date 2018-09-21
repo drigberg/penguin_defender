@@ -26710,9 +26710,9 @@ var __rest = (this && this.__rest) || function (s, e) {
             t[p[i]] = s[p[i]];
     return t;
 };
-exports.__esModule = true;
-var planck = require("./planckv0.1.45.min.js");
+Object.defineProperty(exports, "__esModule", { value: true });
 var createjs = require("createjs-module");
+var planck = require("./planckv0.1.45.min.js");
 var PIXI = require("./pixi.min.js");
 require("./pixi-layers.js");
 require("./pixi-lights.js");
@@ -26722,6 +26722,7 @@ require("./pixi-shadows.js");
  */
 (function main() {
     var Sound = createjs.Sound;
+    console.log(Sound);
     /**
      * Constants
      */
@@ -26731,11 +26732,11 @@ require("./pixi-shadows.js");
         HERO: 0x0004,
         FRIEND: 0x0008,
         WALLS: 0x0016,
-        OFFSCREEN: 0x0032
+        OFFSCREEN: 0x0032,
     });
     var GROUPS = Object.freeze({
         FOE: -2,
-        HERO: -3
+        HERO: -3,
     });
     var MASKS = Object.freeze({
         FOE: CATEGORIES.HERO | CATEGORIES.OFFSCREEN | CATEGORIES.GROUND | CATEGORIES.FRIEND,
@@ -26743,7 +26744,7 @@ require("./pixi-shadows.js");
         HERO: CATEGORIES.FOE | CATEGORIES.WALLS | CATEGORIES.OFFSCREEN | CATEGORIES.GROUND,
         GROUND: CATEGORIES.FOE | CATEGORIES.HERO | CATEGORIES.FRIEND,
         WALLS: CATEGORIES.HERO,
-        OFFSCREEN: CATEGORIES.FOE | CATEGORIES.FRIEND
+        OFFSCREEN: CATEGORIES.FOE | CATEGORIES.FRIEND,
     });
     var RED = '#ee1111';
     var BLUE = '#5555ee';
@@ -26758,7 +26759,7 @@ require("./pixi-shadows.js");
         fontSize: 72,
         strokeThickness: 0,
         fontWeight: 'bold',
-        fill: BLUE
+        fill: BLUE,
     });
     var KEY_CODE_MAP = {
         39: 'RIGHT',
@@ -26766,7 +26767,7 @@ require("./pixi-shadows.js");
         38: 'UP',
         40: 'DOWN',
         32: 'SPACE',
-        13: 'RETURN'
+        13: 'RETURN',
     };
     var LEFT = -1;
     var RIGHT = 1;
@@ -26778,188 +26779,188 @@ require("./pixi-shadows.js");
         MALE: 'MALE',
         FISH: 'FISH',
         SEAL: 'SEAL',
-        GULL: 'GULL'
+        GULL: 'GULL',
     });
-    var CONSTANTS = Object.freeze({
-        ENEMY_TYPES: Object.freeze([
+    var CONSTANTS = {
+        ENEMY_TYPES: [
             TYPES.SEAL,
             TYPES.GULL
-        ]),
-        MALE: Object.freeze({
-            SPAWN: Object.freeze({
+        ],
+        MALE: {
+            SPAWN: {
                 X: 0,
                 Y: 0,
-                SPREAD: 10.0
-            }),
-            JUMP: Object.freeze({
+                SPREAD: 10.0,
+            },
+            JUMP: {
                 MAGNITUDE: 20,
-                MAX: 1
-            }),
-            HITBOX: Object.freeze({
+                MAX: 1,
+            },
+            HITBOX: {
                 WIDTH: 0.5,
-                HEIGHT: 1
-            }),
-            ANIMATION_SPEED: Object.freeze({
+                HEIGHT: 1,
+            },
+            ANIMATION_SPEED: {
                 STANDARD: 0.03,
-                STRESSED: 0.1
-            }),
+                STRESSED: 0.1,
+            },
             NUM: 10,
-            SPEED: 2.0
-        }),
-        HERO: Object.freeze({
-            TRAIL: Object.freeze({
+            SPEED: 2.0,
+        },
+        HERO: {
+            TRAIL: {
                 TEXTURE: PIXI.Texture.fromImage('assets/hero/trail.png'),
                 SMOOTHNESS: 100,
                 LENGTH: 10,
                 THRESHOLD: 20,
-                MIN_VELOCITY: 5
-            }),
-            ANIMATION_SPEED: Object.freeze({
+                MIN_VELOCITY: 5,
+            },
+            ANIMATION_SPEED: {
                 DIVING: 0.18,
                 NEUTRAL: 0.03,
                 RUNNING: 0.06,
-                JUMPING: 0.24
-            }),
-            MOVEMENT_STATES: Object.freeze({
+                JUMPING: 0.24,
+            },
+            MOVEMENT_STATES: {
                 RUNNING: 'RUNNING',
                 GLIDING: 'GLIDING',
                 NEUTRAL: 'NEUTRAL',
                 DIVING: 'DIVING',
-                JUMPING: 'JUMPING'
-            }),
-            JUMP: Object.freeze({
+                JUMPING: 'JUMPING',
+            },
+            JUMP: {
                 MAGNITUDE: 35,
-                MAX: 3
-            }),
-            HEALTH: Object.freeze({
-                MAX: 5
-            }),
-            HITBOX: Object.freeze({
+                MAX: 3,
+            },
+            HEALTH: {
+                MAX: 5,
+            },
+            HITBOX: {
                 WIDTH: 1.5,
-                HEIGHT: 2.0
-            }),
-            DIVE: Object.freeze({
-                HITBOX: Object.freeze({
+                HEIGHT: 2.0,
+            },
+            DIVE: {
+                HITBOX: {
                     WIDTH: 8.0,
-                    HEIGHT: 0.5
-                }),
-                SOUND_OVERFLOW: 200
-            }),
-            SPAWN: Object.freeze({
+                    HEIGHT: 0.5,
+                },
+                SOUND_OVERFLOW: 200,
+            },
+            SPAWN: {
                 X: 0.0,
-                Y: 5.0
-            }),
-            GLIDE: Object.freeze({
-                IMPULSE: 2
-            }),
+                Y: 5.0,
+            },
+            GLIDE: {
+                IMPULSE: 2,
+            },
             INVINCIBILITY_INTERVAL: 30,
             DAMAGE: 1,
             SPEED: 15,
-            THROW_INTERVAL: 25
-        }),
-        HEALTH_BAR: Object.freeze({
+            THROW_INTERVAL: 25,
+        },
+        HEALTH_BAR: {
             X: -40,
             Y: 26,
-            MAX_WIDTH: 10
-        }),
-        FISH: Object.freeze({
-            HITBOX: Object.freeze({
+            MAX_WIDTH: 10,
+        },
+        FISH: {
+            HITBOX: {
                 WIDTH: 1,
-                HEIGHT: 0.6
-            }),
-            LAUNCH_VELOCITY: Object.freeze({
+                HEIGHT: 0.6,
+            },
+            LAUNCH_VELOCITY: {
                 X: 20,
-                Y: 50
-            }),
-            DAMAGE: 1
-        }),
-        SEAL: Object.freeze({
-            SPAWN: Object.freeze({
+                Y: 50,
+            },
+            DAMAGE: 1,
+        },
+        SEAL: {
+            SPAWN: {
                 X: 50,
                 Y: 5,
-                PROBABILITY: 0.01
-            }),
-            JUMP: Object.freeze({
+                PROBABILITY: 0.01,
+            },
+            JUMP: {
                 MAGNITUDE: 20,
-                MAX: 1
-            }),
-            HITBOX: Object.freeze({
+                MAX: 1,
+            },
+            HITBOX: {
                 WIDTH: 2,
-                HEIGHT: 1
-            }),
-            ANIMATION_SPEED: Object.freeze({
-                STANDARD: 0.15
-            }),
+                HEIGHT: 1,
+            },
+            ANIMATION_SPEED: {
+                STANDARD: 0.15,
+            },
             POINTS: 10,
             SPEED: 3.5,
             HEALTH: 1,
-            DAMAGE: 1
-        }),
-        GULL: Object.freeze({
-            SPAWN: Object.freeze({
+            DAMAGE: 1,
+        },
+        GULL: {
+            SPAWN: {
                 X: 50,
                 Y: 20,
-                PROBABILITY: 0.01
-            }),
-            FLAP: Object.freeze({
-                STANDARD: Object.freeze({
+                PROBABILITY: 0.01,
+            },
+            FLAP: {
+                STANDARD: {
                     POWER: 2.1,
-                    INTERVAL: 15
-                }),
-                ABDUCTING: Object.freeze({
+                    INTERVAL: 15,
+                },
+                ABDUCTING: {
                     POWER: 30,
-                    INTERVAL: 15
-                }),
-                FLYAWAY: Object.freeze({
+                    INTERVAL: 15,
+                },
+                FLYAWAY: {
                     POWER: 6,
-                    INTERVAL: 15
-                })
-            }),
-            HITBOX: Object.freeze({
+                    INTERVAL: 15,
+                },
+            },
+            HITBOX: {
                 WIDTH: 1.5,
-                HEIGHT: 0.6
-            }),
-            ANIMATION_SPEED: Object.freeze({
-                STANDARD: 0.1
-            }),
+                HEIGHT: 0.6,
+            },
+            ANIMATION_SPEED: {
+                STANDARD: 0.1,
+            },
             SPEED: 3.0,
             HEALTH: 1,
             DAMAGE: 1.5,
             IMPULSE: 1.5,
-            POINTS: 15
-        }),
-        SHAKE: Object.freeze({
+            POINTS: 15,
+        },
+        SHAKE: {
             DURATION: 10,
-            MAGNITUDE: 1.5
-        }),
-        BORDER: Object.freeze({
+            MAGNITUDE: 1.5,
+        },
+        BORDER: {
             LEFT: -40,
             RIGHT: 40,
-            TOP: 30
-        }),
-        OFFSCREEN: Object.freeze({
+            TOP: 30,
+        },
+        OFFSCREEN: {
             LEFT: -55,
             RIGHT: 55,
-            BOTTOM: -20
-        }),
-        BACKGROUND: Object.freeze({
+            BOTTOM: -20,
+        },
+        BACKGROUND: {
             DIFFUSE: 'assets/mountains.png',
-            NORMAL: 'assets/mountains.normal.clouds.light.png'
-        }),
-        WINTER: Object.freeze({
+            NORMAL: 'assets/mountains.normal.clouds.light.png',
+        },
+        WINTER: {
             COUNTDOWN: 50,
-            INTERIM: 1500
-        }),
+            INTERIM: 1500,
+        },
         TIME_STEP: 1 / 30,
-        GRAVITY: -60
-    });
+        GRAVITY: -60,
+    };
     /**
      * PIXI setup
      */
     var app = new PIXI.Application({
         backgroundColor: 0x000000,
         width: window.innerWidth * 0.9,
-        height: window.innerHeight * 0.9
+        height: window.innerHeight * 0.9,
     });
     var stage = PIXI.shadows.init(app);
     PIXI.shadows.filter.ambientLight = 0.3;
@@ -27079,7 +27080,7 @@ require("./pixi-shadows.js");
                 this.sounds[key].paused = true;
             }
         };
-        SoundManager.prototype["continue"] = function (key) {
+        SoundManager.prototype.continue = function (key) {
             if (this.sounds[key]) {
                 this.sounds[key].paused = false;
             }
@@ -27094,7 +27095,7 @@ require("./pixi-shadows.js");
             var that = this;
             this.soundManager = new SoundManager();
             this.soundManager.play('theme', {
-                loop: true
+                loop: true,
             });
             this.reset();
             this.showMainMenu();
@@ -27115,7 +27116,7 @@ require("./pixi-shadows.js");
                 x: 0,
                 y: 10,
                 style: {
-                    fill: GREEN
+                    fill: GREEN,
                 },
                 container: this.menu,
                 show: 'PENGUIN DEFENDER'
@@ -27128,7 +27129,7 @@ require("./pixi-shadows.js");
                     fn: function () {
                         that.startWinter();
                     },
-                    text: 'PLAY'
+                    text: 'PLAY',
                 }
             });
         };
@@ -27214,12 +27215,14 @@ require("./pixi-shadows.js");
             if (!entity.alive) {
                 return;
             }
-            if (entity.abducting) {
+            if ((entity instanceof Gull || entity instanceof Seal) && entity.abducting) {
                 entity.abducting.onLiberation();
             }
             entity.alive = false;
             this.world.destroyBody(entity.body);
-            entity.destroySprites();
+            if (entity instanceof Gull || entity instanceof Seal || entity instanceof Fish || entity instanceof Hero || entity instanceof Male) {
+                entity.destroySprites();
+            }
             switch (entity.type) {
                 case TYPES.MALE:
                     this.onMaleDestroyed();
@@ -27301,7 +27304,7 @@ require("./pixi-shadows.js");
                 return;
             }
             if (countingDown === 0) {
-                this.hero.activeSprite.visible = true;
+                this.hero.sprite.visible = true;
                 Object.keys(this.objects).forEach(function (key) {
                     _this.objects[key].sprite.visible = true;
                 });
@@ -27344,11 +27347,11 @@ require("./pixi-shadows.js");
                 this.soundManager.play('pause');
                 this.soundManager.pause('theme');
                 this.textDisplays[0].show('PAUSED', {
-                    fill: BLUE
+                    fill: BLUE,
                 });
                 return;
             }
-            this.soundManager["continue"]('theme');
+            this.soundManager.continue('theme');
             this.textDisplays[0].hide();
         };
         Game.prototype.onKeyDown = function (key) {
@@ -27389,7 +27392,7 @@ require("./pixi-shadows.js");
         Game.prototype.setupInteractivity = function () {
             var that = this;
             this.keys = {
-                down: {}
+                down: {},
             };
             window.addEventListener('keydown', function (e) {
                 if (that.winter) {
@@ -27427,75 +27430,108 @@ require("./pixi-shadows.js");
                 },
                 _a[that.hashTypes(TYPES.GULL, TYPES.GROUND)] = function (bodies) {
                     var gull = that.objects[bodies.find(function (item) { return item.type === TYPES.GULL; }).id];
-                    gull.flyAway();
+                    if (gull instanceof Gull) {
+                        gull.flyAway();
+                    }
                 },
                 _a[that.hashTypes(TYPES.GROUND, TYPES.SEAL)] = function (bodies) {
-                    that.objects[bodies.find(function (item) { return item.type === TYPES.SEAL; }).id].jumps = CONSTANTS.SEAL.JUMP.MAX;
+                    var seal = that.objects[bodies.find(function (item) { return item.type === TYPES.SEAL; }).id];
+                    if (seal instanceof Seal) {
+                        seal.jumps = CONSTANTS.SEAL.JUMP.MAX;
+                    }
                 },
                 _a[that.hashTypes(TYPES.GROUND, TYPES.MALE)] = function (bodies) {
-                    that.objects[bodies.find(function (item) { return item.type === TYPES.MALE; }).id].jumps = CONSTANTS.MALE.JUMP.MAX;
+                    var male = that.objects[bodies.find(function (item) { return item.type === TYPES.MALE; }).id];
+                    if (male instanceof Male) {
+                        male.jumps = CONSTANTS.MALE.JUMP.MAX;
+                    }
                 },
                 _a[that.hashTypes(TYPES.HERO, TYPES.SEAL)] = function (bodies, point, fixtures) {
                     var dive = Boolean(fixtures.find(function (item) { return item.dive === true; }));
                     var enemy = that.objects[bodies.find(function (item) { return item.type === TYPES.SEAL; }).id];
-                    that.handleEnemyHeroCollision(enemy, point, dive);
+                    if (enemy instanceof Seal || enemy instanceof Gull) {
+                        that.handleEnemyHeroCollision(enemy, point, dive);
+                    }
                 },
                 _a[that.hashTypes(TYPES.GULL, TYPES.HERO)] = function (bodies, point, fixtures) {
                     var dive = Boolean(fixtures.find(function (item) { return item.dive === true; }));
                     var enemy = that.objects[bodies.find(function (item) { return item.type === TYPES.GULL; }).id];
-                    that.handleEnemyHeroCollision(enemy, point, dive);
+                    if (enemy instanceof Seal || enemy instanceof Gull) {
+                        that.handleEnemyHeroCollision(enemy, point, dive);
+                    }
                 },
                 _a[that.hashTypes(TYPES.FISH, TYPES.SEAL)] = function (bodies) {
-                    that.handleEnemyFishCollision(that.objects[bodies.find(function (item) { return item.type === TYPES.SEAL; }).id], that.objects[bodies.find(function (item) { return item.type === TYPES.FISH; }).id]);
+                    var seal = that.objects[bodies.find(function (item) { return item.type === TYPES.SEAL; }).id];
+                    var fish = that.objects[bodies.find(function (item) { return item.type === TYPES.FISH; }).id];
+                    if (seal instanceof Seal && fish instanceof Fish) {
+                        that.handleEnemyFishCollision(seal, fish);
+                    }
                 },
                 _a[that.hashTypes(TYPES.FISH, TYPES.GULL)] = function (bodies) {
-                    that.handleEnemyFishCollision(that.objects[bodies.find(function (item) { return item.type === TYPES.GULL; }).id], that.objects[bodies.find(function (item) { return item.type === TYPES.FISH; }).id]);
+                    var gull = that.objects[bodies.find(function (item) { return item.type === TYPES.GULL; }).id];
+                    var fish = that.objects[bodies.find(function (item) { return item.type === TYPES.FISH; }).id];
+                    if (gull instanceof Gull && fish instanceof Fish) {
+                        that.handleEnemyFishCollision(gull, fish);
+                    }
                 },
                 _a[that.hashTypes(TYPES.MALE, TYPES.MALE)] = function (bodies) {
+                    if (!(that.objects[bodies[0].id] instanceof Male)) {
+                        return;
+                    }
                     if (Math.random() < 0.1) {
                         that.objects[bodies[0].id].jump();
                     }
                     else if (Math.random() < 0.1) {
-                        that.objects[bodies[1].id].jump();
+                        that.objects[bodies[0].id].jump();
                     }
                 },
                 _a[that.hashTypes(TYPES.MALE, TYPES.OFFSCREEN)] = function (bodies) {
                     var male = that.objects[bodies.find(function (item) { return item.type === TYPES.MALE; }).id];
-                    that.destroyEntity(male.abductor);
-                    that.destroyEntity(male);
+                    if (male instanceof Male) {
+                        that.destroyEntity(male.abductor);
+                        that.destroyEntity(male);
+                    }
                 },
                 _a[that.hashTypes(TYPES.SEAL, TYPES.OFFSCREEN)] = function (bodies) {
                     var seal = that.objects[bodies.find(function (item) { return item.type === TYPES.SEAL; }).id];
-                    that.destroyEntity(seal);
-                    that.destroyEntity(seal.abducting);
+                    if (seal instanceof Seal) {
+                        that.destroyEntity(seal);
+                        that.destroyEntity(seal.abducting);
+                    }
                 },
                 _a[that.hashTypes(TYPES.GULL, TYPES.OFFSCREEN)] = function (bodies) {
                     var gull = that.objects[bodies.find(function (item) { return item.type === TYPES.GULL; }).id];
-                    that.destroyEntity(gull);
-                    that.destroyEntity(gull.abducting);
+                    if (gull instanceof Gull) {
+                        that.destroyEntity(gull);
+                        that.destroyEntity(gull.abducting);
+                    }
                 },
                 _a[that.hashTypes(TYPES.MALE, TYPES.GULL)] = function (bodies) {
                     var male = that.objects[bodies.find(function (item) { return item.type === TYPES.MALE; }).id];
                     var gull = that.objects[bodies.find(function (item) { return item.type === TYPES.GULL; }).id];
-                    if (gull.abducting) {
-                        if (!male.abductor) {
-                            male.jump();
+                    if (gull instanceof Gull && male instanceof Male) {
+                        if (gull.abducting) {
+                            if (!male.abductor) {
+                                male.jump();
+                            }
                         }
-                    }
-                    else {
-                        gull.abduct(male);
+                        else {
+                            gull.abduct(male);
+                        }
                     }
                 },
                 _a[that.hashTypes(TYPES.MALE, TYPES.SEAL)] = function (bodies) {
                     var male = that.objects[bodies.find(function (item) { return item.type === TYPES.MALE; }).id];
                     var seal = that.objects[bodies.find(function (item) { return item.type === TYPES.SEAL; }).id];
-                    if (seal.abducting) {
-                        if (!male.abductor) {
-                            male.jump();
+                    if (seal instanceof Seal && male instanceof Male) {
+                        if (seal.abducting) {
+                            if (!male.abductor) {
+                                male.jump();
+                            }
                         }
-                    }
-                    else {
-                        seal.abduct(male);
+                        else {
+                            seal.abduct(male);
+                        }
                     }
                 },
                 _a);
@@ -27516,17 +27552,17 @@ require("./pixi-shadows.js");
                         x: 0,
                         y: 10,
                         style: {
-                            fill: GREEN
+                            fill: GREEN,
                         },
-                        container: this.container
+                        container: this.container,
                     }),
                     new Text({
                         x: 0,
                         y: 4,
                         style: {
-                            fill: GREEN
+                            fill: GREEN,
                         },
-                        container: this.container
+                        container: this.container,
                     })
                 ];
             }
@@ -27542,7 +27578,7 @@ require("./pixi-shadows.js");
                 prefix: 'WINTER: ',
                 x: 30,
                 y: 20,
-                container: this.container
+                container: this.container,
             });
             this.healthBar = new HealthBar(this);
         };
@@ -27567,7 +27603,7 @@ require("./pixi-shadows.js");
                         normal: worldManifold.normal,
                         normalImpulse: manifold.points[i].normalImpulse,
                         tangentImpulse: manifold.points[i].tangentImpulse,
-                        separation: worldManifold.separations[i]
+                        separation: worldManifold.separations[i],
                     });
                 }
             });
@@ -27625,7 +27661,7 @@ require("./pixi-shadows.js");
             var that = this;
             this.paused = true;
             this.textDisplays[0].show("GAME OVER: " + this.gameOverReason, {
-                fill: RED
+                fill: RED,
             });
             this.healthBar.hide();
             this.resetBodies();
@@ -27634,8 +27670,8 @@ require("./pixi-shadows.js");
                 y: -2,
                 container: this.container,
                 style: {
-                    fill: GREEN
-                }
+                    fill: GREEN,
+                },
             });
             this.resetButton.show({
                 text: 'PLAY AGAIN',
@@ -27649,7 +27685,7 @@ require("./pixi-shadows.js");
                 y: CONSTANTS.HEALTH_BAR.Y,
                 container: this.container,
                 style: {
-                    fill: YELLOW
+                    fill: YELLOW,
                 }
             });
             this.menuButton.show({
@@ -27708,10 +27744,10 @@ require("./pixi-shadows.js");
             var _this = this;
             Object.keys(this.objects).forEach(function (id) {
                 var object = _this.objects[id];
-                if (object.move && typeof object.move === 'function') {
+                if (object instanceof Male || object instanceof Gull || object instanceof Seal) {
                     object.move();
                 }
-                if (object.invincibilityTime) {
+                if (object instanceof Hero) {
                     object.invincibilityTime -= 1;
                 }
             });
@@ -27751,19 +27787,19 @@ require("./pixi-shadows.js");
                 density: 0.0,
                 friction: 7.5,
                 filterCategoryBits: CATEGORIES.GROUND,
-                filterMaskBits: MASKS.GROUND
+                filterMaskBits: MASKS.GROUND,
             };
             var wallOpts = {
                 density: 0.0,
                 friction: 0.0,
                 filterCategoryBits: CATEGORIES.WALLS,
-                filterMaskBits: MASKS.WALLS
+                filterMaskBits: MASKS.WALLS,
             };
             var offscreenOpts = {
                 density: 0.0,
                 friction: 0.0,
                 filterCategoryBits: CATEGORIES.OFFSCREEN,
-                filterMaskBits: MASKS.OFFSCREEN
+                filterMaskBits: MASKS.OFFSCREEN,
             };
             // walls
             this.createBlock(graphics, wall, wallOpts, true, CONSTANTS.BORDER.LEFT, CONSTANTS.OFFSCREEN.BOTTOM, CONSTANTS.BORDER.LEFT, CONSTANTS.BORDER.TOP);
@@ -27807,7 +27843,7 @@ require("./pixi-shadows.js");
             if (health) {
                 this.body = this.game.world.createBody(Vec2(CONSTANTS.HEALTH_BAR.X, CONSTANTS.HEALTH_BAR.Y));
                 this.body.createFixture(planck.Box(CONSTANTS.HEALTH_BAR.MAX_WIDTH * (health / CONSTANTS.HERO.HEALTH.MAX), 0.5), {
-                    filterGroupIndex: 99
+                    filterGroupIndex: 99,
                 });
                 var color = void 0;
                 var bitColor = void 0;
@@ -27826,7 +27862,7 @@ require("./pixi-shadows.js");
                 this.graphics.clear();
                 this.game.createBlockDisplay(this.graphics, CONSTANTS.HEALTH_BAR.X, CONSTANTS.HEALTH_BAR.Y, CONSTANTS.HEALTH_BAR.X + (CONSTANTS.HEALTH_BAR.MAX_WIDTH * (health / CONSTANTS.HERO.HEALTH.MAX)), CONSTANTS.HEALTH_BAR.Y + 2, bitColor);
                 this.body.render = {
-                    stroke: color
+                    stroke: color,
                 };
             }
         };
@@ -27888,7 +27924,7 @@ require("./pixi-shadows.js");
                 friction: 0,
                 filterCategoryBits: CATEGORIES.FRIEND,
                 filterMaskBits: MASKS.FRIEND,
-                filterGroupIndex: 0
+                filterGroupIndex: 0,
             };
             _this.jumps = CONSTANTS.MALE.JUMP.MAX;
             var x = CONSTANTS.MALE.SPAWN.X + (CONSTANTS.MALE.SPAWN.SPREAD * Math.random() - CONSTANTS.MALE.SPAWN.SPREAD / 2);
@@ -27922,7 +27958,7 @@ require("./pixi-shadows.js");
             fixtures.setFilterData({
                 groupIndex: this.filterData.filterGroupIndex,
                 categoryBits: this.filterData.filterCategoryBits,
-                maskBits: this.filterData.filterMaskBits
+                maskBits: this.filterData.filterMaskBits,
             });
         };
         Male.prototype.onAbduction = function (abductor) {
@@ -28012,7 +28048,7 @@ require("./pixi-shadows.js");
             var _this = _super.call(this, {
                 damage: CONSTANTS.SEAL.DAMAGE,
                 health: CONSTANTS.SEAL.HEALTH,
-                game: game
+                game: game,
             }) || this;
             _this.direction = direction;
             _this.points = CONSTANTS.SEAL.POINTS;
@@ -28060,7 +28096,7 @@ require("./pixi-shadows.js");
                 friction: 0,
                 filterCategoryBits: CATEGORIES.FOE,
                 filterMaskBits: MASKS.FOE,
-                filterGroupIndex: GROUPS.FOE
+                filterGroupIndex: GROUPS.FOE,
             });
         };
         Seal.prototype.move = function () {
@@ -28091,7 +28127,7 @@ require("./pixi-shadows.js");
             var _this = _super.call(this, {
                 damage: CONSTANTS.GULL.DAMAGE,
                 health: CONSTANTS.GULL.HEALTH,
-                game: game
+                game: game,
             }) || this;
             _this.direction = direction;
             _this.points = CONSTANTS.GULL.POINTS;
@@ -28135,13 +28171,13 @@ require("./pixi-shadows.js");
                 position: Vec2(x, CONSTANTS.GULL.SPAWN.Y),
                 type: 'dynamic',
                 fixedRotation: true,
-                allowSleep: true
+                allowSleep: true,
             });
             this.body.createFixture(planck.Box(CONSTANTS.GULL.HITBOX.WIDTH, CONSTANTS.GULL.HITBOX.HEIGHT), {
                 friction: 0,
                 filterCategoryBits: CATEGORIES.FOE,
                 filterMaskBits: MASKS.FOE,
-                filterGroupIndex: GROUPS.FOE
+                filterGroupIndex: GROUPS.FOE,
             });
             this.body.render = {
                 stroke: BLUE
@@ -28205,7 +28241,7 @@ require("./pixi-shadows.js");
             this.body.createFixture(planck.Box(CONSTANTS.FISH.HITBOX.WIDTH, CONSTANTS.FISH.HITBOX.HEIGHT), {
                 filterCategoryBits: CATEGORIES.HERO,
                 filterMaskBits: MASKS.HERO,
-                filterGroupIndex: GROUPS.HERO
+                filterGroupIndex: GROUPS.HERO,
             });
             this.body.setLinearVelocity(Vec2(CONSTANTS.FISH.LAUNCH_VELOCITY.X * direction, CONSTANTS.FISH.LAUNCH_VELOCITY.Y));
             this.body.setAngularVelocity(Math.random() * Math.PI * 10 - (Math.PI * 5));
@@ -28224,6 +28260,7 @@ require("./pixi-shadows.js");
         Fish.prototype.destroySprites = function () {
             this.game.container.removeChild(this.sprite);
         };
+        Fish.prototype.move = function () { };
         Fish.prototype.render = function () {
             var pos = this.body.getPosition();
             this.sprite.position.set(mpx(pos.x), mpy(pos.y));
@@ -28242,7 +28279,7 @@ require("./pixi-shadows.js");
             this.points = [];
             this.history = {
                 x: new Array(this.length).fill(mpx(x)),
-                y: new Array(this.length).fill(mpy(y))
+                y: new Array(this.length).fill(mpy(y)),
             };
             this.createRope(x, y);
         }
@@ -28286,12 +28323,12 @@ require("./pixi-shadows.js");
             this.bodyOpts = {
                 filterCategoryBits: CATEGORIES.HERO,
                 filterMaskBits: MASKS.HERO,
-                filterGroupIndex: GROUPS.HERO
+                filterGroupIndex: GROUPS.HERO,
             };
             this.state = {
                 airborne: true,
                 action: 'NEUTRAL',
-                direction: RIGHT
+                direction: RIGHT,
             };
             this.setupSprite();
             this.setupBody();
@@ -28378,7 +28415,7 @@ require("./pixi-shadows.js");
                 texture: CONSTANTS.HERO.TRAIL.TEXTURE,
                 smoothness: CONSTANTS.HERO.TRAIL.SMOOTHNESS,
                 length: CONSTANTS.HERO.TRAIL.LENGTH,
-                game: this.game
+                game: this.game,
             });
             var states = CONSTANTS.HERO.MOVEMENT_STATES;
             this.sprites = (_a = {},
@@ -28439,7 +28476,7 @@ require("./pixi-shadows.js");
                 x: pos.x,
                 y: pos.y,
                 direction: this.state.direction,
-                game: this.game
+                game: this.game,
             });
         };
         Hero.prototype.dive = function () {
@@ -28477,7 +28514,7 @@ require("./pixi-shadows.js");
                 this.state.action = CONSTANTS.HERO.MOVEMENT_STATES.NEUTRAL;
             }
             this.state.airborne = false;
-            this.activeSprite.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED.RUNNING;
+            this.sprite.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED.RUNNING;
             this.jumps = CONSTANTS.HERO.JUMP.MAX;
             if (this.diveFixture) {
                 this.game.deferDestroyFixture(this, 'diveFixture');
@@ -28498,7 +28535,7 @@ require("./pixi-shadows.js");
                 return;
             }
             this.game.soundManager.play('jump');
-            this.activeSprite.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED.JUMPING;
+            this.sprite.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED.JUMPING;
             this.state.airborne = true;
             this.body.setLinearVelocity(Vec2(this.body.getLinearVelocity().x, CONSTANTS.HERO.JUMP.MAGNITUDE));
             this.jumps -= 1;
@@ -28506,26 +28543,26 @@ require("./pixi-shadows.js");
         Hero.prototype.setActiveSprite = function (visible) {
             if (visible === void 0) { visible = true; }
             var sprite = this.stateMappings[this.state.action];
-            if (sprite === this.activeSprite) {
-                this.activeSprite.scale.x = this.stateMappings[this.state.action] === this.stateMappings.RUNNING
+            if (sprite === this.sprite) {
+                this.sprite.scale.x = this.stateMappings[this.state.action] === this.stateMappings.RUNNING
                     ? this.state.direction
                     : 1;
                 return;
             }
-            if (this.activeSprite) {
-                this.activeSprite.visible = false;
-                sprite.animationSpeed = this.activeSprite.animationSpeed;
+            if (this.sprite) {
+                this.sprite.visible = false;
+                sprite.animationSpeed = this.sprite.animationSpeed;
             }
-            this.activeSprite = sprite;
-            this.activeSprite.visible = visible;
-            this.activeSprite.scale.x = this.stateMappings[this.state.action] === this.stateMappings.RUNNING
+            this.sprite = sprite;
+            this.sprite.visible = visible;
+            this.sprite.scale.x = this.stateMappings[this.state.action] === this.stateMappings.RUNNING
                 ? this.state.direction
                 : 1;
         };
         Hero.prototype.render = function () {
             var pos = this.body.getPosition();
             this.setActiveSprite();
-            this.activeSprite.position.set(mpx(pos.x), mpy(pos.y));
+            this.sprite.position.set(mpx(pos.x), mpy(pos.y));
             this.trail.update(mpx(pos.x), mpy(pos.y), this.state.airborne);
         };
         return Hero;
@@ -28560,7 +28597,7 @@ require("./pixi-shadows.js");
             'throw': '/assets/audio/throw.mp3',
             'abduction': '/assets/audio/abduction.mp3',
             'pause': '/assets/audio/pause.mp3',
-            'dive': '/assets/audio/dive.mp3'
+            'dive': '/assets/audio/dive.mp3',
         };
         var graphicsLoaded = false;
         var soundsLoaded = false;

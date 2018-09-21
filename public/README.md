@@ -120,11 +120,14 @@ LOGIC.16
 
 LOGIC.17
 - [x] compile with typescript
-- [ ] bug fix: "cannot import when module is none"
-- [ ] bundle createjs
-- [ ] bundle planck
-- [ ] bundle pixi modules
-- [ ] CONSTANTS interface
+- [x] bundle createjs
+- [x] bundle planck
+- [x] bundle pixi modules
+- [x] bug fix: "cannot import when module is none"
+- [x] CONSTANTS interface
+- [x] collision type checks
+- [x] fix tsconfig setup
+- [ ] bug fix: no sound
 - [ ] planck typings
 - [ ] pixi-layers typings
 - [ ] replace `any`: collisions

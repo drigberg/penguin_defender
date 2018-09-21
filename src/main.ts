@@ -1,15 +1,20 @@
-import * as planck from './planckv0.1.45.min.js'
 import * as createjs from 'createjs-module'
+import * as planck from './planckv0.1.45.min.js'
 import * as PIXI from './pixi.min.js'
 import './pixi-layers.js'
 import './pixi-lights.js'
 import './pixi-shadows.js'
+import {
+  Constants,
+  ShadowEnabledSprite,
+} from './interface'
 
 /**
  * Basic surival game created using pixi.js and planck.js
  */
 (function main() {
   const Sound = createjs.Sound
+  console.log(Sound)
 
   /**
    * Constants
@@ -79,179 +84,179 @@ import './pixi-shadows.js'
     GULL: 'GULL',
   })
 
-  const CONSTANTS = Object.freeze({
-    ENEMY_TYPES: Object.freeze([
+  const CONSTANTS: Constants = {
+    ENEMY_TYPES: [
       TYPES.SEAL,
       TYPES.GULL
-    ]),
-    MALE: Object.freeze({
-      SPAWN: Object.freeze({
+    ],
+    MALE: {
+      SPAWN: {
         X: 0,
         Y: 0,
         SPREAD: 10.0,
-      }),
-      JUMP: Object.freeze({
+      },
+      JUMP: {
         MAGNITUDE: 20,
         MAX: 1,
-      }),
-      HITBOX: Object.freeze({
+      },
+      HITBOX: {
         WIDTH: 0.5,
         HEIGHT: 1,
-      }),
-      ANIMATION_SPEED: Object.freeze({
+      },
+      ANIMATION_SPEED: {
         STANDARD: 0.03,
         STRESSED: 0.1,
-      }),
+      },
       NUM: 10,
       SPEED: 2.0,
-    }),
-    HERO: Object.freeze({
-      TRAIL: Object.freeze({
+    },
+    HERO: {
+      TRAIL: {
         TEXTURE: PIXI.Texture.fromImage('assets/hero/trail.png'),
         SMOOTHNESS: 100,
         LENGTH: 10,
         THRESHOLD: 20,
         MIN_VELOCITY: 5,
-      }),
-      ANIMATION_SPEED: Object.freeze({
+      },
+      ANIMATION_SPEED: {
         DIVING: 0.18,
         NEUTRAL: 0.03,
         RUNNING: 0.06,
         JUMPING: 0.24,
-      }),
-      MOVEMENT_STATES: Object.freeze({
+      },
+      MOVEMENT_STATES: {
         RUNNING: 'RUNNING',
         GLIDING: 'GLIDING',
         NEUTRAL: 'NEUTRAL',
         DIVING: 'DIVING',
         JUMPING: 'JUMPING',
-      }),
-      JUMP: Object.freeze({
+      },
+      JUMP: {
         MAGNITUDE: 35,
         MAX: 3,
-      }),
-      HEALTH: Object.freeze({
+      },
+      HEALTH: {
         MAX: 5,
-      }),
-      HITBOX: Object.freeze({
+      },
+      HITBOX: {
         WIDTH: 1.5,
         HEIGHT: 2.0,
-      }),
-      DIVE: Object.freeze({
-        HITBOX: Object.freeze({
+      },
+      DIVE: {
+        HITBOX: {
           WIDTH: 8.0,
           HEIGHT: 0.5,
-        }),
+        },
         SOUND_OVERFLOW: 200,
-      }),
-      SPAWN: Object.freeze({
+      },
+      SPAWN: {
         X: 0.0,
         Y: 5.0,
-      }),
-      GLIDE: Object.freeze({
+      },
+      GLIDE: {
         IMPULSE: 2,
-      }),
+      },
       INVINCIBILITY_INTERVAL: 30,
       DAMAGE: 1,
       SPEED: 15,
       THROW_INTERVAL: 25,
-    }),
-    HEALTH_BAR: Object.freeze({
+    },
+    HEALTH_BAR: {
       X: -40,
       Y: 26,
       MAX_WIDTH: 10,
-    }),
-    FISH: Object.freeze({
-      HITBOX: Object.freeze({
+    },
+    FISH: {
+      HITBOX: {
         WIDTH: 1,
         HEIGHT: 0.6,
-      }),
-      LAUNCH_VELOCITY: Object.freeze({
+      },
+      LAUNCH_VELOCITY: {
         X: 20,
         Y: 50,
-      }),
+      },
       DAMAGE: 1,
-    }),
-    SEAL: Object.freeze({
-      SPAWN: Object.freeze({
+    },
+    SEAL: {
+      SPAWN: {
         X: 50,
         Y: 5,
         PROBABILITY: 0.01,
-      }),
-      JUMP: Object.freeze({
+      },
+      JUMP: {
         MAGNITUDE: 20,
         MAX: 1,
-      }),
-      HITBOX: Object.freeze({
+      },
+      HITBOX: {
         WIDTH: 2,
         HEIGHT: 1,
-      }),
-      ANIMATION_SPEED: Object.freeze({
+      },
+      ANIMATION_SPEED: {
         STANDARD: 0.15,
-      }),
+      },
       POINTS: 10,
       SPEED: 3.5,
       HEALTH: 1,
       DAMAGE: 1,
-    }),
-    GULL: Object.freeze({
-      SPAWN: Object.freeze({
+    },
+    GULL: {
+      SPAWN: {
         X: 50,
         Y: 20,
         PROBABILITY: 0.01,
-      }),
-      FLAP: Object.freeze({
-        STANDARD: Object.freeze({
+      },
+      FLAP: {
+        STANDARD: {
           POWER: 2.1,
           INTERVAL: 15,
-        }),
-        ABDUCTING: Object.freeze({
+        },
+        ABDUCTING: {
           POWER: 30,
           INTERVAL: 15,
-        }),
-        FLYAWAY: Object.freeze({
+        },
+        FLYAWAY: {
           POWER: 6,
           INTERVAL: 15,
-        }),
-      }),
-      HITBOX: Object.freeze({
+        },
+      },
+      HITBOX: {
         WIDTH: 1.5,
         HEIGHT: 0.6,
-      }),
-      ANIMATION_SPEED: Object.freeze({
+      },
+      ANIMATION_SPEED: {
         STANDARD: 0.1,
-      }),
+      },
       SPEED: 3.0,
       HEALTH: 1,
       DAMAGE: 1.5,
       IMPULSE: 1.5,
       POINTS: 15,
-    }),
-    SHAKE: Object.freeze({
+    },
+    SHAKE: {
       DURATION: 10,
       MAGNITUDE: 1.5,
-    }),
-    BORDER: Object.freeze({
+    },
+    BORDER: {
       LEFT: -40,
       RIGHT: 40,
       TOP: 30,
-    }),
-    OFFSCREEN: Object.freeze({
+    },
+    OFFSCREEN: {
       LEFT: -55,
       RIGHT: 55,
       BOTTOM: -20,
-    }),
-    BACKGROUND: Object.freeze({
+    },
+    BACKGROUND: {
       DIFFUSE: 'assets/mountains.png',
       NORMAL: 'assets/mountains.normal.clouds.light.png',
-    }),
-    WINTER: Object.freeze({
+    },
+    WINTER: {
       COUNTDOWN: 50,
       INTERIM: 1500,
-    }),
+    },
     TIME_STEP: 1 / 30,
     GRAVITY: -60,
-  })
+  }
 
   /**
    * PIXI setup
@@ -275,7 +280,11 @@ import './pixi-shadows.js'
    * Helper functions
    */
 
-  function assembleBasicSprite(diffuseSprite, normalSprite, shadowSprite) {
+  function assembleBasicSprite(
+    diffuseSprite: ShadowEnabledSprite,
+    normalSprite: ShadowEnabledSprite,
+    shadowSprite: ShadowEnabledSprite
+  ) {
     const container = new PIXI.Container()
 
     diffuseSprite.parentGroup = PIXI.lights.diffuseGroup
@@ -604,7 +613,7 @@ import './pixi-shadows.js'
       this.enemyTypeDestroyed = true
     }
 
-    destroyEntity(entity) {
+    destroyEntity(entity: Gull | Seal | Male | Hero | Fish | Friend | Foe) {
       if (!entity) { // TODO: turn patch into fix
         return
       }
@@ -613,14 +622,16 @@ import './pixi-shadows.js'
         return
       }
 
-      if (entity.abducting) {
+      if ((entity instanceof Gull || entity instanceof Seal) && entity.abducting) {
         entity.abducting.onLiberation()
       }
 
       entity.alive = false
       this.world.destroyBody(entity.body)
 
-      entity.destroySprites()
+      if (entity instanceof Gull || entity instanceof Seal || entity instanceof Fish || entity instanceof Hero || entity instanceof Male) {
+        entity.destroySprites()
+      }
 
       switch (entity.type) {
         case TYPES.MALE:
@@ -720,7 +731,7 @@ import './pixi-shadows.js'
       }
 
       if (countingDown === 0) {
-        this.hero.activeSprite.visible = true
+        this.hero.sprite.visible = true
         Object.keys(this.objects).forEach((key) => {
           this.objects[key].sprite.visible = true
         })
@@ -875,81 +886,113 @@ import './pixi-shadows.js'
         },
         [that.hashTypes(TYPES.GULL, TYPES.GROUND)]: function(bodies: any[]) {
           const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id]
-          gull.flyAway()
+          if (gull instanceof Gull) {
+            gull.flyAway()
+          }
         },
         [that.hashTypes(TYPES.GROUND, TYPES.SEAL)]: function(bodies: any[]) {
-          that.objects[bodies.find(item => item.type === TYPES.SEAL).id].jumps = CONSTANTS.SEAL.JUMP.MAX
+          const seal = that.objects[bodies.find(item => item.type === TYPES.SEAL).id]
+          if (seal instanceof Seal) {
+            seal.jumps = CONSTANTS.SEAL.JUMP.MAX
+          }
         },
         [that.hashTypes(TYPES.GROUND, TYPES.MALE)]: function(bodies: any[]) {
-          that.objects[bodies.find(item => item.type === TYPES.MALE).id].jumps = CONSTANTS.MALE.JUMP.MAX
+          const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id]
+          if (male instanceof Male) {
+            male.jumps = CONSTANTS.MALE.JUMP.MAX
+          }
         },
         [that.hashTypes(TYPES.HERO, TYPES.SEAL)]: function(bodies: any[], point: any[], fixtures: any[]) {
           const dive = Boolean(fixtures.find(item => item.dive === true))
           const enemy = that.objects[bodies.find(item => item.type === TYPES.SEAL).id]
 
-          that.handleEnemyHeroCollision(enemy, point, dive)
+          if (enemy instanceof Seal || enemy instanceof Gull) {
+            that.handleEnemyHeroCollision(enemy, point, dive)
+          }
         },
         [that.hashTypes(TYPES.GULL, TYPES.HERO)]: function(bodies: any[], point: any[], fixtures: any[]) {
           const dive = Boolean(fixtures.find(item => item.dive === true))
           const enemy = that.objects[bodies.find(item => item.type === TYPES.GULL).id]
-          that.handleEnemyHeroCollision(enemy, point, dive)
+          if (enemy instanceof Seal || enemy instanceof Gull) {
+            that.handleEnemyHeroCollision(enemy, point, dive)
+          }
         },
         [that.hashTypes(TYPES.FISH, TYPES.SEAL)]: function(bodies: any[]) {
-          that.handleEnemyFishCollision(
-            that.objects[bodies.find(item => item.type === TYPES.SEAL).id],
-            that.objects[bodies.find(item => item.type === TYPES.FISH).id],
-          )
+          const seal = that.objects[bodies.find(item => item.type === TYPES.SEAL).id]
+          const fish = that.objects[bodies.find(item => item.type === TYPES.FISH).id]
+
+          if (seal instanceof Seal && fish instanceof Fish) {
+            that.handleEnemyFishCollision(seal, fish)
+          }
         },
-        [that.hashTypes(TYPES.FISH, TYPES.GULL)]: function(bodies: any) {
-          that.handleEnemyFishCollision(
-            that.objects[bodies.find(item => item.type === TYPES.GULL).id],
-            that.objects[bodies.find(item => item.type === TYPES.FISH).id],
-          )
+        [that.hashTypes(TYPES.FISH, TYPES.GULL)]: function(bodies: any[]) {
+          const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id]
+          const fish = that.objects[bodies.find(item => item.type === TYPES.FISH).id]
+
+          if (gull instanceof Gull && fish instanceof Fish) {
+            that.handleEnemyFishCollision(gull, fish)
+          }
         },
         [that.hashTypes(TYPES.MALE, TYPES.MALE)]: function(bodies: any[]) {
+          if (!(that.objects[bodies[0].id] instanceof Male)) {
+            return
+          }
+
           if (Math.random() < 0.1) {
-            that.objects[bodies[0].id].jump()
+            (<Male>that.objects[bodies[0].id]).jump()
           } else if (Math.random() < 0.1) {
-            that.objects[bodies[1].id].jump()
+            (<Male>that.objects[bodies[0].id]).jump()
           }
         },
         [that.hashTypes(TYPES.MALE, TYPES.OFFSCREEN)]: function(bodies: any[]) {
           const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id]
-          that.destroyEntity(male.abductor)
-          that.destroyEntity(male)
+
+          if (male instanceof Male) {
+            that.destroyEntity(male.abductor)
+            that.destroyEntity(male)
+          }
         },
         [that.hashTypes(TYPES.SEAL, TYPES.OFFSCREEN)]: function(bodies: any[]) {
           const seal = that.objects[bodies.find(item => item.type === TYPES.SEAL).id]
-          that.destroyEntity(seal)
-          that.destroyEntity(seal.abducting)
+
+          if (seal instanceof Seal) {
+            that.destroyEntity(seal)
+            that.destroyEntity(seal.abducting)
+          }
         },
         [that.hashTypes(TYPES.GULL, TYPES.OFFSCREEN)]: function(bodies: any[]) {
           const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id]
-          that.destroyEntity(gull)
-          that.destroyEntity(gull.abducting)
+          if (gull instanceof Gull) {
+            that.destroyEntity(gull)
+            that.destroyEntity(gull.abducting)
+          }
         },
         [that.hashTypes(TYPES.MALE, TYPES.GULL)]: function(bodies: any[]) {
           const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id]
           const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id]
 
-          if (gull.abducting) {
-            if (!male.abductor) {
-              male.jump()
+          if (gull instanceof Gull && male instanceof Male) {
+            if (gull.abducting) {
+              if (!male.abductor) {
+                male.jump()
+              }
+            } else {
+              gull.abduct(male)
             }
-          } else {
-            gull.abduct(male)
           }
         },
         [that.hashTypes(TYPES.MALE, TYPES.SEAL)]: function(bodies: any[]) {
           const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id]
           const seal = that.objects[bodies.find(item => item.type === TYPES.SEAL).id]
 
-          if (seal.abducting) {
-            if (!male.abductor) {
-              male.jump()
+          if (seal instanceof Seal && male instanceof Male) {
+            if (seal.abducting) {
+              if (!male.abductor) {
+                male.jump()
+              }
+            } else {
+              seal.abduct(male)
             }
-          } else {
-            seal.abduct(male)
           }
         },
       }
@@ -1196,11 +1239,11 @@ import './pixi-shadows.js'
     moveObjects() {
       Object.keys(this.objects).forEach((id) => {
         const object = this.objects[id]
-        if (object.move && typeof object.move === 'function') {
+        if (object instanceof Male || object instanceof Gull || object instanceof Seal) {
           object.move()
         }
 
-        if (object.invincibilityTime) {
+        if (object instanceof Hero) {
           object.invincibilityTime -= 1
         }
       })
@@ -1422,6 +1465,8 @@ import './pixi-shadows.js'
     id: string
     sprite: PIXI.extras.AnimatedSprite
     body: any
+    alive: boolean
+    type: string
 
     constructor(game: Game) {
       this.game = game
@@ -1438,7 +1483,6 @@ import './pixi-shadows.js'
   class Male extends Friend {
     game: Game
     velocity: number
-    alive: Boolean
     abductor: Gull | Seal
     filterData: any
     jumps: number
@@ -1586,6 +1630,7 @@ import './pixi-shadows.js'
     direction: number
     abducting: Male
     velocity: number
+    type: string
 
     constructor({
       damage,
@@ -1629,6 +1674,7 @@ import './pixi-shadows.js'
 
   class Seal extends Foe {
     jumps: number
+    type: string
 
     constructor(game: Game, direction: number) {
       super({
@@ -1741,6 +1787,7 @@ import './pixi-shadows.js'
     flapPower: number
     flapInterval: number
     untilFlap: number
+    type: string
 
     constructor(game: Game, direction: number) {
       super({
@@ -1874,6 +1921,7 @@ import './pixi-shadows.js'
     id: string
     sprite: PIXI.extras.AnimatedSprite
     body: any
+    type: string
 
     constructor({
       x,
@@ -1935,6 +1983,8 @@ import './pixi-shadows.js'
     destroySprites() {
       this.game.container.removeChild(this.sprite)
     }
+
+    move() {}
 
     render() {
       const pos = this.body.getPosition()
@@ -2025,7 +2075,8 @@ import './pixi-shadows.js'
     body: any
     diveFixture: any
     trail: Trail
-    activeSprite: PIXI.extras.AnimatedSprite
+    sprite: PIXI.extras.AnimatedSprite
+    type: string
 
     constructor(game: Game) {
       this.game = game
@@ -2287,7 +2338,7 @@ import './pixi-shadows.js'
       }
 
       this.state.airborne = false
-      this.activeSprite.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED.RUNNING
+      this.sprite.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED.RUNNING
       this.jumps = CONSTANTS.HERO.JUMP.MAX
 
       if (this.diveFixture) {
@@ -2316,7 +2367,7 @@ import './pixi-shadows.js'
       }
 
       this.game.soundManager.play('jump')
-      this.activeSprite.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED.JUMPING
+      this.sprite.animationSpeed = CONSTANTS.HERO.ANIMATION_SPEED.JUMPING
       this.state.airborne = true
 
       this.body.setLinearVelocity(Vec2(
@@ -2330,21 +2381,21 @@ import './pixi-shadows.js'
     setActiveSprite(visible = true) {
       const sprite = this.stateMappings[this.state.action]
 
-      if (sprite === this.activeSprite) {
-        this.activeSprite.scale.x = this.stateMappings[this.state.action] === this.stateMappings.RUNNING
+      if (sprite === this.sprite) {
+        this.sprite.scale.x = this.stateMappings[this.state.action] === this.stateMappings.RUNNING
           ? this.state.direction
           : 1
         return
       }
 
-      if (this.activeSprite) {
-        this.activeSprite.visible = false
-        sprite.animationSpeed = this.activeSprite.animationSpeed
+      if (this.sprite) {
+        this.sprite.visible = false
+        sprite.animationSpeed = this.sprite.animationSpeed
       }
 
-      this.activeSprite = sprite
-      this.activeSprite.visible = visible
-      this.activeSprite.scale.x = this.stateMappings[this.state.action] === this.stateMappings.RUNNING
+      this.sprite = sprite
+      this.sprite.visible = visible
+      this.sprite.scale.x = this.stateMappings[this.state.action] === this.stateMappings.RUNNING
         ? this.state.direction
         : 1
     }
@@ -2353,7 +2404,7 @@ import './pixi-shadows.js'
       const pos = this.body.getPosition()
 
       this.setActiveSprite()
-      this.activeSprite.position.set(mpx(pos.x), mpy(pos.y))
+      this.sprite.position.set(mpx(pos.x), mpy(pos.y))
       this.trail.update(mpx(pos.x), mpy(pos.y), this.state.airborne)
     }
   }

@@ -10,4 +10,7 @@
     ]
   },
   "compileOnSave": false,
+  "files": [
+    "./src/main.ts"
+  ]
 }
