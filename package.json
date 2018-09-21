@@ -21,16 +21,11 @@
   },
   "homepage": "https://github.com/drigberg/penguin_defender#readme",
   "dependencies": {
-    "@types/easeljs": "1.0.0",
     "@types/pixi.js": "4.8.0",
     "createjs-module": "0.8.3",
     "express": "4.16.3",
     "install": "0.12.1",
     "npm": "6.4.1",
-    "pixi-layers": "0.1.6",
-    "pixi-lights": "2.0.1",
-    "pixi-shadows": "0.0.3",
-    "pixi.js": "4.8.2",
     "pug": "2.0.3"
   },
   "devDependencies": {

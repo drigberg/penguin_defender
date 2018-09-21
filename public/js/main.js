@@ -824,7 +824,7 @@ require("./pixi-shadows.js");
         };
         Game.prototype.createId = function () {
             this.idPointer += 1;
-            return this.idPointer;
+            return String(this.idPointer);
         };
         Game.prototype.setupMales = function () {
             for (var i = 0; i < this.winterStats[TYPES.MALE].total; i++) {

@@ -430,7 +430,7 @@ import './pixi-shadows.js'
     container: PIXI.Container
     menu: PIXI.Container
     objects: {
-      [index: number]: Gull | Seal | Hero | Fish | Foe
+      [index: string]: Gull | Seal | Hero | Fish | Foe | Friend
     }
     paused: boolean
     over: boolean
@@ -957,7 +957,7 @@ import './pixi-shadows.js'
 
     createId() {
       this.idPointer += 1
-      return this.idPointer
+      return String(this.idPointer)
     }
 
     setupMales() {
@@ -1419,7 +1419,7 @@ import './pixi-shadows.js'
 
   class Friend {
     game: Game
-    id: number
+    id: string
     sprite: PIXI.extras.AnimatedSprite
     body: any
 
@@ -1579,7 +1579,7 @@ import './pixi-shadows.js'
     health: number
     invincibilityTime: number
     game: Game
-    id: number
+    id: string
     sprite: PIXI.extras.AnimatedSprite
     body: any
     points: number
@@ -1871,7 +1871,7 @@ import './pixi-shadows.js'
     alive: boolean
     damage: number
     game: Game
-    id: number
+    id: string
     sprite: PIXI.extras.AnimatedSprite
     body: any
 
