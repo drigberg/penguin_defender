@@ -553,7 +553,7 @@ import {
     onStep() {
       const that = this
 
-      this.timer -= this.timer
+      this.timer -= 1
 
       if (!this.timer) {
         this.nextState()
