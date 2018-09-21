@@ -132,6 +132,7 @@ LOGIC.17
 - [x] dev:start command
 
 LOGIC.18
+- [x] minify bundle
 - [ ] planck typings
 - [ ] replace `any`: collisions
 - [ ] replace `any`: constructor arguments
