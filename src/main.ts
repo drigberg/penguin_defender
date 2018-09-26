@@ -484,15 +484,18 @@ import {
     text: Text
     intervals: { [index: string]: number }
     complete: boolean
+    game: Game
 
     constructor({
       slides,
       intervals,
       onComplete,
+      game,
     }: any) {
       const that = this
       this.complete = false
       this.container = new PIXI.Container()
+      this.game = game
       this.onCompleteCallback = onComplete
 
       this.slides = slides
@@ -513,6 +516,18 @@ import {
         },
         container: this.container,
         centered: false,
+      })
+
+      new Text({
+        x: 16,
+        y: -12,
+        style: {
+          fill: CONSTANTS.COLORS.BLUE,
+          fontSize: 24,
+        },
+        container: this.container,
+        centered: false,
+        show: 'press ENTER to skip'
       })
 
       window.requestAnimationFrame(function() {
@@ -537,7 +552,6 @@ import {
       this.state = SLIDESHOW.TIMELINE[nextIndex]
       this.timer = this.intervals[this.state]
 
-
       if (this.state === SLIDESHOW.STATES.FADING_IN) {
         this.currentSlideIndex += 1
         if (this.currentSlideIndex === this.slides.length) {
@@ -551,6 +565,11 @@ import {
     }
 
     onStep() {
+      if (this.game.keys.down.RETURN) {
+        this.onComplete()
+        return
+      }
+
       const that = this
 
       this.timer -= 1
@@ -641,6 +660,7 @@ import {
     playIntro() {
       const that = this
       new Slideshow({
+        game: this,
         slides: CONSTANTS.INTRO.SLIDES,
         intervals: CONSTANTS.INTRO.TIME_INTERVALS,
         onComplete: () => that.onIntroComplete()

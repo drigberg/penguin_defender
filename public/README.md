@@ -148,21 +148,16 @@ LOGIC.19
 - [ ] replace `any`: remaining
 
 LOGIC.20
-- [ ] settings: shadows on/off
 - [ ] settings: music on/off
 - [ ] settings: sound effects on/off
-- [ ] settings: song selection
+- [ ] settings: shadows on/off
 
 LOGIC.21
-- [ ] light class: implement fade method
-- [ ] lights fade to black upon death
-- [ ] lights fade in when created
-- [ ] blink while invincible
 - [ ] bounce off of enemies
 - [ ] bug fix: "from top" calculation
 
 LOGIC.22
-- [ ] eslint
+- [ ] tslint
 - [ ] gulls drop eggs
 - [ ] new enemy (bank: wolves, caribou, walrus, Putin-on-horse, lumberjack)
 
@@ -238,30 +233,32 @@ UI.7
 - [x] sprite normals: fish
 
 UI.8
+- [x] skip-intro button
 - [ ] retro text
 - [ ] retro introduction with Mars-ish theme
-- [ ] skip-intro button
 
 UI.9
-- [ ] sun rises and brightens between winters, sets during countdown
-- [ ] snowstorm in background
-- [ ] snowstorm stops with winter's end
-
-UI.10
-- [ ] responsive screen
-- [ ] switch to better animation library (smoothie?)
+- [ ] settings UI
+- [ ] song selection screen
 
 UI.11
+- [ ] switch to better animation library (smoothie?)
+- [ ] light class: implement fade method
+- [ ] lights fade to black upon death
+- [ ] lights fade in when created
+- [ ] blink while invincible
+
+UI.12
 - [ ] enemy 3 assets (wolf?)
 - [ ] enemy 4 assets (walrus?)
 
-UI.12
+UI.13
 - [ ] more congrulation text options
 - [ ] controls screen
 - [ ] high score table
 - [ ] high score table input
 
-UI.13
+UI.14
 - [ ] enhance hero assets
 - [ ] enhance male assets
 - [ ] enhance fish assets
@@ -270,11 +267,14 @@ UI.13
 - [ ] enhance background assets
 - [ ] enhance text displays
 
-UI.14
+UI.MAYBE
 - [ ] opening scene
 - [ ] post-wave animation (female textures, cheering)
 - [ ] refine lighting
 - [ ] clouds?
+- [ ] sun rises and brightens between winters, sets during countdown
+- [ ] snowstorm in background
+- [ ] snowstorm stops with winter's end
 
 ### Audio Todos
 AUDIO.1

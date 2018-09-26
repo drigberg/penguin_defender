@@ -455,10 +455,11 @@ require("./pixi-shadows.js");
    */
     var Slideshow = /** @class */ (function () {
         function Slideshow(_a) {
-            var slides = _a.slides, intervals = _a.intervals, onComplete = _a.onComplete;
+            var slides = _a.slides, intervals = _a.intervals, onComplete = _a.onComplete, game = _a.game;
             var that = this;
             this.complete = false;
             this.container = new PIXI.Container();
+            this.game = game;
             this.onCompleteCallback = onComplete;
             this.slides = slides;
             this.intervals = intervals;
@@ -475,6 +476,17 @@ require("./pixi-shadows.js");
                 },
                 container: this.container,
                 centered: false,
+            });
+            new Text({
+                x: 16,
+                y: -12,
+                style: {
+                    fill: CONSTANTS.COLORS.BLUE,
+                    fontSize: 24,
+                },
+                container: this.container,
+                centered: false,
+                show: 'press ENTER to skip'
             });
             window.requestAnimationFrame(function () {
                 that.onStep();
@@ -504,8 +516,12 @@ require("./pixi-shadows.js");
             }
         };
         Slideshow.prototype.onStep = function () {
+            if (this.game.keys.down.RETURN) {
+                this.onComplete();
+                return;
+            }
             var that = this;
-            this.timer -= this.timer;
+            this.timer -= 1;
             if (!this.timer) {
                 this.nextState();
             }
@@ -551,6 +567,7 @@ require("./pixi-shadows.js");
         Game.prototype.playIntro = function () {
             var that = this;
             new Slideshow({
+                game: this,
                 slides: CONSTANTS.INTRO.SLIDES,
                 intervals: CONSTANTS.INTRO.TIME_INTERVALS,
                 onComplete: function () { return that.onIntroComplete(); }
