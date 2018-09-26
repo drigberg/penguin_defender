@@ -133,42 +133,46 @@ LOGIC.17
 
 LOGIC.18
 - [x] minify bundle
+- [x] get rid of Menu, incorporate into Game
+- [x] bug fix: fish appears at origin when created
+- [x] bug fix: key presses while paused
+- [x] get rid of glide()
+- [x] switch to ASWD
+- [x] bug fix: double event listeners
+- [x] bug fix: extra animation frame requests on restart
+
+LOGIC.19
 - [ ] planck typings
 - [ ] replace `any`: collisions
 - [ ] replace `any`: constructor arguments
 - [ ] replace `any`: remaining
 
-LOGIC.19
-- [ ] settings: shadows on/off
+LOGIC.20
 - [ ] settings: music on/off
 - [ ] settings: sound effects on/off
-- [ ] settings: song selection
+- [ ] settings: shadows on/off
 
-LOGIC.20
-- [ ] light class: implement fade method
-- [ ] lights fade to black upon death
-- [ ] lights fade in when created
-- [ ] blink while invincible
+LOGIC.21
 - [ ] bounce off of enemies
 - [ ] bug fix: "from top" calculation
 
-LOGIC.21
-- [ ] eslint
+LOGIC.22
+- [ ] tslint
 - [ ] gulls drop eggs
 - [ ] new enemy (bank: wolves, caribou, walrus, Putin-on-horse, lumberjack)
 
-LOGIC.22
+LOGIC.23
 - [ ] make testbed only differ by testbed and hidden pixi, not commented
 - [ ] refine movement
 - [ ] standardize colors (alert, points, success, etc)
 
-LOGIC.23
+LOGIC.24
 - [ ] gulls fall when killed, are destroyed offscreen
 - [ ] seals fall when killed, are destroyed offscreen
 - [ ] fish fall after collisions, are destroyed offscreen
 - [ ] post-wave movement
 
-LOGIC.21
+LOGIC.25
 - [ ] orca summons
 - [ ] hero.lives
 - [ ] males don't regenerate back to max each winter
@@ -229,30 +233,32 @@ UI.7
 - [x] sprite normals: fish
 
 UI.8
+- [x] skip-intro button
 - [ ] retro text
 - [ ] retro introduction with Mars-ish theme
-- [ ] skip-intro button
 
 UI.9
-- [ ] sun rises and brightens between winters, sets during countdown
-- [ ] snowstorm in background
-- [ ] snowstorm stops with winter's end
-
-UI.10
-- [ ] responsive screen
-- [ ] switch to better animation library (smoothie?)
+- [ ] settings UI
+- [ ] song selection screen
 
 UI.11
+- [ ] switch to better animation library (smoothie?)
+- [ ] light class: implement fade method
+- [ ] lights fade to black upon death
+- [ ] lights fade in when created
+- [ ] blink while invincible
+
+UI.12
 - [ ] enemy 3 assets (wolf?)
 - [ ] enemy 4 assets (walrus?)
 
-UI.12
+UI.13
 - [ ] more congrulation text options
 - [ ] controls screen
 - [ ] high score table
 - [ ] high score table input
 
-UI.13
+UI.14
 - [ ] enhance hero assets
 - [ ] enhance male assets
 - [ ] enhance fish assets
@@ -261,11 +267,14 @@ UI.13
 - [ ] enhance background assets
 - [ ] enhance text displays
 
-UI.14
+UI.MAYBE
 - [ ] opening scene
 - [ ] post-wave animation (female textures, cheering)
 - [ ] refine lighting
 - [ ] clouds?
+- [ ] sun rises and brightens between winters, sets during countdown
+- [ ] snowstorm in background
+- [ ] snowstorm stops with winter's end
 
 ### Audio Todos
 AUDIO.1
