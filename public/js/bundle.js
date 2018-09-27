@@ -26756,6 +26756,7 @@ require("./pixi-shadows.js");
         FISH: 'FISH',
         SEAL: 'SEAL',
         GULL: 'GULL',
+        GORILLA: 'GORILLA',
     });
     var SLIDESHOW = {
         STATES: {
@@ -26824,6 +26825,7 @@ require("./pixi-shadows.js");
         ENEMY_TYPES: [
             TYPES.SEAL,
             TYPES.GULL,
+            TYPES.GORILLA,
         ],
         MALE: {
             SPAWN: {
@@ -26929,6 +26931,28 @@ require("./pixi-shadows.js");
             POINTS: 10,
             SPEED: 3.5,
             HEALTH: 1,
+            DAMAGE: 1,
+        },
+        GORILLA: {
+            SPAWN: {
+                X: 50,
+                Y: 5,
+                PROBABILITY: 0.02,
+            },
+            JUMP: {
+                MAGNITUDE: 30,
+                MAX: 1,
+            },
+            HITBOX: {
+                WIDTH: 3,
+                HEIGHT: 3,
+            },
+            ANIMATION_SPEED: {
+                STANDARD: 0.15,
+            },
+            POINTS: 30,
+            SPEED: 2,
+            HEALTH: 2,
             DAMAGE: 1,
         },
         GULL: {
@@ -27097,7 +27121,7 @@ require("./pixi-shadows.js");
             this.sounds = {};
         }
         SoundManager.prototype.play = function (key, _a) {
-            var _b = (_a === void 0 ? {} : _a).loop, loop = _b === void 0 ? false : _b;
+            var _b = _a === void 0 ? {} : _a, _c = _b.loop, loop = _c === void 0 ? false : _c, _d = _b.volume, volume = _d === void 0 ? 0.5 : _d;
             if (this.sounds[key]) {
                 this.sounds[key].stop();
             }
@@ -27111,6 +27135,7 @@ require("./pixi-shadows.js");
                 });
             }
             this.sounds[key].play();
+            this.sounds[key].volume = volume;
         };
         SoundManager.prototype.stop = function (key) {
             if (this.sounds[key]) {
@@ -27237,6 +27262,7 @@ require("./pixi-shadows.js");
             this.soundManager = new SoundManager();
             this.soundManager.play('theme', {
                 loop: true,
+                volume: 0.1,
             });
             this.setupInteractivity();
             this.setupCollisionHandlers();
@@ -27375,12 +27401,12 @@ require("./pixi-shadows.js");
             if (!entity.alive) {
                 return;
             }
-            if ((entity instanceof Gull || entity instanceof Seal) && entity.abducting) {
+            if ((entity instanceof Gull || entity instanceof Seal || entity instanceof Gorilla) && entity.abducting) {
                 entity.abducting.onLiberation();
             }
             entity.alive = false;
             this.world.destroyBody(entity.body);
-            if (entity instanceof Gull || entity instanceof Seal || entity instanceof Fish || entity instanceof Hero || entity instanceof Male) {
+            if (entity instanceof Gull || entity instanceof Seal || entity instanceof Gorilla || entity instanceof Fish || entity instanceof Hero || entity instanceof Male) {
                 entity.destroySprites();
             }
             switch (entity.type) {
@@ -27615,6 +27641,12 @@ require("./pixi-shadows.js");
                         seal.jumps = CONSTANTS.SEAL.JUMP.MAX;
                     }
                 },
+                _a[that.hashTypes(TYPES.GROUND, TYPES.GORILLA)] = function (bodies) {
+                    var gorilla = that.objects[bodies.find(function (item) { return item.type === TYPES.GORILLA; }).id];
+                    if (gorilla instanceof Gorilla) {
+                        gorilla.jumps = CONSTANTS.SEAL.JUMP.MAX;
+                    }
+                },
                 _a[that.hashTypes(TYPES.GROUND, TYPES.MALE)] = function (bodies) {
                     var male = that.objects[bodies.find(function (item) { return item.type === TYPES.MALE; }).id];
                     if (male instanceof Male) {
@@ -27625,6 +27657,13 @@ require("./pixi-shadows.js");
                     var dive = Boolean(fixtures.find(function (item) { return item.dive === true; }));
                     var enemy = that.objects[bodies.find(function (item) { return item.type === TYPES.SEAL; }).id];
                     if (enemy instanceof Seal || enemy instanceof Gull) {
+                        that.handleEnemyHeroCollision(enemy, point, dive);
+                    }
+                },
+                _a[that.hashTypes(TYPES.HERO, TYPES.GORILLA)] = function (bodies, point, fixtures) {
+                    var dive = Boolean(fixtures.find(function (item) { return item.dive === true; }));
+                    var enemy = that.objects[bodies.find(function (item) { return item.type === TYPES.GORILLA; }).id];
+                    if (enemy instanceof Gorilla || enemy instanceof Gull) {
                         that.handleEnemyHeroCollision(enemy, point, dive);
                     }
                 },
@@ -27640,6 +27679,13 @@ require("./pixi-shadows.js");
                     var fish = that.objects[bodies.find(function (item) { return item.type === TYPES.FISH; }).id];
                     if (seal instanceof Seal && fish instanceof Fish) {
                         that.handleEnemyFishCollision(seal, fish);
+                    }
+                },
+                _a[that.hashTypes(TYPES.FISH, TYPES.GORILLA)] = function (bodies) {
+                    var gorilla = that.objects[bodies.find(function (item) { return item.type === TYPES.GORILLA; }).id];
+                    var fish = that.objects[bodies.find(function (item) { return item.type === TYPES.FISH; }).id];
+                    if (gorilla instanceof Gorilla && fish instanceof Fish) {
+                        that.handleEnemyFishCollision(gorilla, fish);
                     }
                 },
                 _a[that.hashTypes(TYPES.FISH, TYPES.GULL)] = function (bodies) {
@@ -27674,6 +27720,13 @@ require("./pixi-shadows.js");
                         that.destroyEntity(seal.abducting);
                     }
                 },
+                _a[that.hashTypes(TYPES.GORILLA, TYPES.OFFSCREEN)] = function (bodies) {
+                    var gorilla = that.objects[bodies.find(function (item) { return item.type === TYPES.GORILLA; }).id];
+                    if (gorilla instanceof Gorilla) {
+                        that.destroyEntity(gorilla);
+                        that.destroyEntity(gorilla.abducting);
+                    }
+                },
                 _a[that.hashTypes(TYPES.GULL, TYPES.OFFSCREEN)] = function (bodies) {
                     var gull = that.objects[bodies.find(function (item) { return item.type === TYPES.GULL; }).id];
                     if (gull instanceof Gull) {
@@ -27706,6 +27759,20 @@ require("./pixi-shadows.js");
                         }
                         else {
                             seal.abduct(male);
+                        }
+                    }
+                },
+                _a[that.hashTypes(TYPES.MALE, TYPES.GORILLA)] = function (bodies) {
+                    var male = that.objects[bodies.find(function (item) { return item.type === TYPES.MALE; }).id];
+                    var gorilla = that.objects[bodies.find(function (item) { return item.type === TYPES.GORILLA; }).id];
+                    if (gorilla instanceof Gorilla && male instanceof Male) {
+                        if (gorilla.abducting) {
+                            if (!male.abductor) {
+                                male.jump();
+                            }
+                        }
+                        else {
+                            gorilla.abduct(male);
                         }
                     }
                 },
@@ -27804,6 +27871,9 @@ require("./pixi-shadows.js");
             if (dive || Math.abs(point.normal.y) === 1) {
                 enemy.takeDamage(this.hero.damage);
                 this.hero.jumps = CONSTANTS.HERO.JUMP.MAX;
+                if (!this.hero.diveFixture) {
+                    this.hero.jump();
+                }
             }
             else {
                 this.hero.takeDamage(enemy.damage);
@@ -27844,6 +27914,9 @@ require("./pixi-shadows.js");
                     break;
                 case TYPES.GULL:
                     new Gull(this, direction);
+                    break;
+                case TYPES.GORILLA:
+                    new Gorilla(this, direction);
                     break;
                 default:
                 //nothing
@@ -27902,18 +27975,31 @@ require("./pixi-shadows.js");
             }
             this.objects = {};
         };
+        Game.prototype.calculateSealsNumber = function () {
+            return enforcePositive(Math.floor(this.winter * 1.6 + 8.4));
+        };
+        Game.prototype.calculateGullsNumber = function () {
+            return enforcePositive(Math.floor(this.winter * 1.3 - 2.6));
+        };
+        Game.prototype.calculateGorillasNumber = function () {
+            return 10;
+            // return enforcePositive(Math.floor(this.winter - 5))
+        };
         Game.prototype.getWinterStats = function () {
             var _a;
-            var seals = enforcePositive(this.winter * 2 + 10);
-            var gulls = enforcePositive(this.winter * 3 - 10);
             return _a = {},
                 _a[TYPES.SEAL] = {
-                    total: seals,
+                    total: this.calculateSealsNumber(),
                     created: 0,
                     destroyed: 0
                 },
                 _a[TYPES.GULL] = {
-                    total: gulls,
+                    total: this.calculateGullsNumber(),
+                    created: 0,
+                    destroyed: 0
+                },
+                _a[TYPES.GORILLA] = {
+                    total: this.calculateGorillasNumber(),
                     created: 0,
                     destroyed: 0
                 },
@@ -27936,10 +28022,10 @@ require("./pixi-shadows.js");
             var _this = this;
             Object.keys(this.objects).forEach(function (id) {
                 var object = _this.objects[id];
-                if (object instanceof Male || object instanceof Gull || object instanceof Seal) {
+                if (object instanceof Male || object instanceof Gull || object instanceof Seal || object instanceof Gorilla) {
                     object.move();
                 }
-                if (object instanceof Hero) {
+                if ((object instanceof Hero || object instanceof Foe) && object.invincibilityTime) {
                     object.invincibilityTime -= 1;
                 }
             });
@@ -28216,6 +28302,7 @@ require("./pixi-shadows.js");
          * @param {Integer} damage - damage dealt
          */
         Foe.prototype.takeDamage = function (damage) {
+            console.log(this.type, this.invincibilityTime, damage);
             if (this.invincibilityTime) {
                 return;
             }
@@ -28272,6 +28359,9 @@ require("./pixi-shadows.js");
             spriteShadows.animationSpeed = CONSTANTS.SEAL.ANIMATION_SPEED.STANDARD;
             spriteShadows.anchor.set(0.5);
             this.sprite = assembleBasicSprite(sprite, spriteNormals, spriteShadows);
+            this.sprite.scale.x = this.velocity > 0
+                ? 1
+                : -1;
             this.game.container.addChild(this.sprite);
         };
         Seal.prototype.setupBody = function () {
@@ -28292,17 +28382,13 @@ require("./pixi-shadows.js");
             });
         };
         Seal.prototype.move = function () {
-            var velocity = this.abducting
-                ? this.velocity * -1
-                : this.velocity;
-            this.sprite.scale.x = velocity < 0
-                ? -1
-                : 1;
-            this.body.setLinearVelocity(Vec2(velocity, this.body.getLinearVelocity().y));
+            this.body.setLinearVelocity(Vec2(this.velocity, this.body.getLinearVelocity().y));
         };
         Seal.prototype.abduct = function (male) {
             this.abducting = male;
             male.onAbduction(this);
+            this.velocity *= -1;
+            this.sprite.scale.x *= -1;
             this.game.world.createJoint(planck.RevoluteJoint({
                 collideConnected: false
             }, this.body, male.body, Vec2(0, 0)));
@@ -28312,6 +28398,90 @@ require("./pixi-shadows.js");
             this.jumps -= 1;
         };
         return Seal;
+    }(Foe));
+    var Gorilla = /** @class */ (function (_super) {
+        __extends(Gorilla, _super);
+        function Gorilla(game, direction) {
+            var _this = _super.call(this, {
+                damage: CONSTANTS.GORILLA.DAMAGE,
+                health: CONSTANTS.GORILLA.HEALTH,
+                game: game,
+            }) || this;
+            _this.direction = direction;
+            _this.points = CONSTANTS.GORILLA.POINTS;
+            _this.abducting = null;
+            _this.velocity = direction === CONSTANTS.RIGHT
+                ? CONSTANTS.GORILLA.SPEED
+                : CONSTANTS.GORILLA.SPEED * -1;
+            _this.setupBody();
+            _this.game.assignType(_this, TYPES.GORILLA);
+            _this.body.id = _this.id;
+            _this.setupSprite();
+            return _this;
+        }
+        Gorilla.prototype.destroySprites = function () {
+            this.game.container.removeChild(this.sprite);
+        };
+        Gorilla.prototype.setupSprite = function () {
+            var animationStartIndex = Math.floor(Math.random() * 2);
+            var sprite = getAnimatedSprite('gorilla:running:{i}.png', 2);
+            sprite.gotoAndPlay(animationStartIndex);
+            sprite.animationSpeed = CONSTANTS.GORILLA.ANIMATION_SPEED.STANDARD;
+            sprite.anchor.set(0.5);
+            var spriteNormals = getAnimatedSprite('gorilla:running:normal:{i}.png', 2);
+            spriteNormals.gotoAndPlay(animationStartIndex);
+            spriteNormals.animationSpeed = CONSTANTS.GORILLA.ANIMATION_SPEED.STANDARD;
+            spriteNormals.anchor.set(0.5);
+            var spriteShadows = getAnimatedSprite('gorilla:running:{i}.png', 2);
+            spriteShadows.gotoAndPlay(animationStartIndex);
+            spriteShadows.animationSpeed = CONSTANTS.GORILLA.ANIMATION_SPEED.STANDARD;
+            spriteShadows.anchor.set(0.5);
+            this.sprite = assembleBasicSprite(sprite, spriteNormals, spriteShadows);
+            this.sprite.scale.x = this.velocity > 0
+                ? 1
+                : -1;
+            this.game.container.addChild(this.sprite);
+        };
+        Gorilla.prototype.setupBody = function () {
+            var x = this.direction === CONSTANTS.LEFT
+                ? CONSTANTS.GORILLA.SPAWN.X
+                : CONSTANTS.GORILLA.SPAWN.X * -1;
+            this.body = this.game.world.createBody({
+                position: Vec2(x, CONSTANTS.GORILLA.SPAWN.Y),
+                type: 'dynamic',
+                fixedRotation: true,
+                allowSleep: false
+            });
+            this.body.createFixture(planck.Box(CONSTANTS.GORILLA.HITBOX.WIDTH, CONSTANTS.GORILLA.HITBOX.HEIGHT), {
+                friction: 0,
+                filterCategoryBits: CATEGORIES.FOE,
+                filterMaskBits: MASKS.FOE,
+                filterGroupIndex: GROUPS.FOE,
+            });
+        };
+        Gorilla.prototype.move = function () {
+            if (this.invincibilityTime) {
+                this.sprite.alpha = Math.random() * 0.5 + 0.25;
+            }
+            else {
+                this.sprite.alpha = 1;
+            }
+            this.body.setLinearVelocity(Vec2(this.velocity, this.body.getLinearVelocity().y));
+        };
+        Gorilla.prototype.abduct = function (male) {
+            this.abducting = male;
+            male.onAbduction(this);
+            this.velocity *= -1;
+            this.sprite.scale.x *= -1;
+            this.game.world.createJoint(planck.RevoluteJoint({
+                collideConnected: false
+            }, this.body, male.body, Vec2(0, 0)));
+        };
+        Gorilla.prototype.jump = function () {
+            this.body.setLinearVelocity(Vec2(this.body.getLinearVelocity().x, CONSTANTS.GORILLA.JUMP.MAGNITUDE * (Math.random() / 2 + 0.5)));
+            this.jumps -= 1;
+        };
+        return Gorilla;
     }(Foe));
     var Gull = /** @class */ (function (_super) {
         __extends(Gull, _super);
@@ -28814,6 +28984,8 @@ require("./pixi-shadows.js");
             .add('male_neutral_normal_spritesheet', '/assets/male/spritesheets/neutral.normal.json')
             .add('seal_running_spritesheet', '/assets/seal/spritesheets/running.json')
             .add('seal_running_normal_spritesheet', '/assets/seal/spritesheets/running.normal.json')
+            .add('gorilla_running_spritesheet', '/assets/gorilla/spritesheets/running.json')
+            .add('gorilla_running_normal_spritesheet', '/assets/gorilla/spritesheets/running.normal.json')
             .add('gull_flying_spritesheet', '/assets/gull/spritesheets/flying.json')
             .add('gull_flying_normal_spritesheet', '/assets/gull/spritesheets/flying.normal.json')
             .load(function () {

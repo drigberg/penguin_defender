@@ -1,0 +1,55 @@
+{
+  "frames": {
+    "gorilla:running:1.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 102,
+        "h": 105
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 102,
+        "h": 105
+      },
+      "sourceSize": {
+        "w": 102,
+        "h": 105
+      }
+    },
+    "gorilla:running:2.png": {
+      "frame": {
+        "x": 102,
+        "y": 0,
+        "w": 102,
+        "h": 105
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 102,
+        "y": 0,
+        "w": 102,
+        "h": 105
+      },
+      "sourceSize": {
+        "w": 102,
+        "h": 105
+      }
+    }
+  },
+  "meta": {
+    "app": "http://www.penguindefender.com",
+    "version": "1.0",
+    "image": "/assets/gorilla/spritesheets/running.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 204,
+      "h": 105
+    },
+    "scale": "1"
+  }
+}

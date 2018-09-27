@@ -1,5 +1,5 @@
 ### QUEUE
-- AUDIO.2
+- UI.8
 
 ### Gameplay Todos
 LOGIC.1
@@ -141,30 +141,26 @@ LOGIC.18
 - [x] bug fix: double event listeners
 - [x] bug fix: extra animation frame requests on restart
 
+
 LOGIC.19
+- [x] bounce off of enemies
+- [ ] enemy #3 (bank: walrus, elder things, genies)
+
+LOGIC.20
+- [ ] enemy 3 damage animation during invincibility
+- [ ] gulls drop eggs
+- [ ] enemy #4
+
+LOGIC.23
+- [ ] tslint
 - [ ] planck typings
 - [ ] replace `any`: collisions
 - [ ] replace `any`: constructor arguments
-- [ ] replace `any`: remaining
+- [ ] replace `any`: remaining- [ ] refine movement
 
 LOGIC.20
-- [ ] settings: music on/off
-- [ ] settings: sound effects on/off
-- [ ] settings: shadows on/off
-
-LOGIC.21
-- [ ] bounce off of enemies
 - [ ] bug fix: "from top" calculation
-
-LOGIC.22
-- [ ] tslint
-- [ ] gulls drop eggs
-- [ ] new enemy (bank: wolves, caribou, walrus, Putin-on-horse, lumberjack)
-
-LOGIC.23
-- [ ] make testbed only differ by testbed and hidden pixi, not commented
-- [ ] refine movement
-- [ ] standardize colors (alert, points, success, etc)
+- [ ] high score table
 
 LOGIC.24
 - [ ] gulls fall when killed, are destroyed offscreen
@@ -176,6 +172,11 @@ LOGIC.25
 - [ ] orca summons
 - [ ] hero.lives
 - [ ] males don't regenerate back to max each winter
+
+LOGIC.26
+- [ ] settings: music on/off
+- [ ] settings: sound effects on/off
+- [ ] settings: shadows on/off
 
 ### UI Todos
 UI.1
@@ -236,10 +237,10 @@ UI.8
 - [x] skip-intro button
 - [ ] retro text
 - [ ] retro introduction with Mars-ish theme
+- [ ] song selection screen
 
 UI.9
 - [ ] settings UI
-- [ ] song selection screen
 
 UI.11
 - [ ] switch to better animation library (smoothie?)

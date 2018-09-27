@@ -53,6 +53,7 @@ import {
     FISH: 'FISH',
     SEAL: 'SEAL',
     GULL: 'GULL',
+    GORILLA: 'GORILLA',
   })
 
   const SLIDESHOW: ISlideshow = {
@@ -123,6 +124,7 @@ import {
     ENEMY_TYPES: [
       TYPES.SEAL,
       TYPES.GULL,
+      TYPES.GORILLA,
     ],
     MALE: {
       SPAWN: {
@@ -228,6 +230,28 @@ import {
       POINTS: 10,
       SPEED: 3.5,
       HEALTH: 1,
+      DAMAGE: 1,
+    },
+    GORILLA: {
+      SPAWN: {
+        X: 50,
+        Y: 5,
+        PROBABILITY: 0.02,
+      },
+      JUMP: {
+        MAGNITUDE: 30,
+        MAX: 1,
+      },
+      HITBOX: {
+        WIDTH: 3,
+        HEIGHT: 3,
+      },
+      ANIMATION_SPEED: {
+        STANDARD: 0.15,
+      },
+      POINTS: 30,
+      SPEED: 2,
+      HEALTH: 2,
       DAMAGE: 1,
     },
     GULL: {
@@ -434,6 +458,7 @@ import {
 
     play(key: string, {
       loop = false,
+      volume = 0.5,
     } = {}) {
       if (this.sounds[key]) {
         this.sounds[key].stop()
@@ -449,6 +474,7 @@ import {
       }
 
       this.sounds[key].play()
+      this.sounds[key].volume = volume
     }
 
     stop(key: string) {
@@ -614,7 +640,7 @@ import {
     container: PIXI.Container
     menu: PIXI.Container
     objects: {
-      [index: string]: Gull | Seal | Hero | Fish | Foe | Friend
+      [index: string]: Gull | Seal | Gorilla | Hero | Fish | Foe | Friend
     }
     paused: boolean
     over: boolean
@@ -649,6 +675,7 @@ import {
       this.soundManager = new SoundManager()
       this.soundManager.play('theme', {
         loop: true,
+        volume: 0.1,
       })
 
       this.setupInteractivity()
@@ -812,7 +839,7 @@ import {
       this.enemyTypeDestroyed = true
     }
 
-    destroyEntity(entity: Gull | Seal | Male | Hero | Fish | Friend | Foe) {
+    destroyEntity(entity: Gull | Seal | Gorilla | Male | Hero | Fish | Friend | Foe) {
       if (!entity) { // TODO: turn patch into fix
         return
       }
@@ -821,14 +848,14 @@ import {
         return
       }
 
-      if ((entity instanceof Gull || entity instanceof Seal) && entity.abducting) {
+      if ((entity instanceof Gull || entity instanceof Seal || entity instanceof Gorilla) && entity.abducting) {
         entity.abducting.onLiberation()
       }
 
       entity.alive = false
       this.world.destroyBody(entity.body)
 
-      if (entity instanceof Gull || entity instanceof Seal || entity instanceof Fish || entity instanceof Hero || entity instanceof Male) {
+      if (entity instanceof Gull || entity instanceof Seal || entity instanceof Gorilla|| entity instanceof Fish || entity instanceof Hero || entity instanceof Male) {
         entity.destroySprites()
       }
 
@@ -1118,6 +1145,12 @@ import {
             seal.jumps = CONSTANTS.SEAL.JUMP.MAX
           }
         },
+        [that.hashTypes(TYPES.GROUND, TYPES.GORILLA)]: function(bodies: any[]) {
+          const gorilla = that.objects[bodies.find(item => item.type === TYPES.GORILLA).id]
+          if (gorilla instanceof Gorilla) {
+            gorilla.jumps = CONSTANTS.SEAL.JUMP.MAX
+          }
+        },
         [that.hashTypes(TYPES.GROUND, TYPES.MALE)]: function(bodies: any[]) {
           const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id]
           if (male instanceof Male) {
@@ -1129,6 +1162,14 @@ import {
           const enemy = that.objects[bodies.find(item => item.type === TYPES.SEAL).id]
 
           if (enemy instanceof Seal || enemy instanceof Gull) {
+            that.handleEnemyHeroCollision(enemy, point, dive)
+          }
+        },
+        [that.hashTypes(TYPES.HERO, TYPES.GORILLA)]: function(bodies: any[], point: any[], fixtures: any[]) {
+          const dive = Boolean(fixtures.find(item => item.dive === true))
+          const enemy = that.objects[bodies.find(item => item.type === TYPES.GORILLA).id]
+
+          if (enemy instanceof Gorilla || enemy instanceof Gull) {
             that.handleEnemyHeroCollision(enemy, point, dive)
           }
         },
@@ -1145,6 +1186,14 @@ import {
 
           if (seal instanceof Seal && fish instanceof Fish) {
             that.handleEnemyFishCollision(seal, fish)
+          }
+        },
+        [that.hashTypes(TYPES.FISH, TYPES.GORILLA)]: function(bodies: any[]) {
+          const gorilla = that.objects[bodies.find(item => item.type === TYPES.GORILLA).id]
+          const fish = that.objects[bodies.find(item => item.type === TYPES.FISH).id]
+
+          if (gorilla instanceof Gorilla && fish instanceof Fish) {
+            that.handleEnemyFishCollision(gorilla, fish)
           }
         },
         [that.hashTypes(TYPES.FISH, TYPES.GULL)]: function(bodies: any[]) {
@@ -1182,6 +1231,14 @@ import {
             that.destroyEntity(seal.abducting)
           }
         },
+        [that.hashTypes(TYPES.GORILLA, TYPES.OFFSCREEN)]: function(bodies: any[]) {
+          const gorilla = that.objects[bodies.find(item => item.type === TYPES.GORILLA).id]
+
+          if (gorilla instanceof Gorilla) {
+            that.destroyEntity(gorilla)
+            that.destroyEntity(gorilla.abducting)
+          }
+        },
         [that.hashTypes(TYPES.GULL, TYPES.OFFSCREEN)]: function(bodies: any[]) {
           const gull = that.objects[bodies.find(item => item.type === TYPES.GULL).id]
           if (gull instanceof Gull) {
@@ -1214,6 +1271,20 @@ import {
               }
             } else {
               seal.abduct(male)
+            }
+          }
+        },
+        [that.hashTypes(TYPES.MALE, TYPES.GORILLA)]: function(bodies: any[]) {
+          const male = that.objects[bodies.find(item => item.type === TYPES.MALE).id]
+          const gorilla = that.objects[bodies.find(item => item.type === TYPES.GORILLA).id]
+
+          if (gorilla instanceof Gorilla && male instanceof Male) {
+            if (gorilla.abducting) {
+              if (!male.abductor) {
+                male.jump()
+              }
+            } else {
+              gorilla.abduct(male)
             }
           }
         },
@@ -1324,16 +1395,19 @@ import {
       })
     }
 
-    handleEnemyHeroCollision(enemy: Gull | Seal, point: any, dive: boolean) {
+    handleEnemyHeroCollision(enemy: Gull | Seal | Gorilla, point: any, dive: boolean) {
       if (dive || Math.abs(point.normal.y) === 1) {
         enemy.takeDamage(this.hero.damage)
         this.hero.jumps = CONSTANTS.HERO.JUMP.MAX
+        if (!this.hero.diveFixture) {
+          this.hero.jump()
+        }
       } else {
         this.hero.takeDamage(enemy.damage)
       }
     }
 
-    handleEnemyFishCollision(enemy: Gull | Seal, fish: Fish) {
+    handleEnemyFishCollision(enemy: Gull | Seal | Gorilla, fish: Fish) {
       enemy.takeDamage(fish.damage)
       this.destroyEntity(fish)
     }
@@ -1377,6 +1451,9 @@ import {
           break
         case TYPES.GULL:
           new Gull(this, direction)
+          break
+        case TYPES.GORILLA:
+          new Gorilla(this, direction)
           break
         default:
           //nothing
@@ -1446,18 +1523,32 @@ import {
       this.objects = {}
     }
 
-    getWinterStats() {
-      const seals = enforcePositive(this.winter * 2 + 10)
-      const gulls = enforcePositive(this.winter * 3 - 10)
+    calculateSealsNumber() {
+      return enforcePositive(Math.floor(this.winter * 1.6 + 8.4))
+    }
 
+    calculateGullsNumber() {
+      return enforcePositive(Math.floor(this.winter * 1.3 - 2.6))
+    }
+
+    calculateGorillasNumber() {
+      return enforcePositive(Math.floor(this.winter - 5))
+    }
+
+    getWinterStats() {
       return {
         [TYPES.SEAL]: {
-          total: seals,
+          total: this.calculateSealsNumber(),
           created: 0,
           destroyed: 0
         },
         [TYPES.GULL]: {
-          total: gulls,
+          total: this.calculateGullsNumber(),
+          created: 0,
+          destroyed: 0
+        },
+        [TYPES.GORILLA]: {
+          total: this.calculateGorillasNumber(),
           created: 0,
           destroyed: 0
         },
@@ -1480,11 +1571,11 @@ import {
     moveObjects() {
       Object.keys(this.objects).forEach((id) => {
         const object = this.objects[id]
-        if (object instanceof Male || object instanceof Gull || object instanceof Seal) {
+        if (object instanceof Male || object instanceof Gull || object instanceof Seal || object instanceof Gorilla) {
           object.move()
         }
 
-        if (object instanceof Hero) {
+        if ((object instanceof Hero || object instanceof Foe) && object.invincibilityTime) {
           object.invincibilityTime -= 1
         }
       })
@@ -1726,7 +1817,7 @@ import {
   class Male extends Friend {
     game: Game
     velocity: number
-    abductor: Gull | Seal
+    abductor: Gull | Seal | Gorilla
     filterData: any
     jumps: number
     body: any
@@ -1793,7 +1884,7 @@ import {
       })
     }
 
-    onAbduction(abductor: Gull | Seal) {
+    onAbduction(abductor: Gull | Seal | Gorilla) {
       this.game.soundManager.play('abduction')
 
       this.abductor = abductor
@@ -1894,6 +1985,7 @@ import {
      * @param {Integer} damage - damage dealt
      */
     takeDamage(damage: number) {
+      console.log(this.type, this.invincibilityTime, damage)
       if (this.invincibilityTime) {
         return
       }
@@ -1964,6 +2056,10 @@ import {
       spriteShadows.anchor.set(0.5)
 
       this.sprite = assembleBasicSprite(sprite, spriteNormals, spriteShadows)
+      this.sprite.scale.x = this.velocity > 0
+        ? 1
+        : -1
+
       this.game.container.addChild(this.sprite)
     }
 
@@ -1988,16 +2084,8 @@ import {
     }
 
     move() {
-      const velocity = this.abducting
-        ? this.velocity * -1
-        : this.velocity
-
-      this.sprite.scale.x = velocity < 0
-        ? -1
-        : 1
-
       this.body.setLinearVelocity(Vec2(
-        velocity,
+        this.velocity,
         this.body.getLinearVelocity().y
       ))
     }
@@ -2005,6 +2093,10 @@ import {
     abduct(male: Male) {
       this.abducting = male
       male.onAbduction(this)
+
+      this.velocity *= -1
+      this.sprite.scale.x *= -1
+
 
       this.game.world.createJoint(planck.RevoluteJoint(
         {
@@ -2020,6 +2112,122 @@ import {
       this.body.setLinearVelocity(Vec2(
         this.body.getLinearVelocity().x,
         CONSTANTS.SEAL.JUMP.MAGNITUDE * (Math.random() / 2 + 0.5))
+      )
+
+      this.jumps -= 1
+    }
+  }
+
+  class Gorilla extends Foe {
+    jumps: number
+    type: string
+
+    constructor(game: Game, direction: number) {
+      super({
+        damage: CONSTANTS.GORILLA.DAMAGE,
+        health: CONSTANTS.GORILLA.HEALTH,
+        game,
+      })
+
+      this.direction = direction
+      this.points = CONSTANTS.GORILLA.POINTS
+      this.abducting = null
+
+      this.velocity = direction === CONSTANTS.RIGHT
+        ? CONSTANTS.GORILLA.SPEED
+        : CONSTANTS.GORILLA.SPEED * -1
+
+      this.setupBody()
+
+      this.game.assignType(this, TYPES.GORILLA)
+      this.body.id = this.id
+
+      this.setupSprite()
+    }
+
+    destroySprites() {
+      this.game.container.removeChild(this.sprite)
+    }
+
+    setupSprite() {
+      const animationStartIndex = Math.floor(Math.random() * 2)
+      const sprite = getAnimatedSprite('gorilla:running:{i}.png', 2)
+      sprite.gotoAndPlay(animationStartIndex)
+      sprite.animationSpeed = CONSTANTS.GORILLA.ANIMATION_SPEED.STANDARD
+      sprite.anchor.set(0.5)
+
+      const spriteNormals = getAnimatedSprite('gorilla:running:normal:{i}.png', 2)
+      spriteNormals.gotoAndPlay(animationStartIndex)
+      spriteNormals.animationSpeed = CONSTANTS.GORILLA.ANIMATION_SPEED.STANDARD
+      spriteNormals.anchor.set(0.5)
+
+      const spriteShadows = getAnimatedSprite('gorilla:running:{i}.png', 2)
+      spriteShadows.gotoAndPlay(animationStartIndex)
+      spriteShadows.animationSpeed = CONSTANTS.GORILLA.ANIMATION_SPEED.STANDARD
+      spriteShadows.anchor.set(0.5)
+
+      this.sprite = assembleBasicSprite(sprite, spriteNormals, spriteShadows)
+      this.sprite.scale.x = this.velocity > 0
+        ? 1
+        : -1
+
+      this.game.container.addChild(this.sprite)
+    }
+
+    setupBody() {
+      const x = this.direction === CONSTANTS.LEFT
+      ? CONSTANTS.GORILLA.SPAWN.X
+      : CONSTANTS.GORILLA.SPAWN.X * -1
+
+      this.body = this.game.world.createBody({
+        position: Vec2(x, CONSTANTS.GORILLA.SPAWN.Y),
+        type: 'dynamic',
+        fixedRotation: true,
+        allowSleep: false
+      })
+
+      this.body.createFixture(planck.Box(CONSTANTS.GORILLA.HITBOX.WIDTH, CONSTANTS.GORILLA.HITBOX.HEIGHT), {
+        friction: 0,
+        filterCategoryBits: CATEGORIES.FOE,
+        filterMaskBits: MASKS.FOE,
+        filterGroupIndex: GROUPS.FOE,
+      })
+    }
+
+    move() {
+      if (this.invincibilityTime) {
+        this.sprite.alpha = Math.random() * 0.5 + 0.25
+      } else {
+        this.sprite.alpha = 1
+      }
+
+      this.body.setLinearVelocity(Vec2(
+        this.velocity,
+        this.body.getLinearVelocity().y
+      ))
+    }
+
+    abduct(male: Male) {
+      this.abducting = male
+      male.onAbduction(this)
+
+      this.velocity *= -1
+      this.sprite.scale.x *= -1
+
+      this.game.world.createJoint(planck.RevoluteJoint(
+        {
+          collideConnected: false
+        },
+        this.body,
+        male.body,
+        Vec2(0, 0)
+      ))
+    }
+
+    jump() {
+      this.body.setLinearVelocity(Vec2(
+        this.body.getLinearVelocity().x,
+        CONSTANTS.GORILLA.JUMP.MAGNITUDE * (Math.random() / 2 + 0.5))
       )
 
       this.jumps -= 1
@@ -2718,6 +2926,8 @@ import {
       .add('male_neutral_normal_spritesheet', '/assets/male/spritesheets/neutral.normal.json')
       .add('seal_running_spritesheet', '/assets/seal/spritesheets/running.json')
       .add('seal_running_normal_spritesheet', '/assets/seal/spritesheets/running.normal.json')
+      .add('gorilla_running_spritesheet', '/assets/gorilla/spritesheets/running.json')
+      .add('gorilla_running_normal_spritesheet', '/assets/gorilla/spritesheets/running.normal.json')
       .add('gull_flying_spritesheet', '/assets/gull/spritesheets/flying.json')
       .add('gull_flying_normal_spritesheet', '/assets/gull/spritesheets/flying.normal.json')
       .load(() => {

@@ -155,6 +155,33 @@ export interface IConstants {
     readonly HEALTH: number,
     readonly DAMAGE: number,
   },
+  readonly GORILLA: {
+    [index: string]: any
+    readonly SPAWN: {
+      [index: string]: number
+      readonly X: number,
+      readonly Y: number,
+      readonly PROBABILITY: number,
+    },
+    readonly JUMP: {
+      [index: string]: number
+      readonly MAGNITUDE: number,
+      readonly MAX: number,
+    },
+    readonly HITBOX: {
+      [index: string]: number
+      readonly WIDTH: number,
+      readonly HEIGHT: number,
+    },
+    readonly ANIMATION_SPEED: {
+      [index: string]: number
+      readonly STANDARD: number,
+    },
+    readonly POINTS: number,
+    readonly SPEED: number,
+    readonly HEALTH: number,
+    readonly DAMAGE: number,
+  },
   readonly GULL: {
     [index: string]: any
     readonly SPAWN: {
