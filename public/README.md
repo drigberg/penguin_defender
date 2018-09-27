@@ -1,5 +1,6 @@
 ### QUEUE
 - UI.8
+- LOGIC.20
 
 ### Gameplay Todos
 LOGIC.1
@@ -145,33 +146,41 @@ LOGIC.18
 LOGIC.19
 - [x] bounce off of enemies
 - [x] gorillas
+- [ ] use setTimeout for countdown instead of if statement: get all countdown logic out of onStep()
+- [ ] move text display hiding out of onStep()
 
 LOGIC.20
 - [ ] enemy 3 damage animation during invincibility
 - [ ] gulls drop eggs
 - [ ] enemy #4 (bank: walrus, elder things, genies, pterodactyls, dragons)
 
-LOGIC.23
+LOGIC.21
 - [ ] tslint
 - [ ] planck typings
 - [ ] replace `any`: collisions
 - [ ] replace `any`: constructor arguments
-- [ ] replace `any`: remaining- [ ] refine movement
+- [ ] replace `any`: remaining
+- [ ] refine movement
 
-LOGIC.20
+LOGIC.22
 - [ ] bug fix: "from top" calculation
 - [ ] high score table
 
-LOGIC.24
+LOGIC.23
 - [ ] gulls fall when killed, are destroyed offscreen
 - [ ] seals fall when killed, are destroyed offscreen
+- [ ] gorillas fall when killed, are destroyed offscreen
 - [ ] fish fall after collisions, are destroyed offscreen
 - [ ] post-wave movement
 
-LOGIC.25
+LOGIC.24
 - [ ] orca summons
 - [ ] hero.lives
 - [ ] males don't regenerate back to max each winter
+
+LOGIC.25
+- [ ] bonus: all males saved
+- [ ] bonus: no damage taken
 
 LOGIC.26
 - [ ] settings: music on/off
@@ -240,24 +249,28 @@ UI.8
 - [ ] song selection screen
 
 UI.9
-- [ ] settings UI
+- [ ] mute button
+
+UI.10
+- [ ] basic gorilla assets
+- [ ] gorilla normals
+- [ ] gorilla damage animation
 
 UI.11
-- [ ] switch to better animation library (smoothie?)
-- [ ] light class: implement fade method
-- [ ] lights fade to black upon death
-- [ ] lights fade in when created
-- [ ] blink while invincible
+- [ ] hero blinks while invincible
 
 UI.12
-- [ ] enemy 3 assets (wolf?)
-- [ ] enemy 4 assets (walrus?)
-
-UI.13
+- [ ] enemy 4 assets (genies?)
 - [ ] more congrulation text options
 - [ ] controls screen
+
+UI.13
 - [ ] high score table
 - [ ] high score table input
+
+UI.15
+- [ ] bonus points displayed between winters
+- [ ] animate bonus points text
 
 UI.14
 - [ ] enhance hero assets
@@ -269,6 +282,10 @@ UI.14
 - [ ] enhance text displays
 
 UI.MAYBE
+- [ ] light class: implement fade method
+- [ ] lights fade to black upon death
+- [ ] lights fade in when created
+- [ ] switch to better animation library (smoothie?)
 - [ ] opening scene
 - [ ] post-wave animation (female textures, cheering)
 - [ ] refine lighting

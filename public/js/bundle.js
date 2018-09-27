@@ -27982,8 +27982,7 @@ require("./pixi-shadows.js");
             return enforcePositive(Math.floor(this.winter * 1.3 - 2.6));
         };
         Game.prototype.calculateGorillasNumber = function () {
-            return 10;
-            // return enforcePositive(Math.floor(this.winter - 5))
+            return enforcePositive(Math.floor(this.winter - 5));
         };
         Game.prototype.getWinterStats = function () {
             var _a;

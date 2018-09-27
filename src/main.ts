@@ -358,7 +358,7 @@ import {
 
     if (shadowSprite) {
       shadowSprite.parentGroup = PIXI.shadows.casterGroup
-        container.addChild(shadowSprite)
+      container.addChild(shadowSprite)
     }
 
     return container
@@ -950,10 +950,6 @@ import {
       return false
     }
 
-    onStepPauseIndependent() {
-      // nothing yet
-    }
-
     onStepPauseDependent() {
       const countingDown = this.winterCountdown()
 
@@ -995,8 +991,6 @@ import {
 
     onStep() {
       const that = this
-
-      this.onStepPauseIndependent()
 
       if (!this.paused) {
         this.onStepPauseDependent()
