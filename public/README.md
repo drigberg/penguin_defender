@@ -144,12 +144,12 @@ LOGIC.18
 
 LOGIC.19
 - [x] bounce off of enemies
-- [ ] enemy #3 (bank: walrus, elder things, genies)
+- [x] gorillas
 
 LOGIC.20
 - [ ] enemy 3 damage animation during invincibility
 - [ ] gulls drop eggs
-- [ ] enemy #4
+- [ ] enemy #4 (bank: walrus, elder things, genies, pterodactyls, dragons)
 
 LOGIC.23
 - [ ] tslint
