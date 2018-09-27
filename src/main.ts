@@ -470,7 +470,86 @@ import {
     }
   }
 
-    /**
+  /**
+   * Menu
+   */
+
+  class ToggleButton {
+    state: boolean
+    onToggle: Function
+    container: PIXI.Container
+    sprite: PIXI.Sprite
+    constructor({
+      onToggle,
+      container,
+      initialState,
+    }: any) {
+      this.container = container
+      this.state = initialState
+      this.onToggle = onToggle
+      this.setupSprites()
+    }
+
+    setupSprites() {
+      this.sprite = new PIXI.Sprite.fromImage('/assets/button.png', true)
+      this.sprite.on('pointerdown', this.toggle);
+      this.container.addChild(this.sprite)
+
+      if (!this.state) {
+        this.dim()
+      }
+    }
+
+    destroy() {
+      this.container.removeChild(this.sprite)
+    }
+
+    restore() {
+      this.sprite.alpha = 1
+    }
+
+    dim() {
+      this.sprite.alpha = 0.5
+    }
+
+    toggle() {
+      this.state = !this.state
+      this.state
+        ? this.restore()
+        : this.dim()
+
+      this.onToggle(this.state)
+    }
+  }
+
+  class Settings {
+    textDisplays: Text[]
+    buttons: ToggleButton[]
+    container: PIXI.Container
+    onReturn: Function
+
+    constructor({
+      onReturn,
+      container,
+    }: any) {
+      this.container = container
+      this.onReturn = onReturn
+    }
+
+    createBackButton() {
+      // create button which destroys menu and returns to previous state
+      // this.destroyDisplay()
+      // this.onReturn()
+    }
+
+    destroyDisplay() {
+      const that = this
+      this.textDisplays.forEach(text => that.container.removeChild(text.text))
+      this.buttons.forEach(button => button.destroy())
+    }
+  }
+
+  /**
    * Slideshow
    */
 

@@ -27130,8 +27130,63 @@ require("./pixi-shadows.js");
         return SoundManager;
     }());
     /**
-   * Slideshow
-   */
+     * Menu
+     */
+    var ToggleButton = /** @class */ (function () {
+        function ToggleButton(_a) {
+            var onToggle = _a.onToggle, container = _a.container, initialState = _a.initialState;
+            this.container = container;
+            this.state = initialState;
+            this.onToggle = onToggle;
+            this.setupSprites();
+        }
+        ToggleButton.prototype.setupSprites = function () {
+            this.sprite = new PIXI.Sprite.fromImage('/assets/button.png', true);
+            this.sprite.on('pointerdown', this.toggle);
+            this.container.addChild(this.sprite);
+            if (!this.state) {
+                this.dim();
+            }
+        };
+        ToggleButton.prototype.destroy = function () {
+            this.container.removeChild(this.sprite);
+        };
+        ToggleButton.prototype.restore = function () {
+            this.sprite.alpha = 1;
+        };
+        ToggleButton.prototype.dim = function () {
+            this.sprite.alpha = 0.5;
+        };
+        ToggleButton.prototype.toggle = function () {
+            this.state = !this.state;
+            this.state
+                ? this.restore()
+                : this.dim();
+            this.onToggle(this.state);
+        };
+        return ToggleButton;
+    }());
+    var Settings = /** @class */ (function () {
+        function Settings(_a) {
+            var onReturn = _a.onReturn, container = _a.container;
+            this.container = container;
+            this.onReturn = onReturn;
+        }
+        Settings.prototype.createBackButton = function () {
+            // create button which destroys menu and returns to previous state
+            // this.destroyDisplay()
+            // this.onReturn()
+        };
+        Settings.prototype.destroyDisplay = function () {
+            var that = this;
+            this.textDisplays.forEach(function (text) { return that.container.removeChild(text.text); });
+            this.buttons.forEach(function (button) { return button.destroy(); });
+        };
+        return Settings;
+    }());
+    /**
+     * Slideshow
+     */
     var Slideshow = /** @class */ (function () {
         function Slideshow(_a) {
             var slides = _a.slides, intervals = _a.intervals, onComplete = _a.onComplete, game = _a.game;
