@@ -2098,7 +2098,7 @@ require("./pixi-shadows.js");
             'jump': '/assets/audio/jump.mp3',
             'damage': '/assets/audio/damage.mp3',
             'kill': '/assets/audio/kill.mp3',
-            'theme': '/assets/audio/theme.mp3',
+            'theme': '/assets/audio/theme2.mp3',
             'throw': '/assets/audio/throw.mp3',
             'abduction': '/assets/audio/abduction.mp3',
             'pause': '/assets/audio/pause.mp3',
