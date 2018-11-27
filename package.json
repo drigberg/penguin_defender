@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/drigberg/penguin_defender#readme",
   "dependencies": {
+    "cached-path-relative": "^1.0.2",
     "event-stream": "^3.3.4",
     "express": "4.16.3",
     "install": "0.12.1",
